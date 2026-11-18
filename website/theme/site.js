@@ -320,7 +320,7 @@ function initSearchDialog() {
 
   const ensureIndex = () => {
     if (!indexPromise) {
-      indexPromise = fetch("/search_index.json")
+      indexPromise = fetch(new URL("../search_index.json", import.meta.url))
         .then((res) => (res.ok ? res.json() : []))
         .then((data) => {
           searchData = Array.isArray(data) ? data : [];

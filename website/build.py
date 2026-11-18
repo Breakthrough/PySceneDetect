@@ -38,7 +38,7 @@ from pygments.lexers import get_lexer_by_name
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "docs" / "_ext"))
 
-from doc_versions import load_doc_versions
+from doc_versions import load_doc_versions  # type: ignore[import-not-found]
 
 WEBSITE_DIR = Path(__file__).resolve().parent
 REPO_DIR = WEBSITE_DIR.parent
@@ -57,44 +57,80 @@ IMG_SRC_DIR = PAGES_DIR / "img"
 THEME_DIR = WEBSITE_DIR / "theme"
 BUILD_DIR = WEBSITE_DIR / "build"
 
-# Each entry is (sidebar_title, top_nav_label, src_name, slug, is_top_primary).
-NAV_GROUPS: list[tuple[str, list[tuple[str, str, str, str, bool]]]] = [
+
+@dataclass(frozen=True)
+class PageSpec:
+    """One page of the site.
+
+    The sidebar shows `title`. The top bar shows `nav_label`, or `title` if `nav_label` is empty.
+    """
+
+    slug: str
+    title: str
+    nav_label: str = ""
+    is_primary: bool = False
+
+    @property
+    def label(self) -> str:
+        return self.nav_label or self.title
+
+    @property
+    def is_home(self) -> bool:
+        return self.slug == ""
+
+    @property
+    def src_name(self) -> str:
+        return f"{self.slug or 'index'}.md"
+
+    @property
+    def url_path(self) -> str:
+        return "/" if self.is_home else f"/{self.slug}/"
+
+    @property
+    def out_rel_path(self) -> Path:
+        return Path("index.html") if self.is_home else Path(self.slug) / "index.html"
+
+
+NAV_GROUPS: list[tuple[str, list[PageSpec]]] = [
     (
         "PySceneDetect",
         [
-            ("Home", "Overview", "index.md", "", True),
-            ("Features", "Features", "features.md", "features", True),
-            ("Download", "Download", "download.md", "download", True),
-            ("Changelog", "Changelog", "changelog.md", "changelog", False),
+            PageSpec("", "Home", "Overview", is_primary=True),
+            PageSpec("features", "Features", is_primary=True),
+            PageSpec("download", "Download", is_primary=True),
+            PageSpec("changelog", "Changelog"),
         ],
     ),
     (
         "Reference",
         [
-            ("Documentation", "Documentation", "docs.md", "docs", False),
-            ("Command-Line", "CLI", "cli.md", "cli", True),
-            ("Python API", "Python API", "api.md", "api", True),
-            ("Benchmarks", "Benchmarks", "benchmarks.md", "benchmarks", True),
+            PageSpec("docs", "Documentation"),
+            PageSpec("cli", "Command-Line", "CLI", is_primary=True),
+            PageSpec("api", "Python API", is_primary=True),
+            PageSpec("benchmarks", "Benchmarks", is_primary=True),
         ],
     ),
     (
         "Support",
         [
-            ("FAQ", "FAQ", "faq.md", "faq", True),
-            ("Bugs & Contributing", "Contributing", "contributing.md", "contributing", False),
-            ("Development & Support", "Support", "supporting.md", "supporting", False),
+            PageSpec("faq", "FAQ", is_primary=True),
+            PageSpec("contributing", "Bugs & Contributing", "Contributing"),
+            PageSpec("supporting", "Development & Support", "Support"),
         ],
     ),
     (
         "Resources",
         [
-            ("Project Gallery", "Project Gallery", "gallery.md", "gallery", False),
-            ("Similar Projects", "Similar Projects", "similar.md", "similar", False),
-            ("Research & Literature", "Literature", "literature.md", "literature", False),
-            ("License & Copyright", "License", "copyright.md", "copyright", False),
+            PageSpec("gallery", "Project Gallery"),
+            PageSpec("similar", "Similar Projects"),
+            PageSpec("literature", "Research & Literature", "Literature"),
+            PageSpec("copyright", "License & Copyright", "License"),
         ],
     ),
 ]
+
+PAGES: list[PageSpec] = [page for _, group in NAV_GROUPS for page in group]
+KNOWN_SLUGS: set[str] = {page.slug for page in PAGES}
 
 HERO_SNIPPETS: list[tuple[str, str, str, str, str]] = [
     (
@@ -144,32 +180,6 @@ ATTR_RE = re.compile(
 )
 EXTERNAL_SCHEMES = ("http://", "https://", "mailto:", "tel:", "data:", "javascript:")
 
-KNOWN_SLUGS: set[str] = {slug for _, items in NAV_GROUPS for _, _, _, slug, _ in items}
-
-
-@dataclass(frozen=True)
-class PageSpec:
-    """Static definition of a single page in the canonical site tree."""
-
-    group: str
-    title: str
-    nav_label: str
-    src_name: str
-    slug: str
-    is_primary: bool
-
-    @property
-    def is_home(self) -> bool:
-        return self.slug == ""
-
-    @property
-    def url_path(self) -> str:
-        return "/" if self.is_home else f"/{self.slug}/"
-
-    @property
-    def out_rel_path(self) -> Path:
-        return Path("index.html") if self.is_home else Path(self.slug) / "index.html"
-
 
 @dataclass
 class TocItem:
@@ -178,22 +188,6 @@ class TocItem:
     id: str
     title: str
     children: list[TocItem] = field(default_factory=list)
-
-
-def iter_page_specs() -> list[PageSpec]:
-    """Flatten NAV_GROUPS into the ordered page sequence."""
-    return [
-        PageSpec(
-            group=group_title,
-            title=title,
-            nav_label=nav_label,
-            src_name=src_name,
-            slug=slug,
-            is_primary=is_primary,
-        )
-        for group_title, entries in NAV_GROUPS
-        for title, nav_label, src_name, slug, is_primary in entries
-    ]
 
 
 def strip_tags(fragment: str) -> str:
@@ -205,8 +199,6 @@ def strip_tags(fragment: str) -> str:
 
 def get_image_dimensions(img_path: Path) -> tuple[int, int] | None:
     """Read intrinsic (width, height) in pixels for local PNG and SVG assets."""
-    if not img_path.is_file():
-        return None
     data = img_path.read_bytes()
     suffix = img_path.suffix.lower()
 
@@ -242,30 +234,39 @@ def _parse_svg_length(svg_tag: str, attr_name: str) -> int | None:
     return max(1, round(val))
 
 
-def rewrite_internal_href(href: str) -> str:
-    """Normalize Markdown and relative internal links to root-absolute site paths."""
+def normalize_base_path(raw: str) -> str:
+    """Normalize an optional URL base path (e.g. 'staging/' -> '/staging', '/' -> '')."""
+    cleaned = raw.strip().strip("/")
+    return f"/{cleaned}" if cleaned else ""
+
+
+def rewrite_internal_href(href: str, base_path: str = "") -> str:
+    """Normalize Markdown and relative internal links to site-root paths."""
     raw = href.strip()
-    if not raw or raw.startswith(("#", "/docs/", *EXTERNAL_SCHEMES)):
+    if not raw or raw.startswith(("#", *EXTERNAL_SCHEMES)):
         return href
 
     path_part, sep, frag = raw.partition("#")
     suffix = f"#{frag}" if sep else ""
     clean_path = path_part.split("?", 1)[0]
 
+    if SPHINX_ABS_RE.match(clean_path):
+        return href
+
     img_match = IMG_PATH_RE.match(clean_path)
     if img_match:
-        return f"/img/{img_match.group(1)}{suffix}"
+        return f"{base_path}/img/{img_match.group(1)}{suffix}"
 
     if clean_path.endswith(".md"):
         stem = posixpath.basename(clean_path)[:-3]
         if stem == "index":
-            return f"/{suffix}"
+            return f"{base_path}/{suffix}"
         if stem in KNOWN_SLUGS:
-            return f"/{stem}/{suffix}"
+            return f"{base_path}/{stem}/{suffix}"
 
     slug_candidate = clean_path.strip("/")
     if slug_candidate in KNOWN_SLUGS:
-        target = "/" if slug_candidate == "" else f"/{slug_candidate}/"
+        target = f"{base_path}/" if slug_candidate == "" else f"{base_path}/{slug_candidate}/"
         return f"{target}{suffix}"
 
     return href
@@ -300,7 +301,11 @@ def _format_attrs(attrs: list[tuple[str, str | None]]) -> str:
     return (" " + " ".join(parts)) if parts else ""
 
 
-def postprocess_html(rendered_html: str, img_dims: dict[str, tuple[int, int]]) -> str:
+def postprocess_html(
+    rendered_html: str,
+    img_dims: dict[str, tuple[int, int]],
+    base_path: str = "",
+) -> str:
     """Apply accessibility, CLS, code-block, table, and link transforms."""
 
     def _normalize_pre(match: re.Match[str]) -> str:
@@ -319,7 +324,10 @@ def postprocess_html(rendered_html: str, img_dims: dict[str, tuple[int, int]]) -
     def _rewrite_anchor(match: re.Match[str]) -> str:
         attrs = _parse_attrs(match.group(1))
         new_attrs = [
-            (k, rewrite_internal_href(v) if k.lower() == "href" and v is not None else v)
+            (
+                k,
+                rewrite_internal_href(v, base_path) if k.lower() == "href" and v is not None else v,
+            )
             for k, v in attrs
         ]
         return f"<a{_format_attrs(new_attrs)}>"
@@ -337,37 +345,19 @@ def postprocess_html(rendered_html: str, img_dims: dict[str, tuple[int, int]]) -
             img_match = IMG_PATH_RE.match(clean_src)
             if img_match:
                 local_img_name = img_match.group(1)
-                src = f"/img/{local_img_name}"
+                src = f"{base_path}/img/{local_img_name}"
 
-        rebuilt: list[tuple[str, str | None]] = []
-        has_width = False
-        has_height = False
-        has_loading = False
-
-        for k, v in attrs:
-            kl = k.lower()
-            if kl == "src":
-                rebuilt.append(("src", src))
-            elif kl == "width" and v:
-                has_width = True
-                rebuilt.append((k, v))
-            elif kl == "height" and v:
-                has_height = True
-                rebuilt.append((k, v))
-            elif kl == "loading" and v:
-                has_loading = True
-                rebuilt.append((k, v))
-            else:
-                rebuilt.append((k, v))
+        rebuilt = [("src", src) if k.lower() == "src" else (k, v) for k, v in attrs]
+        filled = {k.lower() for k, v in attrs if v}
 
         if local_img_name and local_img_name in img_dims:
             w, h = img_dims[local_img_name]
-            if not has_width:
+            if "width" not in filled:
                 rebuilt.append(("width", str(w)))
-            if not has_height:
+            if "height" not in filled:
                 rebuilt.append(("height", str(h)))
 
-        if not has_loading and attr_map.get("fetchpriority") != "high":
+        if "loading" not in filled and attr_map.get("fetchpriority") != "high":
             rebuilt.append(("loading", "lazy"))
 
         return f"<img{_format_attrs(rebuilt)}>"
@@ -443,11 +433,16 @@ def extract_toc(html_text: str) -> list[TocItem]:
     return items
 
 
-def extract_search_entries(spec: PageSpec, html_text: str) -> list[dict[str, str]]:
+def extract_search_entries(
+    spec: PageSpec,
+    html_text: str,
+    base_path: str = "",
+) -> list[dict[str, str]]:
     """Chunk a page's HTML by h1/h2/h3 sections for instant client-side jump search."""
     heading_re = re.compile(r"<h([123])\b([^>]*)>(.*?)</h\1>", re.DOTALL | re.IGNORECASE)
     matches = list(heading_re.finditer(html_text))
     entries: list[dict[str, str]] = []
+    page_url = f"{base_path}{spec.url_path}"
 
     for idx, match in enumerate(matches):
         level = int(match.group(1))
@@ -457,7 +452,7 @@ def extract_search_entries(spec: PageSpec, html_text: str) -> list[dict[str, str
         start = match.end()
         end = matches[idx + 1].start() if idx + 1 < len(matches) else len(html_text)
         chunk_text = strip_tags(html_text[start:end])
-        url = spec.url_path if (level == 1 and idx == 0) or not hid else f"{spec.url_path}#{hid}"
+        url = page_url if (level == 1 and idx == 0) or not hid else f"{page_url}#{hid}"
         entries.append(
             {
                 "title": spec.title,
@@ -473,7 +468,7 @@ def extract_search_entries(spec: PageSpec, html_text: str) -> list[dict[str, str
             {
                 "title": "Home",
                 "section": "Overview & Quickstart",
-                "url": "/",
+                "url": f"{base_path}/",
                 "text": (
                     "Fast, frame-accurate shot and scene cut detection for video. "
                     "pip install scenedetect AdaptiveDetector ContentDetector HashDetector "
@@ -502,59 +497,20 @@ def render_hero_tabs() -> list[dict[str, str]]:
     return tabs
 
 
-def _nav_item(label: str, slug: str, current_slug: str | None) -> dict[str, Any]:
-    return {
-        "title": label,
-        "href": "/" if slug == "" else f"/{slug}/",
-        "is_current": current_slug == slug,
-    }
+def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
+    """Cleanly generate out_dir from website/pages/ and website/theme/."""
+    base_path = normalize_base_path(base_path)
+    if out_dir.exists():
+        shutil.rmtree(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-
-def build_nav_context(current_slug: str | None) -> dict[str, Any]:
-    """Build sidebar groups and responsive top-navbar link lists derived from NAV_GROUPS."""
-    groups = [
-        {
-            "title": group_title,
-            "pages": [
-                _nav_item(item_title, slug, current_slug) for item_title, _, _, slug, _ in items
-            ],
-        }
-        for group_title, items in NAV_GROUPS
-    ]
-    top_primary = [
-        _nav_item(nav_label, slug, current_slug)
-        for _, items in NAV_GROUPS
-        for _, nav_label, _, slug, is_primary in items
-        if is_primary
-    ]
-    top_mobile_extra = [
-        _nav_item(nav_label, slug, current_slug)
-        for _, items in NAV_GROUPS
-        for _, nav_label, _, slug, is_primary in items
-        if not is_primary
-    ]
-    return {
-        "nav_groups": groups,
-        "top_nav_primary": top_primary,
-        "top_nav_mobile_extra": top_mobile_extra,
-    }
-
-
-def build_site() -> None:
-    """Cleanly generate website/build/ from website/pages/ and website/theme/."""
-    if BUILD_DIR.exists():
-        shutil.rmtree(BUILD_DIR)
-    BUILD_DIR.mkdir(parents=True, exist_ok=True)
-
-    assets_out = BUILD_DIR / "assets"
+    assets_out = out_dir / "assets"
     assets_out.mkdir(parents=True, exist_ok=True)
     shutil.copy2(THEME_DIR / "site.css", assets_out / "site.css")
     shutil.copy2(THEME_DIR / "site.js", assets_out / "site.js")
 
-    shutil.copytree(IMG_SRC_DIR, BUILD_DIR / "img")
-    favicon_src = IMG_SRC_DIR / "favicon.ico"
-    if favicon_src.is_file():
-        shutil.copy2(favicon_src, BUILD_DIR / "favicon.ico")
+    shutil.copytree(IMG_SRC_DIR, out_dir / "img")
+    shutil.copy2(IMG_SRC_DIR / "favicon.ico", out_dir / "favicon.ico")
 
     img_dims: dict[str, tuple[int, int]] = {}
     for img_file in IMG_SRC_DIR.iterdir():
@@ -568,6 +524,7 @@ def build_site() -> None:
 
     site_ctx = {
         "url": SITE_URL,
+        "base_path": base_path,
         "repo_url": REPO_URL,
         "pypi_url": PYPI_URL,
         "version": f"v{latest_ver}",
@@ -599,19 +556,18 @@ def build_site() -> None:
         },
     )
 
-    specs = iter_page_specs()
     hero_tabs = render_hero_tabs()
     search_index: list[dict[str, str]] = []
 
-    for idx, spec in enumerate(specs):
+    for idx, spec in enumerate(PAGES):
         md.reset()
         raw_md = (PAGES_DIR / spec.src_name).read_text(encoding="utf-8")
-        processed_html = postprocess_html(md.convert(raw_md), img_dims)
+        processed_html = postprocess_html(md.convert(raw_md), img_dims, base_path)
         toc_items = extract_toc(processed_html)
-        search_index.extend(extract_search_entries(spec, processed_html))
+        search_index.extend(extract_search_entries(spec, processed_html, base_path))
 
-        prev_spec = specs[idx - 1] if idx > 0 else None
-        next_spec = specs[idx + 1] if idx + 1 < len(specs) else None
+        prev_spec = PAGES[idx - 1] if idx > 0 else None
+        next_spec = PAGES[idx + 1] if idx + 1 < len(PAGES) else None
 
         page_ctx = {
             "html_title": (
@@ -620,14 +576,19 @@ def build_site() -> None:
                 else f"{spec.title} | PySceneDetect"
             ),
             "description": DEFAULT_DESCRIPTION,
-            "url_path": spec.url_path,
+            "slug": spec.slug,
+            "canonical_path": spec.url_path,
             "content": Markup(processed_html),
             "toc": toc_items,
             "prev_page": (
-                {"title": prev_spec.title, "href": prev_spec.url_path} if prev_spec else None
+                {"title": prev_spec.title, "href": f"{base_path}{prev_spec.url_path}"}
+                if prev_spec
+                else None
             ),
             "next_page": (
-                {"title": next_spec.title, "href": next_spec.url_path} if next_spec else None
+                {"title": next_spec.title, "href": f"{base_path}{next_spec.url_path}"}
+                if next_spec
+                else None
             ),
             "edit_url": f"{REPO_URL}/blob/main/website/pages/{spec.src_name}",
         }
@@ -637,10 +598,11 @@ def build_site() -> None:
             site=site_ctx,
             page=page_ctx,
             hero_tabs=hero_tabs,
-            **build_nav_context(spec.slug),
+            nav_groups=NAV_GROUPS,
+            pages=PAGES,
         )
 
-        out_file = BUILD_DIR / spec.out_rel_path
+        out_file = out_dir / spec.out_rel_path
         out_file.parent.mkdir(parents=True, exist_ok=True)
         out_file.write_text(rendered_page, encoding="utf-8")
 
@@ -649,17 +611,19 @@ def build_site() -> None:
         page={
             "html_title": "Page Not Found | PySceneDetect",
             "description": DEFAULT_DESCRIPTION,
-            "url_path": "/404.html",
+            "slug": None,
+            "canonical_path": None,
         },
-        **build_nav_context(None),
+        nav_groups=NAV_GROUPS,
+        pages=PAGES,
     )
-    (BUILD_DIR / "404.html").write_text(rendered_404, encoding="utf-8")
+    (out_dir / "404.html").write_text(rendered_404, encoding="utf-8")
 
-    (BUILD_DIR / "search_index.json").write_text(
+    (out_dir / "search_index.json").write_text(
         json.dumps(search_index, ensure_ascii=True, separators=(",", ":")),
         encoding="utf-8",
     )
-    (BUILD_DIR / "versions.json").write_text(
+    (out_dir / "versions.json").write_text(
         json.dumps(
             {"latest": latest_ver, "versions": doc_versions},
             ensure_ascii=True,
@@ -671,10 +635,10 @@ def build_site() -> None:
     sitemap_lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-        *(f"  <url><loc>{SITE_URL}{spec.url_path}</loc></url>" for spec in specs),
+        *(f"  <url><loc>{SITE_URL}{spec.url_path}</loc></url>" for spec in PAGES),
         "</urlset>",
     ]
-    (BUILD_DIR / "sitemap.xml").write_text("\n".join(sitemap_lines) + "\n", encoding="utf-8")
+    (out_dir / "sitemap.xml").write_text("\n".join(sitemap_lines) + "\n", encoding="utf-8")
 
 
 class _PageInspector(html.parser.HTMLParser):
@@ -723,31 +687,42 @@ class _PageInspector(html.parser.HTMLParser):
                 self.assets.append(("script", src))
 
 
-def verify_build() -> list[str]:
-    """Strictly validate routes, internal links, #fragment anchors, and asset paths."""
-    errors: list[str] = []
-    specs = iter_page_specs()
+def _strip_base_path(site_path: str, base_path: str) -> str | None:
+    """Strip base_path prefix from a resolved site path, or return None if missing."""
+    if not base_path:
+        return site_path
+    if site_path == base_path:
+        return "/"
+    prefix = f"{base_path}/"
+    if site_path.startswith(prefix):
+        return site_path[len(base_path) :]
+    return None
 
-    required_files = [BUILD_DIR / spec.out_rel_path for spec in specs] + [
-        BUILD_DIR / "404.html",
-        BUILD_DIR / "assets" / "site.css",
-        BUILD_DIR / "assets" / "site.js",
-        BUILD_DIR / "favicon.ico",
-        BUILD_DIR / "search_index.json",
-        BUILD_DIR / "versions.json",
-        BUILD_DIR / "sitemap.xml",
+
+def verify_build(base_path: str = "", build_dir: Path = BUILD_DIR) -> list[str]:
+    """Strictly validate routes, internal links, #fragment anchors, and asset paths."""
+    base_path = normalize_base_path(base_path)
+    errors: list[str] = []
+    required_files = [build_dir / spec.out_rel_path for spec in PAGES] + [
+        build_dir / "404.html",
+        build_dir / "assets" / "site.css",
+        build_dir / "assets" / "site.js",
+        build_dir / "favicon.ico",
+        build_dir / "search_index.json",
+        build_dir / "versions.json",
+        build_dir / "sitemap.xml",
     ]
     for req in required_files:
         if not req.is_file():
-            errors.append(f"Missing expected output file: {req.relative_to(WEBSITE_DIR)}")
+            errors.append(f"Missing expected output file: {req}")
 
-    html_files = sorted(BUILD_DIR.rglob("*.html"))
+    html_files = sorted(build_dir.rglob("*.html"))
     inspectors: dict[Path, _PageInspector] = {}
     for html_file in html_files:
         parser = _PageInspector()
         parser.feed(html_file.read_text(encoding="utf-8"))
         inspectors[html_file] = parser
-        rel_label = html_file.relative_to(BUILD_DIR).as_posix()
+        rel_label = html_file.relative_to(build_dir).as_posix()
         if parser.h1_count != 1:
             errors.append(f"{rel_label}: expected exactly 1 <h1>, found {parser.h1_count}")
         for bad_img in parser.imgs_missing_alt:
@@ -756,10 +731,10 @@ def verify_build() -> list[str]:
             errors.append(f"{rel_label}: local <img> missing width/height ({bad_dim})")
 
     for html_file, parser in inspectors.items():
-        rel_file = html_file.relative_to(BUILD_DIR)
+        rel_file = html_file.relative_to(build_dir)
         rel_label = rel_file.as_posix()
         parent_posix = rel_file.parent.as_posix()
-        base_url_dir = "/" if parent_posix == "." else f"/{parent_posix}/"
+        base_url_dir = f"{base_path}/" if parent_posix == "." else f"{base_path}/{parent_posix}/"
 
         for href in parser.links:
             if not href or href.startswith(EXTERNAL_SCHEMES):
@@ -777,7 +752,15 @@ def verify_build() -> list[str]:
             if SPHINX_ABS_RE.match(site_path):
                 continue
 
-            target_file = _map_site_path_to_file(site_path)
+            local_site_path = _strip_base_path(site_path, base_path)
+            if local_site_path is None:
+                errors.append(
+                    f"{rel_label}: internal link '{href}' missing base_path '{base_path}' "
+                    f"(resolved to '{site_path}')"
+                )
+                continue
+
+            target_file = _map_site_path_to_file(local_site_path, build_dir)
             if target_file is None or not target_file.is_file():
                 errors.append(
                     f"{rel_label}: broken internal link '{href}' (resolved to '{site_path}')"
@@ -787,7 +770,7 @@ def verify_build() -> list[str]:
             if sep and frag and target_file in inspectors:
                 decoded_frag = urllib.parse.unquote(frag)
                 if decoded_frag not in inspectors[target_file].ids:
-                    target_label = target_file.relative_to(BUILD_DIR).as_posix()
+                    target_label = target_file.relative_to(build_dir).as_posix()
                     errors.append(
                         f"{rel_label}: broken fragment '{href}' "
                         f"(id '{decoded_frag}' not found in {target_label})"
@@ -798,7 +781,14 @@ def verify_build() -> list[str]:
                 continue
             clean_src = src.split("#", 1)[0].split("?", 1)[0]
             site_path = _resolve_site_path(base_url_dir, clean_src)
-            target_file = BUILD_DIR / site_path.lstrip("/")
+            local_site_path = _strip_base_path(site_path, base_path)
+            if local_site_path is None:
+                errors.append(
+                    f"{rel_label}: <{tag_name}> asset '{src}' missing base_path '{base_path}' "
+                    f"(resolved to '{site_path}')"
+                )
+                continue
+            target_file = build_dir / local_site_path.lstrip("/")
             if not target_file.is_file():
                 errors.append(
                     f"{rel_label}: missing <{tag_name}> asset '{src}' (resolved to '{site_path}')"
@@ -822,23 +812,41 @@ def _resolve_site_path(base_url_dir: str, path_part: str) -> str:
     return joined
 
 
-def _map_site_path_to_file(site_path: str) -> Path | None:
-    """Map a normalized site path (e.g. '/cli/') to an existing file path in BUILD_DIR."""
+def _map_site_path_to_file(site_path: str, build_dir: Path = BUILD_DIR) -> Path | None:
+    """Map a normalized site path (e.g. '/cli/') to an existing file path in build_dir."""
     stripped = site_path.lstrip("/")
     if site_path.endswith("/"):
-        return (BUILD_DIR / stripped / "index.html") if stripped else (BUILD_DIR / "index.html")
-    candidate = BUILD_DIR / stripped
+        return (build_dir / stripped / "index.html") if stripped else (build_dir / "index.html")
+    candidate = build_dir / stripped
     if candidate.is_dir():
         return candidate / "index.html"
     return candidate
 
 
-def serve_site(port: int) -> None:
-    """Serve website/build/ locally on 127.0.0.1:<port> with custom 404.html handling."""
+def serve_site(port: int, base_path: str = "", build_dir: Path = BUILD_DIR) -> None:
+    """Serve build_dir locally on 127.0.0.1:<port> with custom 404.html handling."""
+    base_path = normalize_base_path(base_path)
 
     class PreviewHandler(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *args: Any, **kwargs: Any) -> None:
-            super().__init__(*args, directory=str(BUILD_DIR), **kwargs)
+            super().__init__(*args, directory=str(build_dir), **kwargs)
+
+        def do_GET(self) -> None:
+            if base_path and self.path in {"/", base_path}:
+                self.send_response(302)
+                self.send_header("Location", f"{base_path}/")
+                self.end_headers()
+                return
+            if base_path:
+                parsed = urllib.parse.urlsplit(self.path)
+                local_path = _strip_base_path(parsed.path, base_path)
+                if local_path is None:
+                    self.send_error(404)
+                    return
+                self.path = urllib.parse.urlunsplit(
+                    ("", "", local_path, parsed.query, parsed.fragment)
+                )
+            super().do_GET()
 
         def send_error(
             self,
@@ -846,7 +854,7 @@ def serve_site(port: int) -> None:
             message: str | None = None,
             explain: str | None = None,
         ) -> None:
-            not_found_path = BUILD_DIR / "404.html"
+            not_found_path = build_dir / "404.html"
             if code == 404 and not_found_path.is_file():
                 body = not_found_path.read_bytes()
                 self.send_response(404)
@@ -858,7 +866,8 @@ def serve_site(port: int) -> None:
             super().send_error(code, message, explain)
 
     server = http.server.ThreadingHTTPServer(("127.0.0.1", port), PreviewHandler)
-    print(f"Serving {BUILD_DIR} at http://127.0.0.1:{port}/ (Ctrl+C to stop)")
+    mount = f"{base_path}/" if base_path else "/"
+    print(f"Serving {build_dir} at http://127.0.0.1:{port}{mount} (Ctrl+C to stop)")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -871,6 +880,17 @@ def main(argv: list[str] | None = None) -> int:
     """CLI entry point for building, strictly validating, and serving scenedetect.com."""
     parser = argparse.ArgumentParser(description="Build the PySceneDetect static website.")
     parser.add_argument(
+        "--base-path",
+        default="",
+        help="Optional URL path prefix (e.g. '/staging' for scenedetect.com/staging/).",
+    )
+    parser.add_argument(
+        "--out-dir",
+        type=Path,
+        default=BUILD_DIR,
+        help="Output directory for generated static files (default: website/build).",
+    )
+    parser.add_argument(
         "--strict",
         action="store_true",
         help="Verify all expected routes, internal links, #fragment anchors, and assets.",
@@ -881,15 +901,18 @@ def main(argv: list[str] | None = None) -> int:
         const=8000,
         type=int,
         metavar="PORT",
-        help="Build and serve website/build/ locally on 127.0.0.1:PORT (default: 8000).",
+        help="Build and serve output locally on 127.0.0.1:PORT (default: 8000).",
     )
     args = parser.parse_args(argv)
+    base_path = normalize_base_path(args.base_path)
+    out_dir = args.out_dir.resolve()
 
-    build_site()
-    print(f"Built {len(iter_page_specs())} pages + 404 + search index into {BUILD_DIR}")
+    build_site(base_path=base_path, out_dir=out_dir)
+    prefix_note = f" (base_path={base_path})" if base_path else ""
+    print(f"Built {len(PAGES)} pages + 404 + search index into {out_dir}{prefix_note}")
 
     if args.strict:
-        errors = verify_build()
+        errors = verify_build(base_path=base_path, build_dir=out_dir)
         if errors:
             for err in errors:
                 print(f"[STRICT ERROR] {err}", file=sys.stderr)
@@ -898,7 +921,7 @@ def main(argv: list[str] | None = None) -> int:
         print("Strict verification passed (all routes, anchors, and assets verified).")
 
     if args.serve is not None:
-        serve_site(args.serve)
+        serve_site(args.serve, base_path=base_path, build_dir=out_dir)
 
     return 0
 

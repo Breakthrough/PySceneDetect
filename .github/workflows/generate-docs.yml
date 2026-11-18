@@ -54,12 +54,11 @@ jobs:
         if: ${{ env.scenedetect_docs_dest == '' }}
         run: |
           echo "Failing build: destination must be set!"
+          exit 1
 
       - name: Setup Environment
         run: |
-          python -m pip install --upgrade pip build wheel virtualenv
-          pip install .[docs]
-          pip install -r packaging/windows/requirements.txt
+          pip install ".[docs,pyav,moviepy]"
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
 
@@ -76,7 +75,7 @@ jobs:
 
       - name: Generate Docs
         run: |
-          sphinx-build -b html docs build
+          sphinx-build -b html -d "${RUNNER_TEMP}/doctrees" docs build
 
       - name: Update gh-pages Branch
         run: |

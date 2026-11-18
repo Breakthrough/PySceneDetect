@@ -7,16 +7,19 @@
   <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
   <title>{{ page.html_title }}</title>
   <meta name="description" content="{{ page.description }}">
-  <link rel="icon" href="/img/favicon.ico">
-  {% if page.url_path != "/404.html" %}
-  <link rel="canonical" href="{{ site.url }}{{ page.url_path }}">
+  {% if site.base_path %}
+  <meta name="robots" content="noindex">
+  {% endif %}
+  <link rel="icon" href="{{ site.base_path }}/img/favicon.ico">
+  {% if page.canonical_path %}
+  <link rel="canonical" href="{{ site.url }}{{ page.canonical_path }}">
   {% endif %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&text=PySceneDetect&display=swap">
-  <link rel="stylesheet" href="/assets/site.css">
-  <script type="module" src="/assets/site.js"></script>
+  <link rel="stylesheet" href="{{ site.base_path }}/assets/site.css">
+  <script type="module" src="{{ site.base_path }}/assets/site.js"></script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0"></script>
   <script>
@@ -32,7 +35,7 @@
 
   <header class="site-header">
     <div class="header-inner">
-      <a class="brand-link" href="/" aria-label="PySceneDetect">
+      <a class="brand-link" href="{{ site.base_path }}/" aria-label="PySceneDetect">
         <svg
           class="brand-mark"
           aria-hidden="true"
@@ -61,9 +64,9 @@
         </button>
 
         <ul id="site-menu" class="site-menu" popover="auto">
-          {% for item in top_nav_primary %}
+          {% for item in pages if item.is_primary %}
           <li>
-            <a href="{{ item.href }}"{% if item.is_current %} aria-current="page"{% endif %}>{{ item.title }}</a>
+            <a href="{{ site.base_path }}{{ item.url_path }}"{% if item.slug == page.slug %} aria-current="page"{% endif %}>{{ item.label }}</a>
           </li>
           {% endfor %}
           <li>
@@ -74,11 +77,19 @@
               </svg>
             </a>
           </li>
-          {% for item in top_nav_mobile_extra %}
+          {% for item in pages if not item.is_primary %}
           <li class="mobile-only-nav">
-            <a href="{{ item.href }}"{% if item.is_current %} aria-current="page"{% endif %}>{{ item.title }}</a>
+            <a href="{{ site.base_path }}{{ item.url_path }}"{% if item.slug == page.slug %} aria-current="page"{% endif %}>{{ item.label }}</a>
           </li>
           {% endfor %}
+          <li class="mobile-only-nav">
+            <a href="{{ site.repo_url }}">
+              <span>GitHub</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
         </ul>
       </nav>
 
@@ -86,7 +97,6 @@
         <button
           type="button"
           class="search-trigger"
-          aria-label="Search"
         >
           <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/>
@@ -145,12 +155,12 @@
   {% block main %}
   <div class="docs-shell{% if not page.toc %} docs-shell-no-toc{% endif %}">
     <aside class="docs-sidebar" aria-label="Site navigation">
-      {% for group in nav_groups %}
-      <div class="side-group-title">{{ group.title }}</div>
+      {% for group_title, group_pages in nav_groups %}
+      <div class="side-group-title">{{ group_title }}</div>
       <ul class="side-list" role="list">
-        {% for item in group.pages %}
+        {% for item in group_pages %}
         <li>
-          <a href="{{ item.href }}"{% if item.is_current %} aria-current="page"{% endif %}>{{ item.title }}</a>
+          <a href="{{ site.base_path }}{{ item.url_path }}"{% if item.slug == page.slug %} aria-current="page"{% endif %}>{{ item.title }}</a>
         </li>
         {% endfor %}
       </ul>
@@ -219,14 +229,14 @@
     <div class="footer-inner">
       <p class="footer-copy">
         Copyright &copy; 2014 Brandon Castellano. Licensed under the
-        <a href="/copyright/">BSD 3-Clause License</a>.
+        <a href="{{ site.base_path }}/copyright/">BSD 3-Clause License</a>.
       </p>
       <ul class="footer-links" role="list">
         <li><a href="{{ site.repo_url }}">GitHub</a></li>
         <li><a href="{{ site.pypi_url }}">PyPI</a></li>
         <li><a href="/docs/latest/">Reference Manual</a></li>
-        <li><a href="/changelog/">Changelog</a></li>
-        <li><a href="/copyright/">License</a></li>
+        <li><a href="{{ site.base_path }}/changelog/">Changelog</a></li>
+        <li><a href="{{ site.base_path }}/copyright/">License</a></li>
       </ul>
     </div>
   </footer>

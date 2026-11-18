@@ -16,14 +16,12 @@ Configure with ``section_sidebar_sections`` in conf.py::
 
     section_sidebar_sections = {
         "clitoc": ("CLI", "cli", 2, 2),  # toctree name: (label, landing doc, depth, cur depth)
-        "reftoc": (None, None, 2, 2),  # no label: every page in the section is a small link
+        "reftoc": (None, None, 2, 2),  # no label: not part of the switch
     }
     section_sidebar_root_depth = {"apitoc": 1}  # on the root document: page titles only
 
-A section whose label is ``None`` is not part of the switch; the template gets its pages as
-``sidebar_section_docs[name]`` (a list of ``(title, docname)``) and draws them as a row of
-smaller links. Its tree is only drawn on its own pages, and then holds just the current page's
-headings, since the row already lists the pages.
+A section whose label is ``None`` is not part of the switch. Its tree is only drawn on its own
+pages, and then holds just the current page's headings.
 
 ``section_sidebar_summary`` trims what a page contributes to the tree when it is NOT the
 current page: only entries (at any depth) whose text matches one of the glob patterns are
@@ -185,7 +183,6 @@ def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doct
                 root_nodes.append((name, root_node))
     context["sidebar_section"] = section
     context["sidebar_sections"] = sections
-    context["sidebar_section_docs"] = _section_docs(app, sections) if sections else {}
 
     def render(name: str, toctree_node: addnodes.toctree) -> str:
         _, _, maxdepth, current_maxdepth = sections[name]
@@ -229,19 +226,6 @@ def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doct
         )
 
     context["section_toctree"] = section_toctree
-
-
-def _section_docs(app: Sphinx, sections: dict) -> dict[str, list[tuple[str, str]]]:
-    """(title, docname) of every page listed by each section's toctree, in order."""
-    env = app.env
-    docs: dict[str, list[tuple[str, str]]] = {}
-    for node in env.get_doctree(env.config.root_doc).findall(addnodes.toctree):
-        name = next((n for n in node.parent.get("names", []) if n in sections), None)
-        if name is not None:
-            docs[name] = [
-                (env.titles[d].astext(), d) for d in node["includefiles"] if d in env.titles
-            ]
-    return docs
 
 
 def _check_config(app: Sphinx, env) -> None:

@@ -4,7 +4,7 @@
   <main id="main-content" class="container home-main" tabindex="-1">
     <section class="hero" aria-labelledby="hero-heading">
       <div class="hero-copy">
-        <a class="release-pill" href="/download/">
+        <a class="release-pill" href="{{ site.base_path }}/download/">
           <span>Latest release</span>
           <strong>{{ site.version }}</strong>
           <span>&middot; {{ site.release_date_short }}</span>
@@ -27,13 +27,13 @@
           </button>
         </div>
         <div class="cta-row">
-          <a class="btn-primary" href="/cli/">
+          <a class="btn-primary" href="{{ site.base_path }}/cli/">
             <span>Get Started</span>
             <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14M13 5l7 7-7 7"/>
             </svg>
           </a>
-          <a class="btn-secondary" href="/download/">Download (Win / Docker)</a>
+          <a class="btn-secondary" href="{{ site.base_path }}/download/">Download (Win / Docker)</a>
           <a class="btn-secondary" href="/docs/latest/">Reference Manual</a>
         </div>
       </div>
@@ -80,17 +80,17 @@
       <div class="feature-card">
         <h2>Five Benchmarked Detectors</h2>
         <p>Adaptive, Content (HSV + edges), Perceptual Hash, Y-Channel Histogram, and Threshold detectors &mdash; evaluated against BBC Planet Earth, AutoShot, and ClipShots.</p>
-        <a class="feature-meta" href="/benchmarks/">91.6 F1 on BBC broadcast &rarr;</a>
+        <a class="feature-meta" href="{{ site.base_path }}/benchmarks/">91.6 F1 on BBC broadcast &rarr;</a>
       </div>
       <div class="feature-card">
         <h2>NLE &amp; Pipeline Ready</h2>
         <p>Export standard <code>HH:MM:SS.nnn</code> CSV cut lists, CMX 3600 EDL, OpenTimelineIO (OTIO), x264 QP files, HTML contact sheets, and boundary thumbnails.</p>
-        <a class="feature-meta" href="/features/">save-edl &middot; save-otio &middot; save-images &rarr;</a>
+        <a class="feature-meta" href="{{ site.base_path }}/features/">save-edl &middot; save-otio &middot; save-images &rarr;</a>
       </div>
       <div class="feature-card">
         <h2>Pluggable Video Backends</h2>
         <p>Decode via OpenCV out of the box, PyAV, or MoviePy. Ships as <code>scenedetect</code>, headless server wheels, signed Windows MSI, and official GHCR containers.</p>
-        <a class="feature-meta" href="/download/">Python 3.10+ &middot; Win64 &middot; Docker &rarr;</a>
+        <a class="feature-meta" href="{{ site.base_path }}/download/">Python 3.10+ &middot; Win64 &middot; Docker &rarr;</a>
       </div>
     </div>
 
@@ -102,19 +102,19 @@
       <div class="quick-nav-section">
         <h2>Explore the Documentation</h2>
         <div class="quick-nav-grid">
-          <a class="quick-nav-card" href="/docs/">
+          <a class="quick-nav-card" href="{{ site.base_path }}/docs/">
             <strong>Documentation Versions</strong>
             <span>Browse stable, development, and legacy API &amp; CLI reference manuals.</span>
           </a>
-          <a class="quick-nav-card" href="/faq/">
+          <a class="quick-nav-card" href="{{ site.base_path }}/faq/">
             <strong>Frequently Asked Questions</strong>
             <span>Tuning thresholds, variable framerates, stream-copy vs frame-accurate splits.</span>
           </a>
-          <a class="quick-nav-card" href="/contributing/">
+          <a class="quick-nav-card" href="{{ site.base_path }}/contributing/">
             <strong>Bugs &amp; Contributing</strong>
             <span>Report issues, request features, or contribute pull requests on GitHub.</span>
           </a>
-          <a class="quick-nav-card" href="/literature/">
+          <a class="quick-nav-card" href="{{ site.base_path }}/literature/">
             <strong>Research &amp; Literature</strong>
             <span>Academic papers, shot-boundary methodology, and citations using PySceneDetect.</span>
           </a>

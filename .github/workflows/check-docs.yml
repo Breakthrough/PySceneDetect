@@ -40,10 +40,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip build wheel virtualenv
-          pip install .[docs,website]
-          pip install -r packaging/windows/requirements.txt
-
+          pip install ".[docs,pyav,moviepy]" -r website/requirements.txt
 
       - name: Check CLI Documentation
         shell: bash
@@ -65,3 +62,19 @@ jobs:
         shell: bash
         run: |
           python website/build.py --strict
+
+      - name: Check Responsive Layout & Capture Screenshots
+        shell: bash
+        run: |
+          python website/check_layout.py \
+            --sphinx-dir docs/_build/html \
+            --screenshots "${RUNNER_TEMP}/website-screenshots"
+
+      - name: Upload Website Screenshots
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: website-screenshots
+          path: ${{ runner.temp }}/website-screenshots/
+          if-no-files-found: ignore
+          retention-days: 14

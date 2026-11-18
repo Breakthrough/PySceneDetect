@@ -12,6 +12,11 @@ from typing import Any
 _DOC_LINK_RE = re.compile(r"^-\s*\[([^\]]+)\]\(/docs/([^/]+)/\)")
 
 
+def _entry(slug: str, label: str, group: str) -> dict[str, Any]:
+    """One version entry. Only the legacy group uses a different page layout."""
+    return {"slug": slug, "label": label, "group": group, "same_layout": group != "legacy"}
+
+
 def load_doc_versions(
     repo_dir: Path, fallback_version: str = ""
 ) -> tuple[str, list[dict[str, Any]]]:
@@ -49,37 +54,11 @@ def load_doc_versions(
     if not legacy_slugs:
         legacy_slugs = ["0.6.7"]
 
-    entries: list[dict[str, Any]] = [
-        {
-            "slug": "latest",
-            "label": f"v{latest_ver} (latest)",
-            "group": "channel",
-            "same_layout": True,
-        },
-        {
-            "slug": "head",
-            "label": "dev (head)",
-            "group": "channel",
-            "same_layout": True,
-        },
+    entries = [
+        _entry("latest", f"v{latest_ver} (latest)", "channel"),
+        _entry("head", "dev (head)", "channel"),
     ]
-    for slug in stable_slugs:
-        entries.append(
-            {
-                "slug": slug,
-                "label": f"v{slug}",
-                "group": "release",
-                "same_layout": True,
-            }
-        )
+    entries += [_entry(slug, f"v{slug}", "release") for slug in stable_slugs]
     if legacy_slugs:
-        latest_legacy = legacy_slugs[0]
-        entries.append(
-            {
-                "slug": latest_legacy,
-                "label": f"v{latest_legacy} (legacy)",
-                "group": "legacy",
-                "same_layout": False,
-            }
-        )
+        entries.append(_entry(legacy_slugs[0], f"v{legacy_slugs[0]} (legacy)", "legacy"))
     return latest_ver, entries

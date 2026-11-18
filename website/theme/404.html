@@ -5,13 +5,17 @@
   <div class="not-found-card">
     <p class="not-found-code" aria-hidden="true">404</p>
     <h1 id="404-title">Page Not Found</h1>
-    <p id="404-body">The requested page could not be found. Try searching above or return to the <a href="/">PySceneDetect homepage</a>.</p>
+    <p id="404-body">The requested page could not be found. Try searching above or return to the <a href="{{ site.base_path }}/">PySceneDetect homepage</a>.</p>
   </div>
 </main>
 
 <script>
 (function() {
-  var path = window.location.pathname;
+  var basePath = "{{ site.base_path }}";
+  var rawPath = window.location.pathname;
+  var path = basePath && rawPath.indexOf(basePath + "/") === 0
+    ? rawPath.substring(basePath.length)
+    : rawPath;
   var pageTitle = document.getElementById("404-title");
   var pageBody = document.getElementById("404-body");
 

@@ -67,7 +67,6 @@ dev = [
     "pytest-rerunfailures",
 ]
 docs = ["Sphinx==7.0.1", "sphinx-copybutton==0.5.2"]
-website = ["jinja2>=3.1.6", "markdown>=3.5", "pygments>=2.17"]
 
 [project.urls]
 Homepage = "https://www.scenedetect.com"
