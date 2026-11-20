@@ -118,12 +118,11 @@ _MINUTES_PER_HOUR = 60.0
 # e.g. 23.976 should be detected as 24000/1001, 29.97 should be detected as 30000/1001, etc.
 _NTSC_DETECTION_TOLERANCE: float = 1e-3
 
-# Number of decimal places kept when scaling seconds to the output precision before truncating,
-# e.g. 0.29 * 100 == 28.999999999999996 should truncate to 29, not 28. A double carries ~15-16
-# significant digits, so for timestamps up to a few days scaling by 10**precision leaves an error
-# around 1e-9 or less. Rounding to 6 places removes that error while still being far finer than
-# any real frame boundary, so it never moves a value that is not actually on a boundary.
-_TRUNCATION_FLOAT_DIGITS: int = 6
+# Float error allowed, in units in the last place (ulps) of the scaled value, when truncating a
+# time to a number of decimal places, e.g. 0.29 * 100 == 28.999999999999996 should truncate to 29,
+# not 28. Converting a time to seconds and scaling it by a power of ten each add at most about one
+# ulp of error, so a few ulps absorb it while staying far below the spacing of real timestamps.
+_TRUNCATION_ULPS: int = 4
 
 
 ##
@@ -463,9 +462,16 @@ class FrameTimecode:
         else:
             secs = self.seconds
         if not use_rounding:
-            # Allow for float error when truncating (see _TRUNCATION_FLOAT_DIGITS).
-            scaled = round(secs * 10**precision, _TRUNCATION_FLOAT_DIGITS)
-            secs = math.floor(scaled) / 10**precision
+            # Truncate in whole units of the output precision, allowing for float error (see
+            # _TRUNCATION_ULPS). The split into hours, minutes and seconds is done with integers so
+            # that no further float error can creep in.
+            scaled = secs * 10**precision
+            units = math.floor(scaled + _TRUNCATION_ULPS * math.ulp(scaled))
+            whole_secs, fraction = divmod(units, 10**precision)
+            hrs, whole_secs = divmod(whole_secs, int(_SECONDS_PER_HOUR))
+            mins, whole_secs = divmod(whole_secs, int(_SECONDS_PER_MINUTE))
+            msec_str = f".{fraction:0{precision}d}" if precision else ""
+            return f"{hrs:02d}:{mins:02d}:{whole_secs:02d}{msec_str}"
         hrs = int(secs / _SECONDS_PER_HOUR)
         secs -= hrs * _SECONDS_PER_HOUR
         mins = int(secs / _SECONDS_PER_MINUTE)

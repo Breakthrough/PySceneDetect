@@ -22,6 +22,7 @@ or string HH:MM:SS[.nnn]. timecode format.
 
 # Third-Party Library Imports
 import numbers
+import random
 from fractions import Fraction
 
 import pytest
@@ -394,6 +395,38 @@ def test_precision_truncation():
     assert tc.get_timecode(precision=3, use_rounding=False) == "00:00:21.021"
     tc = FrameTimecode(61.29, 24.0)
     assert tc.get_timecode(precision=2, use_rounding=False, nearest_frame=False) == "00:01:01.29"
+
+
+def test_precision_truncation_matches_exact_arithmetic():
+    """Truncation must give the exact answer at any precision, including large timestamps."""
+    # Float error is larger for big values at high precision: 8192.826s at 1/1000 time base.
+    tc = FrameTimecode(Timecode(pts=8192826, time_base=Fraction(1, 1000)), Fraction(30000, 1001))
+    assert tc.get_timecode(precision=3, use_rounding=False) == "02:16:32.826"
+    assert tc.get_timecode(precision=6, use_rounding=False) == "02:16:32.826000"
+
+    def exact(pts: int, time_base: Fraction, precision: int) -> str:
+        units = (pts * time_base * 10**precision).__floor__()
+        secs, fraction = divmod(units, 10**precision)
+        hrs, secs = divmod(secs, 3600)
+        mins, secs = divmod(secs, 60)
+        return f"{hrs:02d}:{mins:02d}:{secs:02d}" + (
+            f".{fraction:0{precision}d}" if precision else ""
+        )
+
+    rng = random.Random(0)
+    for time_base in (
+        Fraction(1, 1000),
+        Fraction(1, 90000),
+        Fraction(1, 24000),
+        Fraction(1001, 30000),
+    ):
+        for _ in range(500):
+            pts = rng.randrange(0, 400_000_000)
+            tc = FrameTimecode(Timecode(pts=pts, time_base=time_base), Fraction(30000, 1001))
+            for precision in (0, 1, 3, 6):
+                assert tc.get_timecode(precision=precision, use_rounding=False) == exact(
+                    pts, time_base, precision
+                ), (pts, time_base, precision)
 
 
 def test_rational_framerate_precision():
