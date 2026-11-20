@@ -1156,6 +1156,7 @@
 <li>[bugfix] <code>--kernel-size</code>/<code>-k</code> values the detectors cannot use (even numbers, 1, 0 and negatives other than -1) now give a usage error instead of a traceback, and <code>-k -1</code> now means auto, like the config file. A config file with <code>kernel-size = 1</code> is now an error <a href="https://github.com/Breakthrough/PySceneDetect/issues/604">#604</a></li>
 <li>[bugfix] <code>save-images</code> no longer takes the last image of a scene from the first frame of the next scene. <code>--frame-margin</code> is counted from the last frame of the scene again, as in v0.6 (<code>-m 0</code> now selects the last frame itself)</li>
 <li>[bugfix] Out of range values for <code>detect-adaptive --frame-window</code> (below 1) and <code>save-images</code> <code>--num-images</code> (below 1), <code>--scale</code>, <code>--height</code> and <code>--width</code> (negative) now give a usage error instead of a traceback, and the same values are rejected in a config file <a href="https://github.com/Breakthrough/PySceneDetect/issues/609">#609</a></li>
+<li>[bugfix] <code>detect-content</code> / <code>detect-adaptive</code> <code>--weights</code> set to all zeros, or with a negative or non-finite weight (also in a config file), now give an error instead of NaN frame scores and no detected scenes, and <code>ContentDetector</code> / <code>AdaptiveDetector</code> raise a <code>ValueError</code> for them <a href="https://github.com/Breakthrough/PySceneDetect/issues/612">#612</a></li>
 </ul>
               
             </div>
