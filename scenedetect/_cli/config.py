@@ -15,6 +15,7 @@ possible and re-used by the CLI so that there is one source of truth.
 """
 
 import logging
+import math
 import os
 import os.path
 import typing as ty
@@ -221,6 +222,10 @@ class ScoreWeightsValue(ValidatedValue):
             if not len(values) == 4:
                 raise ValueError("Score weights must be specified as four numbers!")
             self._value = ContentDetector.Components(*(float(val) for val in values))
+        if not all(math.isfinite(weight) and weight >= 0.0 for weight in self._value):
+            raise ValueError("Weights must be finite and non-negative.")
+        if not any(self._value):
+            raise ValueError("At least one weight must be non-zero.")
 
     @property
     def value(self) -> ContentDetector.Components:
@@ -237,7 +242,9 @@ class ScoreWeightsValue(ValidatedValue):
         except ValueError as ex:
             raise OptionParseFailure(
                 "Score weights must be specified as four numbers in the form (H,S,L,E),"
-                " e.g. (0.9, 0.2, 2.0, 0.5). Commas/brackets/slashes are ignored."
+                " e.g. (0.9, 0.2, 2.0, 0.5). Weights must be non-negative, with at least one"
+                " non-zero."
+                " Commas/brackets/slashes are ignored."
             ) from ex
 
 
