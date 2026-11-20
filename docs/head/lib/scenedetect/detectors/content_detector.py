@@ -118,6 +118,7 @@ class ContentDetector(SceneDetector):
                 str (e.g. ``"0.6s"``, ``"00:00:00.600"``).
             weights: Weight to place on each component when calculating frame score
                 (`content_val` in a statsfile, the value `threshold` is compared against).
+                Each weight must be finite and non-negative, and at least one must be non-zero.
             luma_only: If True, only considers changes in the luminance channel of the video.
                 Equivalent to specifying `weights` as
                 :attr:`~scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS`.
@@ -132,6 +133,10 @@ class ContentDetector(SceneDetector):
         self._weights: ContentDetector.Components = weights
         if luma_only:
             self._weights = ContentDetector.LUMA_ONLY_WEIGHTS
+        if not all(math.isfinite(weight) and weight >= 0.0 for weight in self._weights):
+            raise ValueError("Weights must be finite and non-negative.")
+        if not any(self._weights):
+            raise ValueError("At least one weight must be non-zero.")
         self._kernel: numpy.ndarray | None = None
         if kernel_size is not None:
             if kernel_size < 3 or kernel_size % 2 == 0:

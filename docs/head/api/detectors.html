@@ -155,7 +155,8 @@ register as a new scene. This is calculated the same way that <cite>detect-conte
 calculates frame score based on <cite>weights</cite>/<cite>luma_only</cite>/<cite>kernel_size</cite>.</p></li>
 <li><p><strong>weights</strong> (<a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><em>Components</em></a>) – Weight to place on each component when calculating frame score
 (<cite>content_val</cite> in a statsfile, the value <cite>threshold</cite> is compared against).
-If omitted, the default ContentDetector weights are used.</p></li>
+If omitted, the default ContentDetector weights are used. Each weight must be
+finite and non-negative, and at least one must be non-zero.</p></li>
 <li><p><strong>luma_only</strong> (<em>bool</em>) – If True, only considers changes in the luminance channel of the video.
 Equivalent to specifying <cite>weights</cite> as
 <a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS" title="scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LUMA_ONLY_WEIGHTS</span></code></a>.
@@ -283,7 +284,8 @@ determine when a fast cut has occurred.</p>
 be added to the scene list. Accepts an int (frames), float (seconds), or
 str (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;0.6s&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;00:00:00.600&quot;</span></code>).</p></li>
 <li><p><strong>weights</strong> (<a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><em>Components</em></a>) – Weight to place on each component when calculating frame score
-(<cite>content_val</cite> in a statsfile, the value <cite>threshold</cite> is compared against).</p></li>
+(<cite>content_val</cite> in a statsfile, the value <cite>threshold</cite> is compared against).
+Each weight must be finite and non-negative, and at least one must be non-zero.</p></li>
 <li><p><strong>luma_only</strong> (<em>bool</em>) – If True, only considers changes in the luminance channel of the video.
 Equivalent to specifying <cite>weights</cite> as
 <a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS" title="scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LUMA_ONLY_WEIGHTS</span></code></a>.
