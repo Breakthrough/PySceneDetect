@@ -586,32 +586,7 @@ def save_images(
                     image_extension,
                 )
                 image_filenames[i].append(file_path)
-                # TODO: Combine this resize with the ones below.
-                if aspect_ratio is not None:
-                    frame_im = cv2.resize(
-                        frame_im, (0, 0), fx=aspect_ratio, fy=1.0, interpolation=interpolation.value
-                    )
-                frame_height = frame_im.shape[0]
-                frame_width = frame_im.shape[1]
-
-                # Figure out what kind of resizing needs to be done
-                if height or width:
-                    if height and not width:
-                        factor = height / float(frame_height)
-                        width = int(factor * frame_width)
-                    elif width and not height:
-                        factor = width / float(frame_width)
-                        height = int(factor * frame_height)
-                    assert height is not None
-                    assert width is not None
-                    assert height > 0 and width > 0
-                    frame_im = cv2.resize(
-                        frame_im, (width, height), interpolation=interpolation.value
-                    )
-                elif scale:
-                    frame_im = cv2.resize(
-                        frame_im, (0, 0), fx=scale, fy=scale, interpolation=interpolation.value
-                    )
+                frame_im = _scale_image(frame_im, aspect_ratio, height, width, scale, interpolation)
                 path = Path(get_and_create_path(file_path, output_dir))
                 (is_ok, encoded) = cv2.imencode(f".{image_extension}", frame_im, imwrite_param)
                 if is_ok:
