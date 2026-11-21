@@ -122,6 +122,9 @@ _NTSC_DETECTION_TOLERANCE: float = 1e-3
 # time to a number of decimal places, e.g. 0.29 * 100 == 28.999999999999996 should truncate to 29,
 # not 28. Converting a time to seconds and scaling it by a power of ten each add at most about one
 # ulp of error, so a few ulps absorb it while staying far below the spacing of real timestamps.
+# The limit is very long videos at high precision: at precision 9 with a 1/90000 time base, the
+# tolerance passes the gap between timestamps after about 40 hours, and the last digit can come
+# out one higher than it should.
 _TRUNCATION_ULPS: int = 4
 
 
@@ -461,6 +464,8 @@ class FrameTimecode:
             secs = self.frame_num / float(self.frame_rate)
         else:
             secs = self.seconds
+        # Negative times (e.g. from a negative PTS) are shown as zero on both paths below.
+        secs = max(0.0, secs)
         if not use_rounding:
             # Truncate in whole units of the output precision, allowing for float error (see
             # _TRUNCATION_ULPS). The split into hours, minutes and seconds is done with integers so
@@ -476,8 +481,7 @@ class FrameTimecode:
         secs -= hrs * _SECONDS_PER_HOUR
         mins = int(secs / _SECONDS_PER_MINUTE)
         secs = max(0.0, secs - (mins * _SECONDS_PER_MINUTE))
-        if use_rounding:
-            secs = round(secs, precision)
+        secs = round(secs, precision)
         secs = min(_SECONDS_PER_MINUTE, secs)
         # Guard against emitting timecodes with 60 seconds after rounding/floating point errors.
         if int(secs) == _SECONDS_PER_MINUTE:

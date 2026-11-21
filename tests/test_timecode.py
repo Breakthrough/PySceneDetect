@@ -21,6 +21,7 @@ or string HH:MM:SS[.nnn]. timecode format.
 """
 
 # Third-Party Library Imports
+import math
 import numbers
 import random
 from fractions import Fraction
@@ -404,8 +405,8 @@ def test_precision_truncation_matches_exact_arithmetic():
     assert tc.get_timecode(precision=3, use_rounding=False) == "02:16:32.826"
     assert tc.get_timecode(precision=6, use_rounding=False) == "02:16:32.826000"
 
-    def exact(pts: int, time_base: Fraction, precision: int) -> str:
-        units = (pts * time_base * 10**precision).__floor__()
+    def exact(secs: Fraction, precision: int) -> str:
+        units = math.floor(secs * 10**precision)
         secs, fraction = divmod(units, 10**precision)
         hrs, secs = divmod(secs, 3600)
         mins, secs = divmod(secs, 60)
@@ -414,6 +415,7 @@ def test_precision_truncation_matches_exact_arithmetic():
         )
 
     rng = random.Random(0)
+    precisions = (0, 1, 3, 6)
     for time_base in (
         Fraction(1, 1000),
         Fraction(1, 90000),
@@ -423,10 +425,30 @@ def test_precision_truncation_matches_exact_arithmetic():
         for _ in range(500):
             pts = rng.randrange(0, 400_000_000)
             tc = FrameTimecode(Timecode(pts=pts, time_base=time_base), Fraction(30000, 1001))
-            for precision in (0, 1, 3, 6):
+            for precision in precisions:
                 assert tc.get_timecode(precision=precision, use_rounding=False) == exact(
-                    pts, time_base, precision
+                    pts * time_base, precision
                 ), (pts, time_base, precision)
+
+    # Frame number timecodes.
+    for fps in (Fraction(24000, 1001), Fraction(30000, 1001), Fraction(25)):
+        for _ in range(500):
+            frame = rng.randrange(0, 10_000_000)
+            tc = FrameTimecode(frame, fps)
+            for precision in precisions:
+                assert tc.get_timecode(precision=precision, use_rounding=False) == exact(
+                    Fraction(frame) / fps, precision
+                ), (frame, fps, precision)
+
+
+def test_negative_time_is_shown_as_zero():
+    """A negative PTS gives a zero timecode, whether rounding or truncating."""
+    tc = FrameTimecode(Timecode(pts=-1, time_base=Fraction(1, 1000)), Fraction(30000, 1001))
+    assert tc.get_timecode(use_rounding=False) == "00:00:00.000"
+    assert tc.get_timecode(use_rounding=True) == "00:00:00.000"
+    tc = FrameTimecode(Timecode(pts=-4_000_000, time_base=Fraction(1, 1000)), Fraction(30000, 1001))
+    assert tc.get_timecode(use_rounding=False) == "00:00:00.000"
+    assert tc.get_timecode(use_rounding=True) == "00:00:00.000"
 
 
 def test_rational_framerate_precision():
