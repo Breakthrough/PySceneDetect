@@ -33,6 +33,9 @@ except ModuleNotFoundError as ex:
 # Note that order of importants is important!
 from scenedetect.platform import init_logger as init_logger  # noqa: I001
 from scenedetect.common import (
+    FramePosition as FramePosition,
+    FrameDuration as FrameDuration,
+    Timecode as Timecode,
     FrameTimecode as FrameTimecode,
     FrameRate as FrameRate,
     SceneList as SceneList,
@@ -43,7 +46,7 @@ from scenedetect.common import (
     Interpolation as Interpolation,
 )
 from scenedetect.platform import StrPath as StrPath
-from scenedetect.video_stream import VideoStream as VideoStream
+from scenedetect.video_stream import VideoStream as VideoStream, FrameNumbering as FrameNumbering
 from scenedetect.video_stream import VideoOpenFailure as VideoOpenFailure
 from scenedetect.output import (
     save_images as save_images,
@@ -147,7 +150,11 @@ def open_video(
     backend_type = VideoStreamCv2
     logger.warning("Trying another backend: %s", backend_type.BACKEND_NAME)
     try:
-        return backend_type(path, frame_rate)
+        return backend_type(
+            path,
+            frame_rate,
+            frame_numbering=kwargs.get("frame_numbering", FrameNumbering.RELATIVE),
+        )
     except VideoOpenFailure as ex:
         logger.debug("Failed to open video: %s", str(ex))
         if last_error is None:

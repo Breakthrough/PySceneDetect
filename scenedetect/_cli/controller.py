@@ -16,13 +16,21 @@ import logging
 import os
 import time
 import warnings
+from fractions import Fraction
+
+import click
 
 from scenedetect._cli.context import CliContext
 from scenedetect.backends import VideoStreamCv2, VideoStreamMoviePy
-from scenedetect.common import FrameTimecode
+from scenedetect.common import (
+    FramePosition,
+    PositionPair,
+    Timecode,
+    parse_frame_or_time,
+)
 from scenedetect.platform import get_and_create_path
-from scenedetect.scene_manager import CutList, SceneList, get_scenes_from_cuts
-from scenedetect.video_stream import SeekError
+from scenedetect.scene_manager import CutList, SceneList
+from scenedetect.video_stream import FrameNumbering, SeekError
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -55,6 +63,7 @@ def run_scenedetect(context: CliContext) -> bool:
         if context.stats_file_path:
             logger.warning("WARNING: -s/--stats will be ignored due to load-scenes.")
         scenes, cuts = _load_scenes(context)
+        context.start_pos = scenes[0][0] if scenes else None
         scenes = _postprocess_scene_list(context, scenes)
         logger.info("Loaded %d scenes.", len(scenes))
     else:
@@ -63,6 +72,7 @@ def run_scenedetect(context: CliContext) -> bool:
         if result is None:
             return False
         scenes, cuts = result
+        context.start_pos = scenes[0][0] if scenes else None
         scenes = _postprocess_scene_list(context, scenes)
         # Handle -s/--stats option.
         _save_stats(context)
@@ -70,8 +80,10 @@ def run_scenedetect(context: CliContext) -> bool:
             logger.info(
                 "Detected %d scenes, average shot length %.1f seconds.",
                 len(scenes),
-                sum([(end_time - start_time).seconds for start_time, end_time in scenes])
-                / float(len(scenes)),
+                float(
+                    sum((end_pos - start_pos).elapsed for start_pos, end_pos in scenes)
+                    / len(scenes)
+                ),
             )
         else:
             logger.info("No scenes detected.")
@@ -83,25 +95,27 @@ def run_scenedetect(context: CliContext) -> bool:
 
 
 def _postprocess_scene_list(context: CliContext, scene_list: SceneList) -> SceneList:
+    if context.min_scene_len is None:
+        return scene_list
+    minimum = parse_frame_or_time(context.min_scene_len)
+    if minimum == 0:
+        return scene_list
+
+    def is_short(scene: PositionPair):
+        start_pos, end_pos = scene
+        if isinstance(minimum, int):
+            return end_pos.frame_number - start_pos.frame_number < minimum
+        return (end_pos - start_pos).elapsed < minimum
+
     # Handle --merge-last-scene. If set, when the last scene is shorter than --min-scene-len,
     # it will be merged with the previous one.
-    if (
-        context.merge_last_scene
-        and context.min_scene_len is not None
-        and context.min_scene_len > 0
-        and len(scene_list) > 1
-        and (scene_list[-1][1] - scene_list[-1][0]) < context.min_scene_len
-    ):
+    if context.merge_last_scene and len(scene_list) > 1 and is_short(scene_list[-1]):
         new_last_scene = (scene_list[-2][0], scene_list[-1][1])
         scene_list = [*scene_list[:-2], new_last_scene]
 
     # Handle --drop-short-scenes.
-    if (
-        context.drop_short_scenes
-        and context.min_scene_len is not None
-        and context.min_scene_len > 0
-    ):
-        scene_list = [s for s in scene_list if (s[1] - s[0]) >= context.min_scene_len]
+    if context.drop_short_scenes:
+        scene_list = [s for s in scene_list if not is_short(s)]
 
     return scene_list
 
@@ -112,24 +126,71 @@ def _detect(context: CliContext) -> tuple[SceneList, CutList] | None:
     assert context.video_stream is not None
     assert context.frame_skip is not None
 
+    # Reject start times past EOF before any backend seeks. OpenCV/PyAV previously
+    # continued and produced inconsistent errors; MoviePy raised SeekError (#380).
+    video_duration = context.video_stream.duration if context.video_stream is not None else None
+    if context.start_time is not None and video_duration is not None and video_duration > 0:
+        if isinstance(context.start_time, int):
+            beyond_end = context.start_time >= video_duration.frame_num
+        else:
+            beyond_end = context.start_time.seconds >= video_duration.seconds
+        if beyond_end:
+            raise click.BadParameter(
+                "start time is beyond the end of the video",
+                param_hint="-s/--start",
+            )
+    if (
+        isinstance(context.start_time, Timecode)
+        and isinstance(context.end_time, int)
+        and context.video_stream is not None
+        and context.video_stream.frame_numbering is FrameNumbering.RELATIVE
+    ):
+        logger.critical(
+            "An integer --end with a timestamp --start requires --frame-numbering source. "
+            "Use a timestamp --end or --duration with relative numbering."
+        )
+        return None
+
     context.ensure_detector()
     if context.start_time is not None:
+        target_description = (
+            f"frame {context.start_time}"
+            if isinstance(context.start_time, int)
+            else context.start_time.get_timecode()
+        )
         logger.debug("Seeking to start time...")
         try:
             context.video_stream.seek(target=context.start_time)
         except SeekError as ex:
-            logger.critical(
-                "Failed to seek to %s / frame %d: %s",
-                context.start_time.get_timecode(),
-                context.start_time.frame_num,
-                str(ex),
-            )
+            logger.critical("Failed to seek to %s: %s", target_description, ex)
+            return None
+
+        if context.video_stream.peek_timecode() is None:
+            logger.critical("No frames available at requested start %s.", target_description)
+            return None
+
+    end_time = context.end_time
+    if (
+        isinstance(context.start_time, int)
+        and isinstance(end_time, int)
+        and context.video_stream.frame_numbering is FrameNumbering.RELATIVE
+    ):
+        # Relative seek resets frame number to 0, so we count till end_time - start_time
+        end_time -= context.start_time
+    if end_time is not None:
+        if isinstance(end_time, int):
+            empty_range = context.video_stream.frame_number + 1 >= end_time
+        else:
+            first_timecode = context.video_stream.peek_timecode()
+            empty_range = first_timecode is not None and first_timecode.seconds >= end_time.seconds
+        if empty_range:
+            logger.critical("No frames fall within the requested detection range.")
             return None
 
     num_frames = context.scene_manager.detect_scenes(
         video=context.video_stream,
         duration=context.duration,
-        end_time=context.end_time,
+        end_time=end_time,
         frame_skip=context.frame_skip,
         show_progress=not context.quiet_mode,
     )
@@ -188,48 +249,134 @@ def _save_stats(context: CliContext) -> None:
 
 def _load_scenes(context: CliContext) -> tuple[SceneList, CutList]:
     assert context.load_scenes_input
-    assert context.load_scenes_column_name is not None
-    assert context.video_stream is not None
+    assert context.load_scenes_columns
     assert os.path.exists(context.load_scenes_input)
 
-    video_stream = context.video_stream
-    with open(context.load_scenes_input) as input_file:
-        file_reader = csv.reader(input_file)
-        csv_headers = next(file_reader)
-        if context.load_scenes_column_name not in csv_headers:
-            csv_headers = next(file_reader)
-        # Check to make sure column headers are present and then load the data.
-        if context.load_scenes_column_name not in csv_headers:
-            raise ValueError("specified column header for scene start is not present")
-        col_idx = csv_headers.index(context.load_scenes_column_name)
+    columns = context.load_scenes_columns
+    scene_list: SceneList = []
+    with open(context.load_scenes_input, newline="", encoding="utf-8-sig") as input_file:
+        reader = csv.DictReader(input_file)
+        if reader.fieldnames and reader.fieldnames[0] == "Timecode List:":
+            reader = csv.DictReader(input_file)
 
-        def calculate_timecode(value: str) -> FrameTimecode:
-            # Assume other columns are in seconds except frame numbers.
-            if value.isdigit():
-                # Frame numbers start from index 1 in the CLI output so we correct for that.
-                return FrameTimecode(int(value) - 1, fps=video_stream.frame_rate)
-            return FrameTimecode(value, fps=video_stream.frame_rate)
+        missing_columns = set(columns.values()) - set(reader.fieldnames or [])
+        if missing_columns:
+            raise ValueError(f"Missing scene columns: {', '.join(sorted(missing_columns))}")
 
-        cut_list = sorted(calculate_timecode(row[col_idx]) for row in file_reader)
-        # `SceneDetector` works on cuts, so we have to skip the first scene and place the first
-        # cut point where the next scenes starts.
-        if cut_list:
-            cut_list = cut_list[1:]
+        for row in reader:
+            if any(row[column] is None for column in columns.values()):
+                raise ValueError("Scene row is missing a required boundary value.")
 
-        start_time = context.video_stream.base_timecode
-        if context.start_time is not None:
-            start_time = context.start_time
-            cut_list = [cut for cut in cut_list if cut > context.start_time]
+            start_frame = int(row[columns["start_frame"]]) - 1
+            end_frame = int(row[columns["end_frame"]])
+            start_seconds = _parse_csv_seconds(row[columns["start_time"]])
+            end_seconds = _parse_csv_seconds(row[columns["end_time"]])
 
-        video_duration = context.video_stream.duration
-        assert video_duration is not None
-        end_time = video_duration
-        if context.end_time is not None:
-            end_time = min(context.end_time, video_duration)
-        elif context.duration is not None:
-            end_time = min(start_time + context.duration, video_duration)
+            if start_frame < 0 or end_frame <= start_frame:
+                raise ValueError("Invalid scene frame range.")
+            if end_seconds < start_seconds:
+                raise ValueError("Scene end time precedes its start time.")
 
-        cut_list = [cut for cut in cut_list if cut < end_time]
-        scene_list = get_scenes_from_cuts(cut_list=cut_list, start_pos=start_time, end_pos=end_time)
+            start = FramePosition(
+                timecode=Timecode(
+                    start_seconds.numerator,
+                    Fraction(1, start_seconds.denominator),
+                ),
+                frame_number=start_frame,
+            )
+            end = FramePosition(
+                timecode=Timecode(
+                    end_seconds.numerator,
+                    Fraction(1, end_seconds.denominator),
+                ),
+                frame_number=end_frame,
+            )
+            scene_list.append((start, end))
 
-        return (scene_list, cut_list)
+    if not scene_list:
+        return [], []
+
+    start_limit = (
+        parse_frame_or_time(context.start_time) if context.start_time is not None else None
+    )
+    stop_limit = parse_frame_or_time(context.end_time) if context.end_time is not None else None
+    length = parse_frame_or_time(context.duration) if context.duration is not None else None
+
+    if length == 0:
+        return [], []
+
+    if length is not None:
+        if start_limit is None:
+            origin = (
+                scene_list[0][0].frame_number
+                if isinstance(length, int)
+                else scene_list[0][0].timecode.seconds
+            )
+        elif (isinstance(start_limit, int) and isinstance(length, int)) or (
+            isinstance(start_limit, Fraction) and isinstance(length, Fraction)
+        ):
+            origin = start_limit
+        else:
+            matches = {
+                (position.frame_number, position.timecode.seconds)
+                for scene in scene_list
+                for position in scene
+                if (
+                    position.frame_number
+                    if isinstance(start_limit, int)
+                    else position.timecode.seconds
+                )
+                == start_limit
+            }
+            if len(matches) != 1:
+                raise ValueError(
+                    "Cannot convert the requested start to the duration's units: "
+                    "the CSV has no unique saved position for it."
+                )
+
+            frame_number, seconds = next(iter(matches))
+            origin = frame_number if isinstance(length, int) else seconds
+
+        stop_limit = origin + length
+
+    selected: SceneList = []
+    for start, end in scene_list:
+        if start_limit is not None:
+            left = start.frame_number if isinstance(start_limit, int) else start.timecode.seconds
+            right = end.frame_number if isinstance(start_limit, int) else end.timecode.seconds
+
+            # Retain a zero-elapsed row exactly at the requested start.
+            if right < start_limit or (right == start_limit and left < right):
+                continue
+            if left < start_limit < right:
+                raise ValueError(
+                    "The requested range would split a saved scene. "
+                    "The CSV does not contain the complete position for that cutoff."
+                )
+
+        if stop_limit is not None:
+            left = start.frame_number if isinstance(stop_limit, int) else start.timecode.seconds
+            right = end.frame_number if isinstance(stop_limit, int) else end.timecode.seconds
+
+            if left >= stop_limit:
+                continue
+            if left < stop_limit < right:
+                raise ValueError(
+                    "The requested range would split a saved scene. "
+                    "The CSV does not contain the complete position for that cutoff."
+                )
+
+        selected.append((start, end))
+
+    cut_list = [start for start, _ in selected[1:]]
+    return selected, cut_list
+
+
+def _parse_csv_seconds(value: str) -> Fraction:
+    """Parse a CSV time field whose unit is already known."""
+    value = value.strip()
+    if ":" in value:
+        sign = -1 if value.startswith("-") else 1
+        text = value[1:] if sign < 0 else value
+        return sign * Fraction(parse_frame_or_time(text))
+    return Fraction(value.removesuffix("s"))

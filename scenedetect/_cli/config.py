@@ -26,12 +26,13 @@ from enum import Enum
 import click
 from platformdirs import user_config_dir
 
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FramePosition, parse_frame_or_time
 from scenedetect.detector import FlashFilter
 from scenedetect.detectors import ContentDetector
 from scenedetect.output.video import _DEFAULT_FFMPEG_ARGS
 from scenedetect.platform import DEBUG_MODE
 from scenedetect.scene_manager import Interpolation
+from scenedetect.video_stream import FrameNumbering
 
 PYAV_THREADING_MODES = ["NONE", "SLICE", "FRAME", "AUTO"]
 
@@ -79,7 +80,7 @@ class TimecodeValue(ValidatedValue):
 
     def __init__(self, value: int | float | str):
         # Ensure value is a valid timecode.
-        FrameTimecode(timecode=value, fps=100.0)
+        parse_frame_or_time(value)
         self._value = value
 
     @property
@@ -328,13 +329,13 @@ class TimecodeFormat(Enum):
     SECONDS = 2
     """Print timecodes in seconds SSS.sss."""
 
-    def format(self, timecode: FrameTimecode) -> str:
+    def format(self, position: FramePosition) -> str:
         if self == TimecodeFormat.FRAMES:
-            return str(timecode.frame_num)
+            return str(position.frame_number)
         if self == TimecodeFormat.TIMECODE:
-            return timecode.get_timecode()
+            return position.timecode.get_timecode()
         if self == TimecodeFormat.SECONDS:
-            return f"{timecode.seconds:.3f}"
+            return f"{float(position.timecode.seconds):.3f}"
         raise RuntimeError("Unhandled format specifier.")
 
 
@@ -418,7 +419,10 @@ CONFIG_MAP: ConfigDict = {
         "threshold": RangeValue(12.0, min_val=0.0, max_val=255.0),
     },
     "load-scenes": {
-        "start-col-name": "Start Frame",
+        "start-frame-col-name": "Start Frame",
+        "start-time-col-name": "Start Time (seconds)",
+        "end-frame-col-name": "End Frame",
+        "end-time-col-name": "End Time (seconds)",
     },
     "list-scenes": {
         "cut-format": TimecodeFormat.TIMECODE,
@@ -438,6 +442,7 @@ CONFIG_MAP: ConfigDict = {
         "default-detector": "detect-adaptive",
         "downscale": 0,
         "downscale-method": Interpolation.LINEAR,
+        "frame-numbering": FrameNumbering.RELATIVE.value,
         "drop-short-scenes": False,
         "frame-skip": 0,
         "merge-last-scene": False,
@@ -535,6 +540,7 @@ CHOICE_MAP: dict[str, dict[str, list[str]]] = {
             "detect-hist",
         ],
         "downscale-method": [value.name.lower() for value in Interpolation],
+        "frame-numbering": [mode.value for mode in FrameNumbering],
         "verbosity": ["debug", "info", "warning", "error", "none"],
     },
     "list-scenes": {

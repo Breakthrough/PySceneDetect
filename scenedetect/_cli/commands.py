@@ -19,8 +19,9 @@ import logging
 import webbrowser
 from string import Template
 
-from scenedetect._cli.config import FcpFormat
+from scenedetect._cli.config import FcpFormat, TimecodeFormat
 from scenedetect._cli.context import CliContext
+from scenedetect.common import TimecodeLike
 from scenedetect.output import save_images as save_images_impl
 from scenedetect.output import (
     split_video_ffmpeg,
@@ -93,13 +94,13 @@ def save_qp(
         Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name),
         output,
     )
-    start_frame = context.start_time.frame_num if context.start_time else 0
+    start_frame = context.start_pos.frame_number if context.start_pos is not None else 0
     shift_start = not disable_shift
     offset = start_frame if shift_start else 0
     with open(qp_path, "w") as qp_file:
         qp_file.write(f"{0 if shift_start else start_frame} I -1\n")
         # Place another I frame at each detected cut.
-        qp_file.writelines(f"{cut.frame_num - offset} I -1\n" for cut in cuts)
+        qp_file.writelines(f"{cut.frame_number - offset} I -1\n" for cut in cuts)
     logger.info(f"QP file written to: {qp_path}")
 
 
@@ -120,9 +121,7 @@ def save_keyframes(
         # https://aegisub.org/docs/latest/video/#keyframe-file-specification
         keyframes_file.write("fps 0\n")
         keyframes_file.write("0\n")
-        # TODO(https://scenedetect.com/issues/569): Frame numbers are approximate for VFR
-        # input until exact presentation-frame ordinals are tracked.
-        keyframes_file.writelines(f"{cut.frame_num}\n" for cut in cuts)
+        keyframes_file.writelines(f"{cut.frame_number}\n" for cut in cuts)
     logger.info(f"Keyframes written to: {keyframes_path}")
 
 
@@ -137,7 +136,7 @@ def list_scenes(
     quiet: bool,
     display_scenes: bool,
     display_cuts: bool,
-    cut_format: str,
+    cut_format: TimecodeFormat,
     col_separator: str,
     row_separator: str,
 ):
@@ -178,8 +177,8 @@ def list_scenes(
 -----------------------------------------------------------------------""",
             "\n".join(
                 [
-                    f" |  {i + 1:5d}  | {start_time.frame_num + 1:11d} | {start_time.get_timecode()} | {end_time.frame_num:11d} | {end_time.get_timecode()} |"
-                    for i, (start_time, end_time) in enumerate(scenes)
+                    f" |  {i + 1:5d}  | {start_pos.frame_number + 1:11d} | {start_pos.timecode.get_timecode()} | {end_pos.frame_number:11d} | {end_pos.timecode.get_timecode()} |"
+                    for i, (start_pos, end_pos) in enumerate(scenes)
                 ]
             ),
         )
@@ -196,18 +195,18 @@ def save_images(
     scenes: SceneList,
     cuts: CutList,
     num_images: int | None,
-    interval: str | None,
+    interval: TimecodeLike | None,
     min_images: int,
     max_images: int | None,
-    frame_margin: int,
+    frame_margin: TimecodeLike,
     image_extension: str,
     encoder_param: int,
     filename: str,
     output: str | None,
     show_progress: bool,
-    scale: int,
-    height: int,
-    width: int,
+    scale: float | None,
+    height: int | None,
+    width: int | None,
     interpolation: Interpolation,
     threading: bool,
 ):

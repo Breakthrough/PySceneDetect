@@ -14,6 +14,7 @@
 import logging
 import sys
 import typing as ty
+from fractions import Fraction
 
 import click
 
@@ -27,7 +28,13 @@ from scenedetect._cli.config import (
     KernelSizeValue,
 )
 from scenedetect.backends import VideoStreamAv
-from scenedetect.common import MAX_FPS_DELTA, FrameTimecode
+from scenedetect.common import (
+    MAX_FPS_DELTA,
+    FramePosition,
+    Timecode,
+    TimecodeLike,
+    parse_frame_or_time,
+)
 from scenedetect.detector import SceneDetector
 from scenedetect.detectors import (
     AdaptiveDetector,
@@ -40,7 +47,12 @@ from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import DEBUG_MODE, init_logger
 from scenedetect.scene_manager import SceneManager
 from scenedetect.stats_manager import StatsManager
-from scenedetect.video_stream import FrameRateUnavailable, VideoOpenFailure, VideoStream
+from scenedetect.video_stream import (
+    FrameNumbering,
+    FrameRateUnavailable,
+    VideoOpenFailure,
+    VideoStream,
+)
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -104,21 +116,23 @@ class CliContext:
         self.save_images: bool = False  # True if the save-images command was specified
         # Result of save-images used by save-html: (image filenames, output directory).
         self.save_images_result: tuple[dict[int, list[str]], str | None] | None = None
+        # Preserve the processing start even if short scenes are removed.
+        self.start_pos: FramePosition | None = None
 
         # Input:
         self.video_stream: VideoStream | None = None
         self.use_stdin: bool = False  # --stdin
         self.load_scenes_input: str | None = None  # load-scenes -i/--input
-        self.load_scenes_column_name: str | None = None  # load-scenes -c/--start-col-name
-        self.start_time: FrameTimecode | None = None  # time -s/--start
-        self.end_time: FrameTimecode | None = None  # time -e/--end
-        self.duration: FrameTimecode | None = None  # time -d/--duration
+        self.load_scenes_columns: dict[str, str] = {}
+        self.start_time: int | Timecode | None = None  # time -s/--start
+        self.end_time: int | Timecode | None = None  # time -e/--end
+        self.duration: int | Timecode | None = None  # time -d/--duration
         self.frame_skip: int | None = None
 
         # Options:
         self.drop_short_scenes: bool | None = None
         self.merge_last_scene: bool | None = None
-        self.min_scene_len: FrameTimecode | None = None
+        self.min_scene_len: int | Timecode | None = None
         self.default_detector: tuple[type[SceneDetector], dict[str, ty.Any]] | None = None
         self.output: str | None = None
         self.stats_file_path: str | None = None
@@ -152,21 +166,21 @@ class CliContext:
             (detector_type, detector_args) = self.default_detector
             self.add_detector(detector_type, detector_args)
 
-    def _resolve_min_scene_len(self, command: str, override: str | None) -> int:
-        """Resolve the minimum scene length (in frames) for a `detect-*` command, honoring
+    def _resolve_min_scene_len(self, command: str, override: str | None) -> int | Timecode:
+        """Resolve the minimum scene length for a `detect-*` command, honoring
         the `--drop-short-scenes` flag, command-specific config, and global default."""
         if self.drop_short_scenes:
             return 0
         if override is not None:
             parsed = self.parse_timecode(override)
             assert parsed is not None
-            return parsed.frame_num
+            return parsed
         if self.config.is_default(command, "min-scene-len"):
             assert self.min_scene_len is not None
-            return self.min_scene_len.frame_num
+            return self.min_scene_len
         parsed = self.parse_timecode(self.config.get_value(command, "min-scene-len"))
         assert parsed is not None
-        return parsed.frame_num
+        return parsed
 
     @staticmethod
     def _kernel_size_value(kernel_size: int | None) -> KernelSizeValue | None:
@@ -181,9 +195,12 @@ class CliContext:
                 "Kernel size must be an odd integer >= 3, or -1 for auto.", param_hint="kernel-size"
             ) from ex
 
-    def parse_timecode(self, value: str | None, correct_pts: bool = False) -> FrameTimecode | None:
-        """Parses a user input string into a FrameTimecode assuming the given framerate. If `value`
-        is None it will be passed through without processing.
+    def parse_timecode(
+        self, value: TimecodeLike | None, correct_pts: bool = False
+    ) -> int | Timecode | None:
+        """Parse a CLI/config value as integer frames or an exact Timecode.
+            None is returned unchanged. With correct_pts, positive frame inputs
+            are converted from CLI one-based numbering to zero-based numbering.
 
         Raises:
             click.BadParameter, click.ClickException
@@ -193,13 +210,12 @@ class CliContext:
         try:
             if self.video_stream is None:
                 raise click.ClickException("No input video (-i/--input) was specified.")
-            timecode: int | str
-            if correct_pts and value.isdigit():
-                int_value = int(value)
-                timecode = int_value - 1 if int_value >= 1 else int_value
-            else:
-                timecode = value
-            return FrameTimecode(timecode=timecode, fps=self.video_stream.frame_rate)
+            parsed = parse_frame_or_time(value)
+            if isinstance(parsed, int):
+                if correct_pts and parsed > 0:
+                    parsed -= 1
+                return parsed
+            return Timecode(pts=parsed.numerator, time_base=Fraction(1, parsed.denominator))
         except ValueError as ex:
             raise click.BadParameter(
                 "timecode must be in seconds (100.0), frames (100), or HH:MM:SS"
@@ -211,6 +227,7 @@ class CliContext:
         use_stdin: bool,
         output: str | None,
         frame_rate: float | None,
+        frame_numbering: str | None,
         stats_file: str | None,
         frame_skip: int | None,
         min_scene_len: str | None,
@@ -297,11 +314,14 @@ class CliContext:
         if input_path is None and not use_stdin:
             return
 
-        # Load the input video to obtain a time base for parsing timecodes.
+        numbering = FrameNumbering(
+            self.config.get_value("global", "frame-numbering", frame_numbering).lower()
+        )
+        # Open the input video before configuring detection.
         if use_stdin:
-            self._open_stdin_stream(frame_rate, backend)
+            self._open_stdin_stream(frame_rate, backend, frame_numbering=numbering)
         else:
-            self._open_video_stream(input_path, frame_rate, backend)
+            self._open_video_stream(input_path, frame_rate, backend, frame_numbering=numbering)
 
         self.output = self.config.get_value("global", "output", output)
         if self.output:
@@ -386,7 +406,7 @@ class CliContext:
         filter_mode: str | None = None,
     ) -> dict[str, ty.Any]:
         """Get a dict containing user options to construct a ContentDetector with."""
-        min_scene_len_frames = self._resolve_min_scene_len("detect-content", min_scene_len)
+        resolved_min_scene_len = self._resolve_min_scene_len("detect-content", min_scene_len)
 
         if weights is not None:
             try:
@@ -403,7 +423,7 @@ class CliContext:
                 "detect-content", "kernel-size", self._kernel_size_value(kernel_size)
             ),
             "luma_only": luma_only or self.config.get_value("detect-content", "luma-only"),
-            "min_scene_len": min_scene_len_frames,
+            "min_scene_len": resolved_min_scene_len,
             "threshold": self.config.get_value("detect-content", "threshold", threshold),
             "filter_mode": self.config.get_value("detect-content", "filter-mode", filter_mode),
         }
@@ -420,7 +440,7 @@ class CliContext:
     ) -> dict[str, ty.Any]:
         """Handle detect-adaptive command options and return args to construct one with."""
 
-        min_scene_len_frames = self._resolve_min_scene_len("detect-adaptive", min_scene_len)
+        resolved_min_scene_len = self._resolve_min_scene_len("detect-adaptive", min_scene_len)
 
         if weights is not None:
             try:
@@ -440,7 +460,7 @@ class CliContext:
             "min_content_val": self.config.get_value(
                 "detect-adaptive", "min-content-val", min_content_val
             ),
-            "min_scene_len": min_scene_len_frames,
+            "min_scene_len": resolved_min_scene_len,
             "window_width": self.config.get_value("detect-adaptive", "frame-window", frame_window),
         }
 
@@ -454,13 +474,13 @@ class CliContext:
     ) -> dict[str, ty.Any]:
         """Handle detect-threshold command options and return args to construct one with."""
 
-        min_scene_len_frames = self._resolve_min_scene_len("detect-threshold", min_scene_len)
+        resolved_min_scene_len = self._resolve_min_scene_len("detect-threshold", min_scene_len)
         # TODO(v1.0): add_last_scene cannot be disabled right now.
         return {
             "add_final_scene": add_last_scene
             or self.config.get_value("detect-threshold", "add-last-scene"),
             "fade_bias": self.config.get_value("detect-threshold", "fade-bias", fade_bias),
-            "min_scene_len": min_scene_len_frames,
+            "min_scene_len": resolved_min_scene_len,
             "min_out_length": self.parse_timecode(
                 self.config.get_value("detect-threshold", "min-out-length", min_out_length)
             ),
@@ -475,10 +495,10 @@ class CliContext:
     ) -> dict[str, ty.Any]:
         """Handle detect-hist command options and return args to construct one with."""
 
-        min_scene_len_frames = self._resolve_min_scene_len("detect-hist", min_scene_len)
+        resolved_min_scene_len = self._resolve_min_scene_len("detect-hist", min_scene_len)
         return {
             "bins": self.config.get_value("detect-hist", "bins", bins),
-            "min_scene_len": min_scene_len_frames,
+            "min_scene_len": resolved_min_scene_len,
             "threshold": self.config.get_value("detect-hist", "threshold", threshold),
         }
 
@@ -536,7 +556,12 @@ class CliContext:
         # Initialize logger with the set CLI args / user configuration.
         init_logger(log_level=curr_verbosity, show_stdout=not self.quiet_mode, log_file=logfile)
 
-    def _open_stdin_stream(self, frame_rate: float | None, backend: str | None):
+    def _open_stdin_stream(
+        self,
+        frame_rate: float | None,
+        backend: str | None,
+        frame_numbering: FrameNumbering = FrameNumbering.RELATIVE,
+    ):
         if backend not in (None, "pyav") or VideoStreamAv is None:
             raise click.BadParameter(
                 "--stdin requires the pyav backend. Install it with `pip install av`.",
@@ -548,13 +573,14 @@ class CliContext:
                 "--stdin requires a video to be piped to the program.", param_hint="--stdin"
             )
         self.use_stdin = True
-        self._open_video_stream(None, frame_rate, "pyav")
+        self._open_video_stream(None, frame_rate, "pyav", frame_numbering=frame_numbering)
 
     def _open_video_stream(
         self,
         input_path: str | None,
         frame_rate: float | None,
         backend: str | None,
+        frame_numbering: FrameNumbering = FrameNumbering.RELATIVE,
     ):
         input_hint = "--stdin" if self.use_stdin else "-i/--input"
         if input_path is not None and "%" in input_path and backend != "opencv":
@@ -578,6 +604,7 @@ class CliContext:
                     # _PipeReader only implements the part of BinaryIO that PyAV uses.
                     ty.cast(ty.BinaryIO, _PipeReader(sys.stdin.buffer)),
                     frame_rate=frame_rate,
+                    frame_numbering=frame_numbering,
                     name="stdin",
                     threading_mode=self.config.get_value("backend-pyav", "threading-mode"),
                     suppress_output=self.config.get_value("backend-pyav", "suppress-output"),
@@ -586,6 +613,7 @@ class CliContext:
                 self.video_stream = open_video(
                     path=input_path,
                     frame_rate=frame_rate,
+                    frame_numbering=frame_numbering,
                     backend=backend,
                     threading_mode=self.config.get_value("backend-pyav", "threading-mode"),
                     suppress_output=self.config.get_value("backend-pyav", "suppress-output"),
@@ -594,6 +622,7 @@ class CliContext:
                 self.video_stream = open_video(
                     path=input_path,
                     frame_rate=frame_rate,
+                    frame_numbering=frame_numbering,
                     backend=backend,
                     max_decode_attempts=self.config.get_value(
                         "backend-opencv", "max-decode-attempts"
@@ -605,6 +634,7 @@ class CliContext:
                     path=input_path,
                     frame_rate=frame_rate,
                     backend=backend,
+                    frame_numbering=frame_numbering,
                 )
             if not self.video_stream.name:
                 logger.warning(
