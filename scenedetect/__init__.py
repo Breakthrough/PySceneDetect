@@ -36,7 +36,6 @@ from scenedetect.common import (
     FramePosition as FramePosition,
     FrameDuration as FrameDuration,
     Timecode as Timecode,
-    FrameTimecode as FrameTimecode,
     FrameRate as FrameRate,
     SceneList as SceneList,
     CutList as CutList,
