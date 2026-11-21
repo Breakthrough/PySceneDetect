@@ -54,7 +54,7 @@ def _run_predictions(
         pred_scene_list = detect(str(sample.video_file), detector_cls(), backend=backend)
         elapsed = time.time() - start
         predictions[sample.video_file] = Prediction(
-            predicted_cuts=[scene[1].frame_num for scene in pred_scene_list],
+            predicted_cuts=[scene[1].frame_number for scene in pred_scene_list],
             ground_truth=sample.ground_truth,
             elapsed=elapsed,
         )

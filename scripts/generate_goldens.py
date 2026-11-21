@@ -53,7 +53,7 @@ def generate_golden(video_path: str, detector_class, params: dict) -> list[int]:
     scene_manager.detect_scenes(video)
     scene_list = scene_manager.get_scene_list()
     # Return start frame of each scene except the first one (which is 0)
-    return [scene[0].get_frames() for scene in scene_list[1:]]
+    return [scene[0].frame_number for scene in scene_list[1:]]
 
 
 def main():
