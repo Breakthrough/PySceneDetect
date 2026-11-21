@@ -31,7 +31,6 @@ from moviepy.video.io.ffmpeg_reader import FFMPEG_VideoReader
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.common import (
     FrameRate,
-    FrameTimecode,
     Timecode,
     TimecodeLike,
     framerate_to_fraction,
@@ -172,10 +171,15 @@ class VideoStreamMoviePy(VideoStream):
         return tuple(self._reader.infos["video_size"])
 
     @property
-    def duration(self) -> FrameTimecode | None:
-        """Duration of the stream as a FrameTimecode, or None if non terminating."""
+    def duration(self) -> Fraction | None:
+        """Reported source duration in seconds."""
         assert isinstance(self._reader.infos["duration"], float)
-        return self.base_timecode + self._reader.infos["duration"]
+        return Fraction(str(self._reader.infos["duration"]))
+
+    @property
+    def frame_count(self) -> int | None:
+        """Unavailable: MoviePy derives its frame count from duration and frame rate."""
+        return None
 
     @property
     def aspect_ratio(self) -> float:

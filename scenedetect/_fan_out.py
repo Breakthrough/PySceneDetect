@@ -29,7 +29,7 @@ from fractions import Fraction
 
 import numpy as np
 
-from scenedetect.common import FramePosition, FrameTimecode, Timecode, TimecodeLike
+from scenedetect.common import FramePosition, Timecode, TimecodeLike
 from scenedetect.video_stream import SeekError, VideoStream
 
 _EOF = object()
@@ -173,6 +173,7 @@ class _FanOutConsumer(VideoStream):
 
     def __init__(self, parent: FanOutVideoStream, index: int):
         super().__init__(frame_numbering=parent._source.frame_numbering)
+        self._position = parent._source.position
         self._parent = parent
         self._index = index
         self._eof = False
@@ -195,8 +196,12 @@ class _FanOutConsumer(VideoStream):
         return self._parent._source.frame_rate
 
     @property
-    def duration(self) -> FrameTimecode | None:
+    def duration(self) -> Fraction | None:
         return self._parent._source.duration
+
+    @property
+    def frame_count(self) -> int | None:
+        return self._parent._source.frame_count
 
     @property
     def frame_size(self) -> tuple[int, int]:

@@ -30,7 +30,6 @@ import numpy as np
 from scenedetect.common import (
     MAX_FPS_DELTA,
     FrameRate,
-    FrameTimecode,
     Timecode,
     TimecodeLike,
     framerate_to_fraction,
@@ -231,13 +230,26 @@ class VideoStreamCv2(VideoStream):
         )
 
     @property
-    def duration(self) -> FrameTimecode | None:
-        """Duration of the stream as a FrameTimecode, or None if non terminating."""
+    def duration(self) -> Fraction | None:
+        """Estimated source duration in seconds, or None if unavailable.
+
+        Calculated from reported frame count and frame rate; may be inaccurate for VFR.
+        """
+        frame_count = self.frame_count
+        if frame_count is None:
+            return None
+        return frame_count / self.frame_rate
+
+    @property
+    def frame_count(self) -> int | None:
+        """Reported total source frame count, or None if unavailable."""
         if self._is_device:
             return None
         if self._closed:
-            return self.base_timecode + math.trunc(self._closed_frame_count)
-        return self.base_timecode + math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            frame_count = math.trunc(self._closed_frame_count)
+        else:
+            frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        return frame_count if frame_count > 0 else None
 
     @property
     def aspect_ratio(self) -> float:
@@ -581,12 +593,21 @@ class VideoCaptureAdapter(VideoStream):
         )
 
     @property
-    def duration(self) -> FrameTimecode | None:
-        """Duration of the stream as a FrameTimecode, or None if non terminating."""
+    def duration(self) -> Fraction | None:
+        """Estimated source duration in seconds, or None if unavailable.
+
+        Calculated from reported frame count and frame rate; may be inaccurate for VFR.
+        """
+        frame_count = self.frame_count
+        if frame_count is None:
+            return None
+        return frame_count / self.frame_rate
+
+    @property
+    def frame_count(self) -> int | None:
+        """Reported total source frame count, or None if unavailable."""
         frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        if frame_count > 0:
-            return self.base_timecode + frame_count
-        return None
+        return frame_count if frame_count > 0 else None
 
     @property
     def aspect_ratio(self) -> float:

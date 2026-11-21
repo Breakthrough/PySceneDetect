@@ -42,7 +42,7 @@ from types import TracebackType
 
 import numpy as np
 
-from scenedetect.common import FramePosition, FrameTimecode, Timecode, TimecodeLike
+from scenedetect.common import FramePosition, Timecode, TimecodeLike
 
 
 class FrameNumbering(Enum):
@@ -141,11 +141,6 @@ class VideoStream(ABC):
     instance attribute, and call `_check_open()` from methods which require an open stream."""
 
     @property
-    def base_timecode(self) -> FrameTimecode:
-        """FrameTimecode object to use as a time base."""
-        return FrameTimecode(timecode=0, fps=self.frame_rate)
-
-    @property
     def decode_failures(self) -> int:
         """Number of frames that failed to decode and were skipped (may indicate video
         corruption). Always 0 for backends which do not track decode failures."""
@@ -229,8 +224,20 @@ class VideoStream(ABC):
 
     @property
     @abstractmethod
-    def duration(self) -> FrameTimecode | None:
-        """Duration of the stream as a FrameTimecode, or None if non terminating."""
+    def duration(self) -> Fraction | None:
+        """Reported source duration in seconds, or None if unavailable.
+
+        This is metadata and may be inaccurate. Estimates may be revised during decoding.
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def frame_count(self) -> int | None:
+        """Reported total source frame count, or None if unavailable.
+
+        This is metadata and may be inaccurate. Seeking and frame numbering does not change it.
+        """
         ...
 
     @property

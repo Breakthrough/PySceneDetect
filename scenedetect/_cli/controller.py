@@ -18,8 +18,6 @@ import time
 import warnings
 from fractions import Fraction
 
-import click
-
 from scenedetect._cli.context import CliContext
 from scenedetect.backends import VideoStreamCv2, VideoStreamMoviePy
 from scenedetect.common import (
@@ -128,17 +126,16 @@ def _detect(context: CliContext) -> tuple[SceneList, CutList] | None:
 
     # Reject start times past EOF before any backend seeks. OpenCV/PyAV previously
     # continued and produced inconsistent errors; MoviePy raised SeekError (#380).
-    video_duration = context.video_stream.duration if context.video_stream is not None else None
-    if context.start_time is not None and video_duration is not None and video_duration > 0:
+    if context.start_time is not None:
         if isinstance(context.start_time, int):
-            beyond_end = context.start_time >= video_duration.frame_num
+            frame_count = context.video_stream.frame_count
+            beyond_end = frame_count is not None and context.start_time >= frame_count
         else:
-            beyond_end = context.start_time.seconds >= video_duration.seconds
+            video_duration = context.video_stream.duration
+            beyond_end = video_duration is not None and context.start_time.seconds >= video_duration
         if beyond_end:
-            raise click.BadParameter(
-                "start time is beyond the end of the video",
-                param_hint="-s/--start",
-            )
+            logger.critical("start time is beyond the end of the video")
+            return None
     if (
         isinstance(context.start_time, Timecode)
         and isinstance(context.end_time, int)

@@ -102,7 +102,7 @@ from scenedetect.detector import SceneDetector
 from scenedetect.output import *  # noqa: F403
 from scenedetect.platform import tqdm
 from scenedetect.stats_manager import StatsManager
-from scenedetect.video_stream import VideoStream
+from scenedetect.video_stream import FrameNumbering, VideoStream
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -475,8 +475,8 @@ class SceneManager:
                 where N is frame_skip), speeding up detection at the expense of accuracy.
                 `frame_skip` **must** be 0 (the default) when using a StatsManager.
             show_progress: If True, and the ``tqdm`` module is available, displays
-                progress in seconds for time limits and frames otherwise, with an estimated
-                time remaining when a total is known.
+                progress in frames or seconds, with an estimated time remaining when
+                a suitable total is known.
             callback: If set, called with (image, FramePosition) for cuts reported during frame
                 processing whose images remain buffered.
             frame_source: [DEPRECATED] DO NOT USE. For compatibility with previous version.
@@ -557,10 +557,18 @@ class SceneManager:
             total = max(0, stop_at - start_seconds)
         elif isinstance(stop_at, int):
             total = max(0, stop_at - start_frame_num - 1)
-        else:
-            video_duration = video.duration
-            if video_duration is not None:
-                total = max(0, video_duration.frame_num - start_frame_num - 1)
+        elif show_progress:
+            frame_count = video.frame_count
+            if frame_count is not None and video.frame_numbering is FrameNumbering.SOURCE:
+                total = max(0, frame_count - start_frame_num - 1)
+            else:
+                video_duration = video.duration
+                if video_duration is not None:
+                    next_timecode = video.peek_timecode()
+                    if next_timecode is None:
+                        return 0
+                    start_seconds = next_timecode.seconds
+                    total = max(0, video_duration - start_seconds)
 
         progress_bar = None
         if show_progress:

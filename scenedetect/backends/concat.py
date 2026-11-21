@@ -40,14 +40,11 @@ from pathlib import Path
 
 import numpy as np
 
-from scenedetect.common import FrameRate, FrameTimecode, Timecode, TimecodeLike, parse_frame_or_time
+from scenedetect.common import FrameRate, Timecode, TimecodeLike, parse_frame_or_time
 from scenedetect.platform import StrPath
 from scenedetect.video_stream import FrameNumbering, SeekError, VideoOpenFailure, VideoStream
 
 logger = logging.getLogger("pyscenedetect")
-
-_GLOBAL_TIME_BASE = Fraction(1, 1000000)
-"""Time base used for the legacy combined-duration value."""
 
 FRAMERATE_DELTA_TOLERANCE: float = 0.1
 """Tolerance in frames/sec above which a framerate mismatch between inputs is warned about."""
@@ -60,9 +57,11 @@ class _SourceMetadata:
     path: Path
     frame_size: tuple[int, int]
     frame_rate: Fraction
-    duration: Fraction
-    """Declared duration of the video in seconds (exact rational value). May be inaccurate;
+    duration: Fraction | None
+    """Declared duration of the video in seconds, or None if unavailable. May be inaccurate;
     later source offsets may be extended when decoding reaches this source's end."""
+    frame_count: int | None
+    """Reported total source frame count, or None if unavailable."""
     aspect_ratio: float
 
 
@@ -77,11 +76,6 @@ class SourceSpan:
     path: Path
     local_start: Timecode
     local_end: Timecode
-
-
-def _exact_seconds(timecode: FrameTimecode) -> Fraction:
-    """Time represented by `timecode` as an exact rational number of seconds."""
-    return Fraction(timecode.pts) * timecode.time_base
 
 
 class VideoStreamConcat(VideoStream):
@@ -145,14 +139,13 @@ class VideoStreamConcat(VideoStream):
         try:
             for index in range(len(self._paths)):
                 cap = self._open_source(index)
-                duration = cap.duration
-                declared_seconds = _exact_seconds(duration) if duration is not None else Fraction(0)
                 self._sources.append(
                     _SourceMetadata(
                         path=self._paths[index],
                         frame_size=cap.frame_size,
                         frame_rate=cap.frame_rate,
-                        duration=declared_seconds,
+                        duration=cap.duration,
+                        frame_count=cap.frame_count,
                         aspect_ratio=cap.aspect_ratio,
                     )
                 )
@@ -175,7 +168,9 @@ class VideoStreamConcat(VideoStream):
         # when each source reaches EOF.
         self._offsets: list[Fraction] = [Fraction(0)]
         for source in self._sources:
-            self._offsets.append(self._offsets[-1] + source.duration)
+            # Preserve the existing zero placeholder for unknown source offsets.
+            duration = source.duration if source.duration is not None else Fraction(0)
+            self._offsets.append(self._offsets[-1] + duration)
 
         self._index: int = 0
         self._decode_failures_prior: int = 0
@@ -442,14 +437,21 @@ class VideoStreamConcat(VideoStream):
         return self._sources[0].frame_rate
 
     @property
-    def duration(self) -> FrameTimecode:
-        """Total duration of all input videos combined. May be inaccurate."""
-        return FrameTimecode(
-            timecode=Timecode(
-                pts=round(self._offsets[-1] / _GLOBAL_TIME_BASE), time_base=_GLOBAL_TIME_BASE
-            ),
-            fps=self.frame_rate,
-        )
+    def duration(self) -> Fraction | None:
+        """Combined duration estimate in seconds, or None if an input duration is unavailable."""
+        if any(source.duration is None for source in self._sources):
+            return None
+        return self._offsets[-1]
+
+    @property
+    def frame_count(self) -> int | None:
+        """Combined reported frame count, or None if an input count is unavailable."""
+        total = 0
+        for source in self._sources:
+            if source.frame_count is None:
+                return None
+            total += source.frame_count
+        return total
 
     @property
     def frame_size(self) -> tuple[int, int]:

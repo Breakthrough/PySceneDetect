@@ -40,7 +40,6 @@ from scenedetect._thirdparty.simpletable import (
 from scenedetect.common import (
     CutList,
     FrameRate,
-    FrameTimecode,
     SceneList,
     Timecode,
     framerate_to_fraction,
@@ -660,7 +659,7 @@ def write_scene_list_fcp7(
     frame_rate: Fraction,
     frame_size: tuple[int, int],
     video_name: str | None = None,
-    source_duration: FrameTimecode | None = None,
+    source_duration: Fraction | None = None,
 ):
     """Writes the given list of scenes to `output_path` in Final Cut Pro 7 XML (xmeml) format.
 
@@ -677,9 +676,9 @@ def write_scene_list_fcp7(
         frame_size: Source resolution as a ``(width, height)`` tuple in pixels.
         video_name: Display name used for project and sequence. Defaults to the stem of
             `video_path`.
-        source_duration: Total duration of the source media. Required on ``<file>`` so NLEs
-            (DaVinci Resolve, Premiere) can seek into the source - without it the clip plays
-            frozen. If None, falls back to the last scene's end time.
+        source_duration: Total duration of the source media in seconds. Required on ``<file>``
+            so NLEs (DaVinci Resolve, Premiere) can seek into the source - without it the
+            clip plays frozen. If None, falls back to the last scene's end time.
     """
     assert scene_list
     # `_open_output_file` replaces filesystem paths with writable text streams.
@@ -723,11 +722,7 @@ def write_scene_list_fcp7(
     path_uri = video_path.absolute().as_uri()
     source_duration_frames = str(
         round(
-            (
-                source_duration.seconds
-                if source_duration is not None
-                else scene_list[-1][1].timecode.seconds
-            )
+            (source_duration if source_duration is not None else scene_list[-1][1].timecode.seconds)
             * frame_rate
         )
     )
@@ -786,7 +781,7 @@ def write_scene_list_otio(
     frame_rate: Fraction,
     name: str | None = None,
     audio: bool = True,
-    source_duration: FrameTimecode | None = None,
+    source_duration: Fraction | None = None,
 ):
     """Writes the given list of scenes to `output_path` as an OTIO Timeline.1 JSON document.
 
@@ -801,9 +796,9 @@ def write_scene_list_otio(
             current OTIO format does not support rational timings.
         name: Timeline name. Defaults to the stem of `video_path`.
         audio: If True (default), include an audio track alongside the video track.
-        source_duration: Total duration of the source media. Written as the media reference's
-            available range so NLEs can seek into the source. If None, the available range is
-            left unspecified rather than inferred from the selected scenes.
+        source_duration: Total duration of the source media in seconds. Written as the media
+            reference's available range so NLEs can seek into the source. If None, the available
+            range is left unspecified rather than inferred from the selected scenes.
     """
     # `_open_output_file` replaces filesystem paths with writable text streams.
     assert isinstance(output_path, _SupportsWrite)
@@ -822,7 +817,7 @@ def write_scene_list_otio(
             "duration": {
                 "OTIO_SCHEMA": "RationalTime.1",
                 "rate": fps,
-                "value": round(source_duration.seconds * fps, 6),
+                "value": float(round(source_duration * fps, 6)),
             },
             "start_time": {
                 "OTIO_SCHEMA": "RationalTime.1",

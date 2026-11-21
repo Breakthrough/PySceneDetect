@@ -35,12 +35,7 @@ from scenedetect.output import (
     write_scene_list_otio,
 )
 from scenedetect.platform import get_and_create_path
-from scenedetect.scene_manager import (
-    CutList,
-    Interpolation,
-    SceneList,
-    expand_scenes_to_bounds,
-)
+from scenedetect.scene_manager import CutList, Interpolation, SceneList
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -252,17 +247,6 @@ def split_video(
     del cuts  # split-video only uses scenes.
     assert context.video_stream is not None
 
-    if expand and scenes:
-        video_duration = context.video_stream.duration
-        if video_duration is None:
-            logger.warning("Cannot --expand: video duration is unavailable for this stream.")
-        else:
-            scenes = expand_scenes_to_bounds(
-                scenes,
-                start=context.video_stream.base_timecode,
-                end=video_duration,
-            )
-
     if use_mkvmerge:
         name_format = name_format.removesuffix("-$SCENE_NUMBER")
 
@@ -281,6 +265,7 @@ def split_video(
             scene_list=scenes,
             output_dir=output,
             output_file_template=name_format,
+            expand=expand,
             show_output=show_output,
         )
     else:
@@ -289,6 +274,7 @@ def split_video(
             scene_list=scenes,
             output_dir=output,
             output_file_template=name_format,
+            expand=expand,
             arg_override=ffmpeg_args,
             show_progress=not context.quiet_mode,
             show_output=show_output,

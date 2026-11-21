@@ -1369,8 +1369,8 @@ Customized filenames:
     "--expand",
     is_flag=True,
     flag_value=True,
-    default=False,
-    help="Extend the first/last output clips to cover the full input video, even if `time -s/-e` limited the analysis window. Useful for keeping content outside the analyzed region attached to the adjacent split.{}".format(
+    default=None,
+    help="Extend the first/last output clips to cover the full input video, even if `time -s/-e` limited the analysis window. Useful for keeping content outside the analyzed region attached to the adjacent split. Expanded filename boundary variables use zero for the first start and a blank last end.{}".format(
         USER_CONFIG.get_help_string("split-video", "expand")
     ),
 )
@@ -1386,7 +1386,7 @@ def split_video_command(
     preset: str | None,
     args: str | None,
     mkvmerge: bool,
-    expand: bool,
+    expand: bool | None,
 ):
     ctx = ctx.obj
     assert isinstance(ctx, CliContext)

@@ -641,14 +641,23 @@ class CliContext:
                     "Could not determine a video name from the input path, so $VIDEO_NAME will be"
                     " empty in output filenames."
                 )
+            duration_str = "unknown"
             duration = self.video_stream.duration
-            duration_str = f"{duration} ({duration.frame_num} frames)" if duration else "unknown"
+            if duration is not None:
+                duration_str = Timecode(
+                    pts=duration.numerator,
+                    time_base=Fraction(1, duration.denominator),
+                ).get_timecode()
+            frame_count = self.video_stream.frame_count
+            frame_count_str = str(frame_count) if frame_count is not None else "unknown"
+
             rate = self.video_stream.frame_rate
             logger.debug(f"""Video information:
   Backend:      {type(self.video_stream).__name__}
   Resolution:   {self.video_stream.frame_size}
   Frame rate:   {float(rate):.3f} ({rate.numerator}/{rate.denominator})
-  Duration:     {duration_str}""")
+  Duration:     {duration_str}
+  Frame count:  {frame_count_str}""")
 
         except FrameRateUnavailable as ex:
             if DEBUG_MODE:

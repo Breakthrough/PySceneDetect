@@ -24,7 +24,6 @@ import numpy as np
 from scenedetect.common import (
     MAX_FPS_DELTA,
     FrameRate,
-    FrameTimecode,
     Timecode,
     TimecodeLike,
     framerate_to_fraction,
@@ -220,8 +219,15 @@ class VideoStreamAv(VideoStream):
             assert frame_rate >= MAX_FPS_DELTA
             self._frame_rate: Fraction = framerate_to_fraction(frame_rate)
 
-        # Calculate duration after we have set the framerate.
-        self._duration_frames = self._get_duration()
+        # Cache source metadata so it remains available after closing.
+        self._duration = self._get_duration()
+        # TODO(https://scenedetect.com/issues/590): Some AVI files remuxed by ffmpeg set the stream
+        # rate to a high tick rate (e.g. 600/1), causing `stream.frames` to report tick count
+        # rather than actual frame count (e.g. 12012 instead of 480). OpenCV reports the same value
+        # via CAP_PROP_FRAME_COUNT, but `duration_sec * frame_rate` would be more accurate when
+        # `stream.frames` disagrees with the stream duration and codec frame rate.
+        frame_count = self._video_stream.frames
+        self._frame_count = frame_count if frame_count > 0 else None
 
     def __del__(self):
         # Finalizers must never raise - an exception here becomes an unraisable error. During
@@ -294,9 +300,14 @@ class VideoStreamAv(VideoStream):
         return (self._codec_context.width, self._codec_context.height)
 
     @property
-    def duration(self) -> FrameTimecode:
-        """Duration of the video as a FrameTimecode."""
-        return self.base_timecode + self._duration_frames
+    def duration(self) -> Fraction | None:
+        """Duration of the video, or None if unavailable."""
+        return self._duration
+
+    @property
+    def frame_count(self) -> int | None:
+        """Reported total source frame count, or None if unavailable."""
+        return self._frame_count
 
     @property
     def frame_rate(self) -> Fraction:
@@ -643,41 +654,29 @@ class VideoStreamAv(VideoStream):
                     continue
                 return None
 
-    def _get_duration(self) -> int:
-        """Get video duration as number of frames based on the video and set framerate.
+    def _get_duration(self) -> Fraction | None:
+        """Get reported video duration in seconds, or None if unavailable.
 
         See https://pyav.org/docs/develop/api/time.html for details on how ffmpeg/PyAV
         handle time calculations internally and which time base to use.
         """
-        assert self.frame_rate is not None, "Frame rate must be set before calling _get_duration!"
-        # See if we can obtain the number of frames directly from the stream itself.
-        # TODO(https://scenedetect.com/issues/590): Some AVI files remuxed by ffmpeg set the stream
-        # rate to a high tick rate (e.g. 600/1), causing `stream.frames` to report tick count
-        # rather than actual frame count (e.g. 12012 instead of 480). OpenCV reports the same value
-        # via CAP_PROP_FRAME_COUNT, but `duration_sec * frame_rate` would be more accurate when
-        # `stream.frames` disagrees with the stream duration and codec frame rate.
-        if self._video_stream.frames > 0:
-            return self._video_stream.frames
-        # Calculate based on the reported container duration.
-        duration_sec = None
-        container = self._video_stream.container
-        if container.duration is not None and container.duration > 0:
+        stream = self._video_stream
+        if (
+            stream.duration is not None
+            and stream.duration >= 0
+            and stream.time_base is not None
+            and stream.time_base > 0
+        ):
+            return stream.duration * _to_fraction(stream.time_base)
+        logger.debug("Video-stream duration unavailable; trying container duration.")
+        # Fall back to container duration, which may include other tracks.
+        container = stream.container
+        if container.duration is not None and container.duration >= 0:
             # Containers use AV_TIME_BASE as the time base.
-            duration_sec = float(self._video_stream.container.duration / av.time_base)
-        # Lastly, if that calculation fails, try to calculate it based on the stream duration.
-        if duration_sec is None or duration_sec < MAX_FPS_DELTA:
-            if self._video_stream.duration is None:
-                logger.warning("Video duration unavailable.")
-                return 0
-            # Streams use stream `time_base` as the time base. Unset is None on PyAV < 19 and
-            # a falsy AVRational(0, 1) on PyAV 19+.
-            time_base = self._video_stream.time_base
-            if not time_base:
-                logger.warning("Unable to calculate video duration: stream time_base is unset.")
-                return 0
-            # `duration` is in units of `time_base`, so seconds = duration * time_base.
-            duration_sec = float(self._video_stream.duration * _to_fraction(time_base))
-        return round(duration_sec * self.frame_rate)
+            return Fraction(container.duration, av.time_base)
+
+        logger.warning("Video duration unavailable.")
+        return None
 
     def _handle_eof(self):
         """Attempt one recovery from an EOF error in AUTO/FRAME decoding.
