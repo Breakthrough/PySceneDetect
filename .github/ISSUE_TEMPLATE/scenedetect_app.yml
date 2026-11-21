@@ -1,5 +1,6 @@
 name: Application Bug
 description: Help us fix and improve PySceneDetect by reporting bugs or other issues.
+type: Bug
 body:
   - type: textarea
     id: description

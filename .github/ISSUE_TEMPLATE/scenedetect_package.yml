@@ -1,5 +1,6 @@
 name: Python API
 description: Programmers using the `scenedetect` package.
+type: Bug
 body:
   - type: textarea
     id: description
