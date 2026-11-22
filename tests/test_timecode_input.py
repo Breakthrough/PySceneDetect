@@ -1,3 +1,14 @@
+#
+#            PySceneDetect: Python-Based Video Scene Detector
+#   -------------------------------------------------------------------
+#     [  Site:    https://scenedetect.com                           ]
+#     [  Docs:    https://scenedetect.com/docs/                     ]
+#     [  Github:  https://github.com/Breakthrough/PySceneDetect/    ]
+#
+# Copyright (C) 2025 Brandon Castellano <http://www.bcastell.com>.
+# PySceneDetect is licensed under the BSD 3-Clause License; see the
+# included LICENSE file, or visit one of the above pages for details.
+#
 """Unit-preserving frame-or-time input parsing."""
 
 from fractions import Fraction
