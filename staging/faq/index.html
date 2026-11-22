@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
   <title>FAQ | PySceneDetect</title>
-  <meta name="description" content="Fast, frame-accurate video scene cut detection and splitting tool in Python with command-line interface and API.">
+  <meta name="description" content="Fast, frame-accurate video scene detection and splitting tool in Python with a command-line interface and Python API.">
   <meta name="robots" content="noindex">
   <link rel="icon" href="/staging/img/favicon.ico">
   <link rel="canonical" href="https://www.scenedetect.com/faq/">
@@ -99,16 +99,7 @@
             <a href="/staging/contributing/">Contributing</a>
           </li>
           <li class="mobile-only-nav">
-            <a href="/staging/supporting/">Support</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/gallery/">Project Gallery</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/similar/">Similar Projects</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/literature/">Literature</a>
+            <a href="/staging/projects/">Projects</a>
           </li>
           <li class="mobile-only-nav">
             <a href="/staging/copyright/">License</a>
@@ -178,7 +169,7 @@
         <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
       </form>
       <div id="search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite">
-        <p class="search-empty">Type a keyword to search across all guides, CLI options, detectors, and FAQs.</p>
+        <p class="search-empty">Type a keyword to search guides, CLI options, detectors, and FAQs.</p>
       </div>
     </dialog>
   </search>
@@ -215,28 +206,16 @@
           <a href="/staging/benchmarks/">Benchmarks</a>
         </li>
       </ul>
-      <div class="side-group-title">Support</div>
+      <div class="side-group-title">Community</div>
       <ul class="side-list" role="list">
         <li>
           <a href="/staging/faq/" aria-current="page">FAQ</a>
         </li>
         <li>
-          <a href="/staging/contributing/">Bugs &amp; Contributing</a>
+          <a href="/staging/contributing/">Contributing &amp; Support</a>
         </li>
         <li>
-          <a href="/staging/supporting/">Development &amp; Support</a>
-        </li>
-      </ul>
-      <div class="side-group-title">Resources</div>
-      <ul class="side-list" role="list">
-        <li>
-          <a href="/staging/gallery/">Project Gallery</a>
-        </li>
-        <li>
-          <a href="/staging/similar/">Similar Projects</a>
-        </li>
-        <li>
-          <a href="/staging/literature/">Research &amp; Literature</a>
+          <a href="/staging/projects/">Projects &amp; Research</a>
         </li>
         <li>
           <a href="/staging/copyright/">License &amp; Copyright</a>
@@ -248,36 +227,60 @@
       <article class="prose">
         <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
 <h2 id="installation-and-setup">Installation and Setup</h2>
-<h3 id="how-can-i-fix-importerror-no-module-named-cv2">How can I fix <code>ImportError: No module named cv2</code>?</h3>
-<p>As of PySceneDetect 0.7, the OpenCV dependency is bundled with the install. The standard <code>scenedetect</code> package depends on <code>opencv-python</code>:</p>
+<h3 id="how-do-i-fix-importerror-no-module-named-cv2">How do I fix <code>ImportError: No module named cv2</code>?</h3>
+<p>Since PySceneDetect 0.7, OpenCV is installed automatically. Install the standard package:</p>
 <div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>scenedetect
 </code></pre></div>
 
-<p>For server environments without GUI libraries, install the headless variant instead, which depends on <code>opencv-python-headless</code>:</p>
+<p>For servers or containers without GUI libraries, install the headless package instead:</p>
 <div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>scenedetect-headless
 </code></pre></div>
 
-<p>Both packages ship the same <code>scenedetect</code> Python module -- install only one of them.</p>
-<p>For projects that need a different OpenCV variant (e.g. <code>opencv-contrib-python</code>), install it <em>pinned to the same version</em> as the <code>opencv-python</code> variant your <code>scenedetect</code> package pulled in, so the two resolve to identical <code>cv2</code> files:</p>
+<p>Both packages provide the same <code>scenedetect</code> Python module. Install only one of them.</p>
+<p>If your project needs a different OpenCV package (such as <code>opencv-contrib-python</code>), install the exact same version that <code>scenedetect</code> installed so both packages share identical <code>cv2</code> files:</p>
 <div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>scenedetect
 pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"opencv-contrib-python==</span><span class="k">$(</span>pip<span class="w"> </span>show<span class="w"> </span>opencv-python<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>^Version<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">' '</span><span class="w"> </span>-f2<span class="k">)</span><span class="s2">"</span>
 </code></pre></div>
 
-<p>Mixing OpenCV variants at <em>different</em> versions corrupts the shared <code>cv2</code> install. First-class support for choosing your own OpenCV variant is tracked in <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">#558</a>.</p>
-<h3 id="how-can-i-enable-video-splitting-support">How can I enable video splitting support?</h3>
-<p>Video splitting is performed by <code>ffmpeg</code> (<a href="https://ffmpeg.org/download.html">https://ffmpeg.org/download.html</a>) or <code>mkvmerge</code> (<a href="https://mkvtoolnix.download/downloads.html">https://mkvtoolnix.download/downloads.html</a>) depending on which command line arguments are used. Ensure the tool is available and somewhere in your system's <code>PATH</code> folder.</p>
+<p>Mixing different versions of OpenCV packages can break your <code>cv2</code> install. First-class support for choosing an OpenCV variant is tracked in <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">Issue #558</a>.</p>
+<h3 id="how-do-i-enable-video-splitting">How do I enable video splitting?</h3>
+<p>PySceneDetect uses <code>ffmpeg</code> or <code>mkvmerge</code> to split videos:</p>
+<ul>
+<li>Download <code>ffmpeg</code> from <a href="https://ffmpeg.org/download.html">the FFmpeg website</a>.</li>
+<li>Download <code>mkvmerge</code> as part of <a href="https://mkvtoolnix.download/downloads.html">MKVToolNix</a>.</li>
+</ul>
+<p>Make sure the executable is on your system <code>PATH</code> or in the same folder as <code>scenedetect</code>. Windows installers and Docker images already include both tools.</p>
+<h2 id="detection-and-splitting">Detection and Splitting</h2>
+<h3 id="how-do-i-tune-the-detection-threshold">How do I tune the detection threshold?</h3>
+<p>Generate a per-frame stats file with <code>-s</code> / <code>--stats</code>:</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>-s<span class="w"> </span>video.stats.csv<span class="w"> </span>detect-adaptive
+</code></pre></div>
+
+<p>Open <code>video.stats.csv</code> in a spreadsheet tool and inspect the metric column for your detector (<code>adaptive_ratio</code> for <code>detect-adaptive</code>, <code>content_val</code> for <code>detect-content</code>, or <code>average_rgb</code> for <code>detect-threshold</code>).</p>
+<ul>
+<li>Lower the threshold (<code>-t</code>) if PySceneDetect misses real cuts.</li>
+<li>Raise the threshold (<code>-t</code>) if PySceneDetect reports too many false cuts.</li>
+</ul>
+<p>See <a href="/staging/cli/#detection-parameters">Detection Parameters</a> for a full walkthrough and <a href="/staging/benchmarks/">Benchmarks</a> for parameter sweep results across datasets.</p>
+<h3 id="does-pyscenedetect-support-variable-frame-rate-vfr-videos">Does PySceneDetect support variable frame rate (VFR) videos?</h3>
+<p>Yes. Both the default OpenCV backend and the PyAV backend support VFR videos using presentation timestamps (PTS) instead of assuming a constant frame rate.</p>
+<p>For difficult VFR files, use the PyAV backend (<code>pip install av</code>, then pass <code>-b pyav</code>), which reads native PTS timestamps directly from the video container. The MoviePy backend does not support VFR video. See <a href="/docs/latest/cli/backends.html">Video Backends</a> for details.</p>
+<h3 id="should-i-use-stream-copy-or-re-encoding-when-splitting-video">Should I use stream copy or re-encoding when splitting video?</h3>
+<ul>
+<li><strong>Default re-encoding (<code>split-video</code>)</strong>: uses <code>ffmpeg</code> to re-encode each clip. Cuts are frame-accurate, and you can adjust quality with <code>-hq</code> / <code>--high-quality</code>, <code>-crf</code>, or <code>-p</code> / <code>--preset</code>.</li>
+<li><strong>Stream copy (<code>split-video --copy</code> or <code>split-video --mkvmerge</code>)</strong>: copies the compressed video and audio streams without re-encoding. This is much faster and preserves original quality, but splits can only happen on keyframes, so clip start and end times may shift slightly.</li>
+</ul>
 <h2 id="troubleshooting">Troubleshooting</h2>
-<h3 id="how-can-i-fix-the-error-cannot-split-video-due-to-too-many-scenes">How can I fix the error <code>Cannot split video due to too many scenes</code>?</h3>
-<p>This error occurs on Windows platforms specifically when the number of detected scenes is too large. This is because PySceneDetect internally invokes other commands, such as those used for the <code>split-video</code> command.</p>
-<p>You can get around this issue by simply invoking those tools manually, using a smaller sub-set of scenes (or splitting the scene list into multiple parts). You can obtain a comma-separated list of timecodes by using the <code>list-scenes</code> command.</p>
-<p>See <a href="https://github.com/Breakthrough/PySceneDetect/issues/164">Issue #164</a> for details, or if you have any further questions.</p>
-<h3 id="how-can-i-fix-the-error-failed-to-read-any-frames-from-video-file">How can I fix the error <code>Failed to read any frames from video file</code>?</h3>
-<p>Unfortunately, the underlying library used to perform video I/O was unable to open the file. Try using a different backend by installing PyAV (<code>pip install av</code>) and see if the problem persists.</p>
-<p>This can also happen due to videos having multiple audio tracks (as per <a href="https://github.com/Breakthrough/PySceneDetect/issues/179">#179</a>). If the PyAV backend does not succeed in processing the video, as a workaround you can remove the audio track using either <code>ffmpeg</code> or <code>mkvmerge</code>:</p>
+<h3 id="how-do-i-fix-cannot-split-video-due-to-too-many-scenes">How do I fix <code>Cannot split video due to too many scenes</code>?</h3>
+<p>On Windows, passing hundreds of scene timecodes to an external command can exceed the operating system's command-line length limit.</p>
+<p>To work around this limit, export the scene list with <code>list-scenes</code> and split the video in smaller batches using <code>ffmpeg</code> or <code>mkvmerge</code> directly. See <a href="https://github.com/Breakthrough/PySceneDetect/issues/164">Issue #164</a> for details.</p>
+<h3 id="how-do-i-fix-failed-to-read-any-frames-from-video-file">How do I fix <code>Failed to read any frames from video file</code>?</h3>
+<p>The active video backend could not decode the file. Install PyAV (<code>pip install av</code>) and run PySceneDetect with <code>-b pyav</code> to test another backend.</p>
+<p>Videos with multiple audio tracks can also cause decode failures in OpenCV (see <a href="https://github.com/Breakthrough/PySceneDetect/issues/179">Issue #179</a>). If switching to PyAV does not help, remove the audio tracks into a temporary file before running detection:</p>
 <div class="codehilite"><pre tabindex="0"><code>ffmpeg<span class="w"> </span>-i<span class="w"> </span>input.mp4<span class="w"> </span>-c<span class="w"> </span>copy<span class="w"> </span>-an<span class="w"> </span>output.mp4
 </code></pre></div>
 
-<p>Or:</p>
+<p>Or with <code>mkvmerge</code>:</p>
 <div class="codehilite"><pre tabindex="0"><code>mkvmerge<span class="w"> </span>-o<span class="w"> </span>output.mkv<span class="w"> </span>input.mp4
 </code></pre></div>
       </article>
@@ -298,7 +301,7 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"open
         </a>
         <a class="pagination-link pagination-next" href="/staging/contributing/">
           <span class="pagination-hint">Next &rarr;</span>
-          <span class="pagination-title">Bugs &amp; Contributing</span>
+          <span class="pagination-title">Contributing &amp; Support</span>
         </a>
       </nav>
     </main>
@@ -310,15 +313,23 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"open
           <li>
             <a href="#installation-and-setup">Installation and Setup</a>
             <ul class="toc-sublist" role="list">
-              <li><a href="#how-can-i-fix-importerror-no-module-named-cv2">How can I fix ImportError: No module named cv2 ?</a></li>
-              <li><a href="#how-can-i-enable-video-splitting-support">How can I enable video splitting support?</a></li>
+              <li><a href="#how-do-i-fix-importerror-no-module-named-cv2">How do I fix ImportError: No module named cv2 ?</a></li>
+              <li><a href="#how-do-i-enable-video-splitting">How do I enable video splitting?</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#detection-and-splitting">Detection and Splitting</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#how-do-i-tune-the-detection-threshold">How do I tune the detection threshold?</a></li>
+              <li><a href="#does-pyscenedetect-support-variable-frame-rate-vfr-videos">Does PySceneDetect support variable frame rate (VFR) videos?</a></li>
+              <li><a href="#should-i-use-stream-copy-or-re-encoding-when-splitting-video">Should I use stream copy or re-encoding when splitting video?</a></li>
             </ul>
           </li>
           <li>
             <a href="#troubleshooting">Troubleshooting</a>
             <ul class="toc-sublist" role="list">
-              <li><a href="#how-can-i-fix-the-error-cannot-split-video-due-to-too-many-scenes">How can I fix the error Cannot split video due to too many scenes ?</a></li>
-              <li><a href="#how-can-i-fix-the-error-failed-to-read-any-frames-from-video-file">How can I fix the error Failed to read any frames from video file ?</a></li>
+              <li><a href="#how-do-i-fix-cannot-split-video-due-to-too-many-scenes">How do I fix Cannot split video due to too many scenes ?</a></li>
+              <li><a href="#how-do-i-fix-failed-to-read-any-frames-from-video-file">How do I fix Failed to read any frames from video file ?</a></li>
             </ul>
           </li>
         </ul>

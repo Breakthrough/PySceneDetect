@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
-  <title>Bugs &amp; Contributing | PySceneDetect</title>
-  <meta name="description" content="Fast, frame-accurate video scene cut detection and splitting tool in Python with command-line interface and API.">
+  <title>Contributing &amp; Support | PySceneDetect</title>
+  <meta name="description" content="Fast, frame-accurate video scene detection and splitting tool in Python with a command-line interface and Python API.">
   <meta name="robots" content="noindex">
   <link rel="icon" href="/staging/img/favicon.ico">
   <link rel="canonical" href="https://www.scenedetect.com/contributing/">
@@ -99,16 +99,7 @@
             <a href="/staging/contributing/" aria-current="page">Contributing</a>
           </li>
           <li class="mobile-only-nav">
-            <a href="/staging/supporting/">Support</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/gallery/">Project Gallery</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/similar/">Similar Projects</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/literature/">Literature</a>
+            <a href="/staging/projects/">Projects</a>
           </li>
           <li class="mobile-only-nav">
             <a href="/staging/copyright/">License</a>
@@ -178,7 +169,7 @@
         <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
       </form>
       <div id="search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite">
-        <p class="search-empty">Type a keyword to search across all guides, CLI options, detectors, and FAQs.</p>
+        <p class="search-empty">Type a keyword to search guides, CLI options, detectors, and FAQs.</p>
       </div>
     </dialog>
   </search>
@@ -215,28 +206,16 @@
           <a href="/staging/benchmarks/">Benchmarks</a>
         </li>
       </ul>
-      <div class="side-group-title">Support</div>
+      <div class="side-group-title">Community</div>
       <ul class="side-list" role="list">
         <li>
           <a href="/staging/faq/">FAQ</a>
         </li>
         <li>
-          <a href="/staging/contributing/" aria-current="page">Bugs &amp; Contributing</a>
+          <a href="/staging/contributing/" aria-current="page">Contributing &amp; Support</a>
         </li>
         <li>
-          <a href="/staging/supporting/">Development &amp; Support</a>
-        </li>
-      </ul>
-      <div class="side-group-title">Resources</div>
-      <ul class="side-list" role="list">
-        <li>
-          <a href="/staging/gallery/">Project Gallery</a>
-        </li>
-        <li>
-          <a href="/staging/similar/">Similar Projects</a>
-        </li>
-        <li>
-          <a href="/staging/literature/">Research &amp; Literature</a>
+          <a href="/staging/projects/">Projects &amp; Research</a>
         </li>
         <li>
           <a href="/staging/copyright/">License &amp; Copyright</a>
@@ -246,34 +225,45 @@
 
     <main id="main-content" class="docs-main" tabindex="-1">
       <article class="prose">
-        <h1 id="bug-reports-and-contributing">Bug Reports and Contributing</h1>
-<h2 id="bug-reports">Bug Reports</h2>
-<p>Bugs, issues, features, and improvements to PySceneDetect are handled through <a href="https://github.com/Breakthrough/PySceneDetect/issues">the issue tracker on Github</a>. If you run into any bugs using PySceneDetect, please <a href="https://github.com/Breakthrough/PySceneDetect/issues/new/choose">create a new issue</a>.</p>
-<p>Try to <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=">find an existing issue</a> before creating a new one, as there may be a workaround posted there. Additional information is also helpful for existing reports.</p>
-<h2 id="contributing-to-development">Contributing to Development</h2>
-<p>Development of PySceneDetect happens on <a href="https://github.com/Breakthrough/PySceneDetect">github.com/Breakthrough/PySceneDetect</a>. Pull requests are accepted and encouraged. Where possible, PRs should be submitted with a dedicated entry in <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=">the issue tracker</a>. Issues and features are typically grouped into version milestones.</p>
-<p>The following checklist covers the basics of pre-submission requirements:</p>
+        <h1 id="contributing-support">Contributing &amp; Support</h1>
+<h2 id="reporting-bugs">Reporting Bugs</h2>
+<p>Report bugs and request features on <a href="https://github.com/Breakthrough/PySceneDetect/issues">the PySceneDetect issue tracker on GitHub</a>. Before <a href="https://github.com/Breakthrough/PySceneDetect/issues/new/choose">opening a new issue</a>, search <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=">existing issues</a> to check for known fixes or workarounds. Adding reproduction details to an existing report is also helpful.</p>
+<h2 id="contributing-code">Contributing Code</h2>
+<p>PySceneDetect development takes place at <a href="https://github.com/Breakthrough/PySceneDetect">github.com/Breakthrough/PySceneDetect</a>. Pull requests are welcome. When possible, link each pull request to an entry on <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=">the issue tracker</a>.</p>
+<p>Before submitting a pull request, check that your changes meet these requirements:</p>
 <ul>
-<li>Code passes all unit tests (run <code>pytest</code>)</li>
-<li>Code passes static analysis and formatting checks (<code>ruff check</code> and <code>ruff format</code>)</li>
-<li>Follows the <a href="https://google.github.io/styleguide/pyguide.html">Google Python Style Guide</a></li>
+<li>All unit tests pass (<code>pytest</code>).</li>
+<li>Linting and formatting checks pass (<code>ruff check</code> and <code>ruff format</code>).</li>
+<li>New public APIs include type hints and NumPy-style docstrings.</li>
 </ul>
-<p>Note that PySceneDetect is released under the BSD 3-Clause license, and submitted code should comply with this license (see <a href="/staging/copyright/">License &amp; Copyright Information</a> for details).</p>
+<p>PySceneDetect is released under the BSD 3-Clause License, and all submitted code must comply with this license (see <a href="/staging/copyright/">License &amp; Copyright</a>).</p>
 <h2 id="features-that-need-help">Features That Need Help</h2>
-<p>The following is a "wishlist" of features which PySceneDetect eventually should have, but does not currently due to lack of resources. Anyone who is able to contribute in any capacity to these items is encouraged to do so by starting a dialogue by opening a new issue on Github as per above.</p>
-<h3 id="flash-suppression">Flash Suppression</h3>
-<p>Some detection methods struggle with bright flashes and fast camera movement. The detection pipeline has some filters in place to deal with these cases, but there are still drawbacks. We are actively seeking methods which can improve both performance and accuracy in these cases.</p>
-<h3 id="automatic-thresholding">Automatic Thresholding</h3>
-<p>The <code>detect-content</code> command requires a manual threshold to be set currently. Methods to use peak detection to dynamically determine when scene cuts occur would allow for the program to work with a much wider amount of material without requiring manual tuning, but would require statistical analysis.</p>
-<p>Ideally, this would be something like <code>--threshold=auto</code> as a default.</p>
-<h3 id="dissolve-detection">Dissolve Detection</h3>
-<p>Depending on the length of the dissolve and parameters being used, detection accuracy for these types of cuts can vary widely. A method to improve accuracy with minimal performance loss is an open problem.</p>
-<h3 id="advanced-strategies">Advanced Strategies</h3>
-<p>Research into detection methods and performance are ongoing. All contributions in this regard are most welcome.</p>
-<h3 id="gui">GUI</h3>
-<p>A graphical user interface will be crucial for making PySceneDetect approachable by a wider audience. There have been several suggested designs, but nothing concrete has been developed yet. Any proposed solution for the GUI should work across Windows, Linux, and OSX.</p>
+<p>These areas are open for community contributions. Open an issue on GitHub to discuss an approach before writing a large change.</p>
+<h3 id="flash-suppression">Flash suppression</h3>
+<p>Bright flashes and fast camera movement can still trigger false cuts in some videos. Contributions that improve both accuracy and speed for these cases are welcome.</p>
+<h3 id="automatic-thresholding">Automatic thresholding</h3>
+<p><code>detect-content</code> currently requires a fixed threshold. Peak-detection methods that estimate a threshold automatically (for example, <code>--threshold=auto</code>) would reduce manual tuning across diverse videos.</p>
+<h3 id="dissolve-detection">Dissolve detection</h3>
+<p>Detection accuracy on slow dissolves varies with transition length and detector settings. Better dissolve detection with low performance overhead remains an open problem.</p>
+<h3 id="new-detection-methods">New detection methods</h3>
+<p>Research and prototypes for faster or more accurate detection algorithms are always welcome.</p>
+<h3 id="graphical-user-interface-gui">Graphical user interface (GUI)</h3>
+<p>A cross-platform GUI for Windows, Linux, and macOS would make PySceneDetect easier for non-technical users. No official GUI has been built yet.</p>
 <h3 id="localization">Localization</h3>
-<p>PySceneDetect currently is not localized for other languages. Anyone who can help improve how localization can be approached for development material is encouraged to contribute in any way possible. Whether it is the GUI program, the command line interface, or documentation, localization will allow PySceneDetect to be used by much more users in their native languages.</p>
+<p>PySceneDetect is currently available only in English. Contributions to support localization in the CLI, documentation, or a future GUI will help more people use PySceneDetect in their own language.</p>
+<h2 id="project-support-and-credits">Project Support and Credits</h2>
+<p>PySceneDetect is built and distributed with help from the tools, services, and contributors below. Listing these services gives credit for their support and does not imply endorsement.</p>
+<h3 id="tools-and-services">Tools and services</h3>
+<ul>
+<li><a href="https://github.com/">GitHub</a>: Git hosting, website hosting, code review, issue tracking, and CI builds.</li>
+<li><a href="https://www.appveyor.com/">AppVeyor</a>: Windows portable and MSI builds.</li>
+<li><a href="https://www.advancedinstaller.com/">AdvancedInstaller</a>: Windows MSI installer packaging.</li>
+<li><a href="https://signpath.io/">SignPath</a>: free code signing for Windows builds.</li>
+</ul>
+<h3 id="community-contributions">Community contributions</h3>
+<p>Thank you to everyone who has submitted bug reports, feature requests, documentation fixes, and pull requests. You can view the contributor list on <a href="https://github.com/Breakthrough/PySceneDetect/graphs/contributors">the GitHub contributors page</a> or on <a href="https://libraries.io/github/Breakthrough/PySceneDetect/contributors">libraries.io</a>.</p>
+<h3 id="donations">Donations</h3>
+<p>PySceneDetect does not accept monetary donations. The best ways to support the project are reporting bugs, improving docs, and contributing code. If you can offer tools, hosting, or testing resources that help development, open an issue on GitHub or reach out through <a href="https://bcastell.com/contact/">bcastell.com/contact</a>.</p>
       </article>
 
       <div class="doc-meta-bar">
@@ -290,9 +280,9 @@
           <span class="pagination-hint">&larr; Previous</span>
           <span class="pagination-title">FAQ</span>
         </a>
-        <a class="pagination-link pagination-next" href="/staging/supporting/">
+        <a class="pagination-link pagination-next" href="/staging/projects/">
           <span class="pagination-hint">Next &rarr;</span>
-          <span class="pagination-title">Development &amp; Support</span>
+          <span class="pagination-title">Projects &amp; Research</span>
         </a>
       </nav>
     </main>
@@ -302,20 +292,28 @@
         <div class="toc-title">On this page</div>
         <ul class="toc-list" role="list">
           <li>
-            <a href="#bug-reports">Bug Reports</a>
+            <a href="#reporting-bugs">Reporting Bugs</a>
           </li>
           <li>
-            <a href="#contributing-to-development">Contributing to Development</a>
+            <a href="#contributing-code">Contributing Code</a>
           </li>
           <li>
             <a href="#features-that-need-help">Features That Need Help</a>
             <ul class="toc-sublist" role="list">
-              <li><a href="#flash-suppression">Flash Suppression</a></li>
-              <li><a href="#automatic-thresholding">Automatic Thresholding</a></li>
-              <li><a href="#dissolve-detection">Dissolve Detection</a></li>
-              <li><a href="#advanced-strategies">Advanced Strategies</a></li>
-              <li><a href="#gui">GUI</a></li>
+              <li><a href="#flash-suppression">Flash suppression</a></li>
+              <li><a href="#automatic-thresholding">Automatic thresholding</a></li>
+              <li><a href="#dissolve-detection">Dissolve detection</a></li>
+              <li><a href="#new-detection-methods">New detection methods</a></li>
+              <li><a href="#graphical-user-interface-gui">Graphical user interface (GUI)</a></li>
               <li><a href="#localization">Localization</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#project-support-and-credits">Project Support and Credits</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#tools-and-services">Tools and services</a></li>
+              <li><a href="#community-contributions">Community contributions</a></li>
+              <li><a href="#donations">Donations</a></li>
             </ul>
           </li>
         </ul>

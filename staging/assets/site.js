@@ -363,7 +363,7 @@ function initSearchDialog() {
     const q = rawQuery.trim().toLowerCase();
     if (!q) {
       renderMessage(
-        "Type a keyword to search across all guides, CLI options, detectors, and FAQs."
+        "Type a keyword to search guides, CLI options, detectors, and FAQs."
       );
       return;
     }

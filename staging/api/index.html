@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
   <title>Python API | PySceneDetect</title>
-  <meta name="description" content="Fast, frame-accurate video scene cut detection and splitting tool in Python with command-line interface and API.">
+  <meta name="description" content="Fast, frame-accurate video scene detection and splitting tool in Python with a command-line interface and Python API.">
   <meta name="robots" content="noindex">
   <link rel="icon" href="/staging/img/favicon.ico">
   <link rel="canonical" href="https://www.scenedetect.com/api/">
@@ -99,16 +99,7 @@
             <a href="/staging/contributing/">Contributing</a>
           </li>
           <li class="mobile-only-nav">
-            <a href="/staging/supporting/">Support</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/gallery/">Project Gallery</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/similar/">Similar Projects</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/literature/">Literature</a>
+            <a href="/staging/projects/">Projects</a>
           </li>
           <li class="mobile-only-nav">
             <a href="/staging/copyright/">License</a>
@@ -178,7 +169,7 @@
         <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
       </form>
       <div id="search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite">
-        <p class="search-empty">Type a keyword to search across all guides, CLI options, detectors, and FAQs.</p>
+        <p class="search-empty">Type a keyword to search guides, CLI options, detectors, and FAQs.</p>
       </div>
     </dialog>
   </search>
@@ -215,28 +206,16 @@
           <a href="/staging/benchmarks/">Benchmarks</a>
         </li>
       </ul>
-      <div class="side-group-title">Support</div>
+      <div class="side-group-title">Community</div>
       <ul class="side-list" role="list">
         <li>
           <a href="/staging/faq/">FAQ</a>
         </li>
         <li>
-          <a href="/staging/contributing/">Bugs &amp; Contributing</a>
+          <a href="/staging/contributing/">Contributing &amp; Support</a>
         </li>
         <li>
-          <a href="/staging/supporting/">Development &amp; Support</a>
-        </li>
-      </ul>
-      <div class="side-group-title">Resources</div>
-      <ul class="side-list" role="list">
-        <li>
-          <a href="/staging/gallery/">Project Gallery</a>
-        </li>
-        <li>
-          <a href="/staging/similar/">Similar Projects</a>
-        </li>
-        <li>
-          <a href="/staging/literature/">Research &amp; Literature</a>
+          <a href="/staging/projects/">Projects &amp; Research</a>
         </li>
         <li>
           <a href="/staging/copyright/">License &amp; Copyright</a>
@@ -246,57 +225,58 @@
 
     <main id="main-content" class="docs-main" tabindex="-1">
       <article class="prose">
-        <h1 id="api-reference">API Reference</h1>
-<p>The Python API is documented using Sphinx and <a href="/staging/docs/">can be found here</a>.</p>
+        <h1 id="python-api">Python API</h1>
+<p>The complete Python API reference is in the <a href="/docs/latest/api.html">Reference Manual</a>. See <a href="/staging/docs/">Documentation Versions</a> for older releases.</p>
 <h2 id="scene-detection-algorithms">Scene Detection Algorithms</h2>
-<p>This page discusses the scene detection methods/algorithms available for use in PySceneDetect, including details describing the operation of the detection method, as well as relevant command-line arguments and recommended values.</p>
-<h3 id="content-aware-detector">Content-Aware Detector</h3>
-<p>The content-aware scene detector (<code>detect-content</code>) detects <a href="https://en.wikipedia.org/wiki/Jump_cut">jump cuts</a> in the input video. This is typically what people think of as "cuts" between scenes in a movie - given two adjacent frames, do they belong to the same scene? The content-aware scene detector finds areas where the <em>difference</em> between two subsequent frames exceeds the threshold value that is set (a good value to start with is <code>--threshold 27</code>).</p>
-<p>Internally, this detector functions by converting the colorspace of each decoded frame from <a href="https://en.wikipedia.org/wiki/RGB_color_space">RGB</a> into <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a>. It then takes the average difference across all channels (or optionally just the <em>value</em> channel) from frame to frame. When this exceeds a set threshold, a scene change is triggered.</p>
-<p><code>detect-content</code> also has edge detection, which can be enabled by providing a set of 4 numbers in the form (<em>delta_hue</em>, <em>delta_sat</em>, <em>delta_lum</em>, <em>delta_edges</em>). Changes in edges are typically larger than the other components, so threshold may need to be increased accordingly. For example, <code>-w 1.0 0.5 1.0 0.2 -t 32</code> is a good starting point to use with edge detection. The default weights are <code>--weights 1.0 1.0 1.0 0.0</code> which does not include edges, but this may change in the future.</p>
-<p>See <a href="/docs/latest/cli.html#detect-content">the documentation for <code>detect-content</code></a> for details.</p>
+<p>This page describes how each built-in detector works, along with its key CLI options and default values.</p>
 <h3 id="adaptive-content-detector">Adaptive Content Detector</h3>
-<p>The adaptive content detector (<code>detect-adaptive</code>) compares the difference in content between adjacent frames similar to <code>detect-content</code> but instead using a rolling average of adjacent frame changes. This helps mitigate false detections where there is fast camera motion.</p>
+<p>The adaptive detector (<code>AdaptiveDetector</code> / <code>detect-adaptive</code>, default in the CLI) scores adjacent frames the same way as <code>ContentDetector</code>, then compares each frame's score against a rolling average of nearby frames. This reduces false cuts during fast camera movement.</p>
+<p>Default settings: <code>--threshold 3.0</code>, <code>--frame-window 2</code>, <code>--min-content-val 15.0</code>. See <a href="/docs/latest/cli.html#detect-adaptive"><code>detect-adaptive</code></a> and <a href="/docs/latest/api/detectors.html#adaptivedetector"><code>AdaptiveDetector</code></a> for details.</p>
+<h3 id="content-aware-detector">Content-Aware Detector</h3>
+<p>The content detector (<code>ContentDetector</code> / <code>detect-content</code>) finds fast cuts between scenes. It converts each frame from <a href="https://en.wikipedia.org/wiki/RGB_color_space">RGB</a> to <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a>, computes the average difference across hue, saturation, and value (brightness) between adjacent frames, and records a cut when that score exceeds <code>--threshold</code> (default: <code>27.0</code>).</p>
+<p>You can also enable edge detection by passing four weights (<code>delta_hue</code>, <code>delta_sat</code>, <code>delta_lum</code>, <code>delta_edges</code>). Edge differences are usually larger than color differences, so raise the threshold when enabling edges (for example, <code>-w 1.0 0.5 1.0 0.2 -t 32</code>). The default weights are <code>--weights 1.0 1.0 1.0 0.0</code> (edges disabled).</p>
+<p>See <a href="/docs/latest/cli.html#detect-content"><code>detect-content</code></a> and <a href="/docs/latest/api/detectors.html#contentdetector"><code>ContentDetector</code></a> for details.</p>
 <h3 id="threshold-detector">Threshold Detector</h3>
-<p>The threshold-based scene detector (<code>detect-threshold</code>) is how most traditional scene detection methods work (e.g. the <code>ffmpeg blackframe</code> filter), by comparing the intensity/brightness of the current frame with a set threshold, and triggering a scene cut/break when this value crosses the threshold. In PySceneDetect, this value is computed by averaging the R, G, and B values for every pixel in the frame, yielding a single floating point number representing the average pixel value (from 0.0 to 255.0).</p>
+<p>The threshold detector (<code>ThresholdDetector</code> / <code>detect-threshold</code>) finds fades to and from black, similar to the <code>ffmpeg blackframe</code> filter. It averages the R, G, and B values of every pixel in each frame to get a brightness score from <code>0.0</code> to <code>255.0</code>, and records fade events when that score crosses <code>--threshold</code> (default: <code>12.0</code>).</p>
+<p>See <a href="/docs/latest/cli.html#detect-threshold"><code>detect-threshold</code></a> and <a href="/docs/latest/api/detectors.html#thresholddetector"><code>ThresholdDetector</code></a> for details.</p>
 <h3 id="histogram-detector">Histogram Detector</h3>
-<p>The scene change detection algorithm uses histograms of the Y channel in the YCbCr color space to detect scene changes, which helps mitigate issues caused by lighting variations. Each frame of the video is converted from its original color space to the YCbCr color space. The Y channel, which represents luminance, is extracted from the YCbCr color space. This helps in focusing on intensity variations rather than color variations. A histogram of the Y channel is computed using the specified number of bins (<code>--bins</code>/<code>-b</code>). The histogram is normalized to ensure that it can be consistently compared with histograms from other frames. The normalized histogram of the current frame is compared with the normalized histogram of the previous frame using the correlation method (<code>cv2.HISTCMP_CORREL</code>). A scene change is detected if the correlation between the histograms of consecutive frames is below the specified threshold (<code>--threshold</code>/<code>-t</code>). This indicates a significant change in luminance, suggesting a scene change.</p>
+<p>The histogram detector (<code>HistogramDetector</code> / <code>detect-hist</code>) finds fast cuts using brightness histograms. It converts each frame to the YUV color space, extracts the Y (luminance) channel, and builds a normalized histogram with <code>--bins</code> bins (default: <code>128</code>).</p>
+<p>Adjacent frame histograms are compared using correlation (<code>cv2.HISTCMP_CORREL</code>). When the difference exceeds <code>--threshold</code> (default: <code>0.20</code>), the detector records a cut. Focusing on luminance makes this detector less sensitive to pure color shifts.</p>
+<p>See <a href="/docs/latest/cli.html#detect-hist"><code>detect-hist</code></a> and <a href="/docs/latest/api/detectors.html#histogramdetector"><code>HistogramDetector</code></a> for details.</p>
 <h3 id="perceptual-hash-detector">Perceptual Hash Detector</h3>
-<p>The perceptual hash detector (<code>detect-hash</code>) calculates a hash for a frame and compares that hash to the previous frame's hash. If the hashes differ by more than the defined threshold, then a scene change is recorded. The hashing algorithm used for this detector is an implementation of <code>phash</code> from the <a href="https://github.com/JohannesBuchner/imagehash">imagehash</a> library. In practice, this detector works similarly to <code>detect-content</code> in that it picks up large differences between adjacent frames. One important note is that the hashing algorithm converts the frames to grayscale, so this detector is insensitive to changes in colors if the brightness remains constant. In general, this algorithm is very computationally efficient compared to <code>detect-content</code> or <code>detect-adaptive</code>, especially if downscaling is not used. See <a href="https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html">here</a> for an overview of how a perceptual hashing algorithm can be used for detecting similarity (or otherwise) of images and a visual depiction of the algorithm.</p>
+<p>The perceptual hash detector (<code>HashDetector</code> / <code>detect-hash</code>) computes a perceptual hash (<code>phash</code>, based on <a href="https://github.com/JohannesBuchner/imagehash">imagehash</a>) for each frame and compares adjacent hashes using normalized Hamming distance. When the distance exceeds <code>--threshold</code> (default: <code>0.35</code>, with <code>--size 8</code> and <code>--lowpass 2</code>), it records a cut.</p>
+<p>Because <code>phash</code> converts frames to grayscale first, <code>HashDetector</code> ignores color changes when brightness stays constant. It is fast even without downscaling. See <a href="https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html">Looks Like It</a> for a visual explanation of perceptual hashing.</p>
+<p>See <a href="/docs/latest/cli.html#detect-hash"><code>detect-hash</code></a> and <a href="/docs/latest/api/detectors.html#hashdetector"><code>HashDetector</code></a> for details.</p>
 <h2 id="creating-new-detection-algorithms">Creating New Detection Algorithms</h2>
-<p>All scene detection algorithms must inherit from <a href="/docs/latest/api/detector.html">the base <code>SceneDetector</code> class</a>. Note that the current <code>SceneDetector</code> API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your <code>scenedetect</code> dependency to the correct API version (e.g. <code>scenedetect &lt; 0.6</code>, <code>scenedetect &lt; 0.7</code>, etc.).</p>
-<p>Creating a new scene detection method can be as simple as implementing the <code>process_frame</code> function, and optionally <code>post_process</code>:</p>
-<div class="codehilite"><pre tabindex="0"><code><span class="kn">import</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ty</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<p>Custom detectors must inherit from <a href="/docs/latest/api/detector.html"><code>SceneDetector</code></a>. Because the <code>SceneDetector</code> interface may change before v1.0, pin your dependency to a minor version (for example, <code>scenedetect~=0.7</code>).</p>
+<p>To create a detector, implement <code>process_frame</code> and, if needed, <code>post_process</code>:</p>
+<div class="codehilite"><pre tabindex="0"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameTimecode</span><span class="p">,</span> <span class="n">SceneDetector</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomDetector</span><span class="p">(</span><span class="n">SceneDetector</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""CustomDetector class to implement a scene detection algorithm."""</span>
+<span class="w">    </span><span class="sd">"""Example custom scene detector."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">process_frame</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">timecode</span><span class="p">:</span> <span class="n">FrameTimecode</span><span class="p">,</span>
-        <span class="n">frame_im</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ty</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">FrameTimecode</span><span class="p">]:</span>
-        <span class="c1"># Return a list of timecodes where we found cuts (either on this frame or previously).</span>
+        <span class="n">frame_img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FrameTimecode</span><span class="p">]:</span>
+        <span class="c1"># Return a list of cut timecodes found on this frame or earlier.</span>
         <span class="k">return</span> <span class="p">[]</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timecode</span><span class="p">:</span> <span class="n">FrameTimecode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ty</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">FrameTimecode</span><span class="p">]:</span>
-        <span class="c1"># Called after the last frame has been read to handle pending events.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timecode</span><span class="p">:</span> <span class="n">FrameTimecode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FrameTimecode</span><span class="p">]:</span>
+        <span class="c1"># Called after the last frame to emit any pending cuts.</span>
         <span class="k">return</span> <span class="p">[]</span>
 </code></pre></div>
 
-<p><code>process_frame</code> is called on every frame in the input video, and <code>post_process</code> is called after the final frame of the video is passed to <code>process_frame</code>. This may be useful for multi-pass algorithms, or detectors which are waiting on some condition but still wish to output an event on the final frame.</p>
-<p>For example, a detector may output at most 1 cut for every call to <code>process_frame</code>, it may output the entire scene list in <code>post_process</code>, or a combination of both. Note that the latter will not work in cases where a live video stream or camera input device is being used. See the <a href="/docs/latest/api/detector.html#scenedetect.detector.SceneDetector">API documentation for the <code>SceneDetector</code> class</a> for details. Alternatively, you can call <code>help(SceneDetector)</code> from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the <code>scenedetect/detectors/</code> directory (e.g. <code>threshold_detector.py</code>, <code>content_detector.py</code>).</p>
-<p>Processing is done by calling the <code>process_frame(...)</code> function for all frames in the video, followed by <code>post_process(...)</code> (optional) after the final frame. Scene cuts are detected and returned as a list of <code>FrameTimecode</code> values in both cases.</p>
-<p><code>process_frame(...)</code> is called for each frame in sequence, passing the following arguments:</p>
+<p>PySceneDetect calls <code>process_frame(timecode, frame_img)</code> for every frame in sequence:</p>
 <ul>
-<li><code>timecode</code>: the <code>FrameTimecode</code> of the current frame being processed</li>
-<li><code>frame_img</code>: frame decoded from the video file or stream (accessible as a NumPy <code>ndarray</code>)</li>
+<li><code>timecode</code>: <code>FrameTimecode</code> of the current frame.</li>
+<li><code>frame_img</code>: decoded video frame as a NumPy <code>ndarray</code>.</li>
 </ul>
-<p><code>post_process(...)</code> is called <strong>after</strong> the final frame has been processed, to allow for any stored scene cuts to be emitted <em>if required</em> (e.g. in the case of the <code>ThresholdDetector</code>).</p>
-<p>You may also want to look into the implementation of current detectors to understand how frame metrics are saved/loaded to/from a <a href="/docs/latest/api/stats_manager.html"><code>StatsManager</code></a> for caching and allowing values to be written to a stats file for users to graph and find trends in to tweak detector options. Also see the documentation for the <a href="/docs/latest/api/scene_manager.html"><code>SceneManager</code></a> for details.</p>
+<p>After the final frame, PySceneDetect calls <code>post_process(timecode)</code> so multi-pass detectors or detectors waiting on an end condition (such as <code>ThresholdDetector</code>) can emit remaining cuts. Both methods return a list of <code>FrameTimecode</code> cut locations. Note that detectors that emit cuts only in <code>post_process</code> will not report cuts live on continuous streams.</p>
+<p>To save or reuse frame metrics in a CSV stats file, integrate with <a href="/docs/latest/api/stats_manager.html"><code>StatsManager</code></a>. See the built-in detectors in <a href="https://github.com/Breakthrough/PySceneDetect/tree/main/scenedetect/detectors"><code>scenedetect/detectors/</code></a>, <a href="/docs/latest/api/detector.html#scenedetect.detector.SceneDetector"><code>SceneDetector</code></a>, and <a href="/docs/latest/api/scene_manager.html"><code>SceneManager</code></a> for working examples.</p>
       </article>
 
       <div class="doc-meta-bar">
@@ -327,8 +307,8 @@
           <li>
             <a href="#scene-detection-algorithms">Scene Detection Algorithms</a>
             <ul class="toc-sublist" role="list">
-              <li><a href="#content-aware-detector">Content-Aware Detector</a></li>
               <li><a href="#adaptive-content-detector">Adaptive Content Detector</a></li>
+              <li><a href="#content-aware-detector">Content-Aware Detector</a></li>
               <li><a href="#threshold-detector">Threshold Detector</a></li>
               <li><a href="#histogram-detector">Histogram Detector</a></li>
               <li><a href="#perceptual-hash-detector">Perceptual Hash Detector</a></li>

@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
   <title>Features | PySceneDetect</title>
-  <meta name="description" content="Fast, frame-accurate video scene cut detection and splitting tool in Python with command-line interface and API.">
+  <meta name="description" content="Fast, frame-accurate video scene detection and splitting tool in Python with a command-line interface and Python API.">
   <meta name="robots" content="noindex">
   <link rel="icon" href="/staging/img/favicon.ico">
   <link rel="canonical" href="https://www.scenedetect.com/features/">
@@ -99,16 +99,7 @@
             <a href="/staging/contributing/">Contributing</a>
           </li>
           <li class="mobile-only-nav">
-            <a href="/staging/supporting/">Support</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/gallery/">Project Gallery</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/similar/">Similar Projects</a>
-          </li>
-          <li class="mobile-only-nav">
-            <a href="/staging/literature/">Literature</a>
+            <a href="/staging/projects/">Projects</a>
           </li>
           <li class="mobile-only-nav">
             <a href="/staging/copyright/">License</a>
@@ -178,7 +169,7 @@
         <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
       </form>
       <div id="search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite">
-        <p class="search-empty">Type a keyword to search across all guides, CLI options, detectors, and FAQs.</p>
+        <p class="search-empty">Type a keyword to search guides, CLI options, detectors, and FAQs.</p>
       </div>
     </dialog>
   </search>
@@ -215,28 +206,16 @@
           <a href="/staging/benchmarks/">Benchmarks</a>
         </li>
       </ul>
-      <div class="side-group-title">Support</div>
+      <div class="side-group-title">Community</div>
       <ul class="side-list" role="list">
         <li>
           <a href="/staging/faq/">FAQ</a>
         </li>
         <li>
-          <a href="/staging/contributing/">Bugs &amp; Contributing</a>
+          <a href="/staging/contributing/">Contributing &amp; Support</a>
         </li>
         <li>
-          <a href="/staging/supporting/">Development &amp; Support</a>
-        </li>
-      </ul>
-      <div class="side-group-title">Resources</div>
-      <ul class="side-list" role="list">
-        <li>
-          <a href="/staging/gallery/">Project Gallery</a>
-        </li>
-        <li>
-          <a href="/staging/similar/">Similar Projects</a>
-        </li>
-        <li>
-          <a href="/staging/literature/">Research &amp; Literature</a>
+          <a href="/staging/projects/">Projects &amp; Research</a>
         </li>
         <li>
           <a href="/staging/copyright/">License &amp; Copyright</a>
@@ -250,59 +229,63 @@
 <h2 id="overview">Overview</h2>
 <div class="admonition note">
 <p class="admonition-title">Content-Aware Scene Detection</p>
-<p>Detects breaks in-between <em>content</em>, not only when the video fades to black (although a threshold mode is available as well for those cases).</p>
+<p>PySceneDetect finds cuts between scenes by comparing frame content, not only fades to black. A threshold mode is also included for detecting fades.</p>
 </div>
 <div class="admonition important">
-<p class="admonition-title">Compatible With Many External Tools</p>
-<p>The detected scene boundaries/cuts can be exported in a variety of formats, with the default type (comma-separated <code>HH:MM:SS.nnn</code> values) being ready to copy-and-paste directly into other tools (such as <code>ffmpeg</code>, <code>mkvmerge</code>, etc.) for splitting and/or re-encoding the video.</p>
+<p class="admonition-title">Standard Export Formats</p>
+<p>Export detected scene cuts in formats that work directly with video editors and command-line tools. The default comma-separated <code>HH:MM:SS.nnn</code> format can be pasted directly into <code>ffmpeg</code> or <code>mkvmerge</code>.</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Statistical Video Analysis</p>
-<p>Can output a spreadsheet-compatible file for analyzing trends in a particular video file, to determine the optimal threshold values to use with specific scene detection methods/algorithms.</p>
+<p class="admonition-title">Per-Frame Video Analysis</p>
+<p>Export frame-by-frame metrics to a CSV stats file so you can plot trends in a spreadsheet and pick the best threshold for your video.</p>
 </div>
 <div class="admonition important">
-<p class="admonition-title">Extendible and Embeddable</p>
-<p>Written in Python, and designed with an easy-to-use and extendable API, PySceneDetect is ideal for embedding into other programs, or to implement custom methods/algorithms of scene detection for specific applications (e.g. analyzing security camera footage).</p>
+<p class="admonition-title">Modular Python API</p>
+<p>PySceneDetect is written in Python with an extensible API. You can embed it in your own applications or write custom detection methods for specialized video workflows.</p>
 </div>
 <hr />
 <h2 id="key-capabilities">Key Capabilities</h2>
 <ul>
-<li>exports timecodes in standard format (<code>HH:MM:SS.nnn</code>), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software</li>
-<li>statistics/analysis mode to export frame-by-frame video metrics via the <code>-s [FILE]</code>/<code>--stats [FILE]</code> argument (e.g. <code>--stats metrics.csv</code>)</li>
-<li>output-suppression (quiet) mode for better automation with external scripts/programs (<code>-q</code>/<code>--quiet</code>)</li>
-<li>save an image of the first and last frame of each detected scene via the <code>save-images</code> command</li>
-<li>split the input video automatically if <code>ffmpeg</code> or <code>mkvmerge</code> is available via the <code>split-video</code> command</li>
+<li>Export timecodes in comma-separated <code>HH:MM:SS.nnn</code> format for external tools and spreadsheets.</li>
+<li>Save frame-by-frame video metrics to a CSV stats file with <code>-s FILE</code> / <code>--stats FILE</code> (for example, <code>--stats metrics.csv</code>).</li>
+<li>Hide terminal output with <code>-q</code> / <code>--quiet</code> when automating scripts.</li>
+<li>Save still frames from each scene with the <code>save-images</code> command.</li>
+<li>Split the input video into separate scene clips with <code>split-video</code> using <code>ffmpeg</code> or <code>mkvmerge</code>.</li>
 </ul>
 <h2 id="output-formats">Output Formats</h2>
 <ul>
-<li><strong>Chapters</strong>: <code>save-chapters</code> command (save as FFmetadata chapters, which can be added to a video with ffmpeg)</li>
-<li><strong>EDL</strong>: <code>save-edl</code> command (save as edit decision list in CMX 3600 format, compatible with most editors)</li>
-<li><strong>HTML</strong>: <code>save-html</code> command (save HTML table that can be viewed with browser)</li>
-<li><strong>OTIO</strong>: <code>save-otio</code> command (save as <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO">OpenTimelineIO</a> file)</li>
-<li><strong>QP</strong>: <code>save-qp</code> command (can be used with x264 <code>--qpfile</code>)</li>
+<li><strong>CSV</strong> (<code>list-scenes</code>): save a scene list table and comma-separated cut times (<code>HH:MM:SS.nnn</code>).</li>
+<li><strong>Chapters</strong> (<code>save-chapters</code>): save FFmetadata chapters to add to a video with <code>ffmpeg</code>.</li>
+<li><strong>EDL</strong> (<code>save-edl</code>): save a CMX 3600 edit decision list for most video editors.</li>
+<li><strong>Final Cut Pro XML</strong> (<code>save-fcp</code>): save a Final Cut Pro X (FCPXML) or Final Cut Pro 7 (xmeml) timeline.</li>
+<li><strong>HTML</strong> (<code>save-html</code>): save an HTML scene table to view in a web browser, with optional preview images.</li>
+<li><strong>Images</strong> (<code>save-images</code>): save still frames from each scene as JPEG, PNG, or WebP files.</li>
+<li><strong>Keyframes</strong> (<code>save-keyframes</code>): save cut frame numbers in keyframe format v1 (for example, for Aegisub).</li>
+<li><strong>OpenTimelineIO</strong> (<code>save-otio</code>): save an <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO">OpenTimelineIO</a> timeline file.</li>
+<li><strong>QP</strong> (<code>save-qp</code>): save cut frame numbers for use with x264 and x265 <code>--qpfile</code>.</li>
+<li><strong>Video Clips</strong> (<code>split-video</code>): split the input video into one file per scene with <code>ffmpeg</code> or <code>mkvmerge</code>.</li>
 </ul>
 <h2 id="detection-methods">Detection Methods</h2>
-<p>PySceneDetect implements a variety of different detection algorithms which can be used independently or combined depending on the source material being analyzed.</p>
+<p>PySceneDetect includes five detection methods. You can run them alone or combine more than one for the same video:</p>
 <ul>
-<li><strong>adaptive content scene detection</strong> (<code>detect-adaptive</code>): uses rolling average of differences in HSL colorspace combined with thresholding to detect shot changes (fast cut)</li>
-<li><strong>content-aware scene detection</strong> (<code>detect-content</code>): uses differences in HSL colorspace combined with filtering to detect shot changes (fast cut)</li>
-<li><strong>content-aware scene detection</strong> (<code>detect-hash</code>): uses perceptual hashing to determine differences between frames to find shot changes (fast cut)</li>
-<li><strong>content-aware scene detection</strong> (<code>detect-hist</code>): uses differences in histograms of Y channel of frames after conversion to YUV (fast cut)</li>
-<li><strong>threshold scene detection</strong> (<code>detect-threshold</code>): uses average frame intensity (brightness) to detect slow transitions (fade in/out)</li>
+<li><strong>Adaptive detector</strong> (<code>detect-adaptive</code>, default): compares each frame's HSV content score against a rolling average of nearby frames to find fast cuts while reducing false cuts during camera motion.</li>
+<li><strong>Content detector</strong> (<code>detect-content</code>): compares differences in the HSV color space (and optional edges) between adjacent frames to find fast cuts.</li>
+<li><strong>Perceptual hash detector</strong> (<code>detect-hash</code>): computes a perceptual hash for each frame and compares adjacent hashes to find fast cuts.</li>
+<li><strong>Histogram detector</strong> (<code>detect-hist</code>): compares Y-channel (brightness) histograms in the YUV color space between adjacent frames to find fast cuts.</li>
+<li><strong>Threshold detector</strong> (<code>detect-threshold</code>): measures average RGB frame brightness to find fades to and from black.</li>
 </ul>
-<p>By default, detection methods are tuned to provide high performance during processing, while maintaining reasonable accuracy. Each detection method is configurable, and different parameters can be changed for specific use cases. See <a href="/staging/docs/">the documentation</a> for details, and <a href="/staging/benchmarks/">the benchmarks page</a> for how each detector scores on public shot-boundary-detection datasets.</p>
+<p>Each detection method uses default settings tuned for both speed and accuracy. You can adjust every parameter from the command line, a config file, or Python. See the <a href="/docs/latest/">Reference Manual</a> for option details and the <a href="/staging/benchmarks/">Benchmarks</a> page for accuracy scores across public datasets.</p>
 <hr />
 <h2 id="version-roadmap">Version Roadmap</h2>
-<p>Future version roadmaps are now <a href="https://github.com/Breakthrough/PySceneDetect/milestones">tracked as milestones (link)</a>. Specific issues/features that are queued up for the very next release will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22">the <code>backlog</code> tag</a>, and issues/features being worked on will have <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22">the <code>status: in progress</code> tag</a>. Also note that bug reports as well as additional feature requests can be submitted via <a href="https://github.com/Breakthrough/PySceneDetect/issues">the issue tracker</a>; read <a href="/staging/contributing/">the Bug Reports and Contributing page</a> for details.</p>
-<h3 id="planned-features">Planned Features</h3>
-<p>The following features are under consideration for future releases. Any contributions towards completing these features are most welcome (pull requests may be accepted via Github).</p>
+<p>Planned releases are tracked in <a href="https://github.com/Breakthrough/PySceneDetect/milestones">GitHub milestones</a>. Items queued for the next release use <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22">the <code>backlog</code> label</a>, and active work uses <a href="https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22">the <code>status: in progress</code> label</a>. You can submit bug reports and feature requests on <a href="https://github.com/Breakthrough/PySceneDetect/issues">the issue tracker</a>; see <a href="/staging/contributing/">Contributing &amp; Support</a> for guidelines.</p>
+<h3 id="planned-features">Planned features</h3>
+<p>The following features are under consideration for future releases. Pull requests on GitHub are welcome:</p>
 <ul>
-<li>graphical interface (GUI)</li>
-<li>automatic threshold detection for the current scene detection methods (or just output message indicating "Predicted Threshold: X")</li>
-<li>suppression of short-length flashes/bursts of light <a href="https://github.com/Breakthrough/PySceneDetect/issues/35">#35</a></li>
-<li>histogram-based detection algorithm in HSV/HSL color space <a href="https://github.com/Breakthrough/PySceneDetect/issues/53">#53</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Perceptual_hashing">perceptual hash</a> based scene detection (<a href="https://github.com/Breakthrough/PySceneDetect/pull/290">prototype by @wjs018 in PR#290</a>)</li>
-<li>adaptive bias for fade in/out interpolation</li>
+<li>Graphical user interface (GUI).</li>
+<li>Automatic threshold selection for scene detectors.</li>
+<li>Better suppression of short bright flashes (<a href="https://github.com/Breakthrough/PySceneDetect/issues/35">#35</a>).</li>
+<li>Improved dissolve detection.</li>
+<li>Adaptive bias for fade-in and fade-out detection.</li>
 </ul>
       </article>
 
@@ -346,7 +329,7 @@
           <li>
             <a href="#version-roadmap">Version Roadmap</a>
             <ul class="toc-sublist" role="list">
-              <li><a href="#planned-features">Planned Features</a></li>
+              <li><a href="#planned-features">Planned features</a></li>
             </ul>
           </li>
         </ul>
