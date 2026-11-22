@@ -454,8 +454,14 @@ class FrameTimecode:
                 object has a defined framerate, otherwise has no effect.
 
         Returns:
-            str: The current time in the form ``"HH:MM:SS[.nnn]"``.
+            str: The current time in the form ``"HH:MM:SS[.nnn]"``. A negative time (e.g. from a
+            negative PTS) is shown as zero.
+
+        Raises:
+            ValueError: `precision` is negative.
         """
+        if precision < 0:
+            raise ValueError("precision must not be negative")
         # Compute hours and minutes based off of seconds, and update seconds.
         # For PTS-backed timecodes, the PTS already represents an exact frame boundary, so we use
         # `seconds` directly. For non-PTS timecodes, `nearest_frame` snaps to the nearest frame

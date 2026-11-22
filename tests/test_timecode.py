@@ -451,6 +451,14 @@ def test_negative_time_is_shown_as_zero():
     assert tc.get_timecode(use_rounding=True) == "00:00:00.000"
 
 
+@pytest.mark.parametrize("use_rounding", [True, False])
+def test_negative_precision_is_rejected(use_rounding: bool):
+    """A negative precision gives a clear error, whether rounding or truncating."""
+    tc = FrameTimecode(10, 24.0)
+    with pytest.raises(ValueError, match="precision must not be negative"):
+        tc.get_timecode(precision=-1, use_rounding=use_rounding)
+
+
 def test_rational_framerate_precision():
     """Rational framerates should round-trip frame/second conversions without drift."""
     fps = Fraction(24000, 1001)
