@@ -1,49 +1,64 @@
-# Bug Reports and Contributing
+# Contributing & Support
 
-## Bug Reports
+## Reporting Bugs
 
-Bugs, issues, features, and improvements to PySceneDetect are handled through [the issue tracker on Github](https://github.com/Breakthrough/PySceneDetect/issues). If you run into any bugs using PySceneDetect, please [create a new issue](https://github.com/Breakthrough/PySceneDetect/issues/new/choose).
+Report bugs and request features on [the PySceneDetect issue tracker on GitHub](https://github.com/Breakthrough/PySceneDetect/issues). Before [opening a new issue](https://github.com/Breakthrough/PySceneDetect/issues/new/choose), search [existing issues](https://github.com/Breakthrough/PySceneDetect/issues?q=) to check for known fixes or workarounds. Adding reproduction details to an existing report is also helpful.
 
-Try to [find an existing issue](https://github.com/Breakthrough/PySceneDetect/issues?q=) before creating a new one, as there may be a workaround posted there. Additional information is also helpful for existing reports.
+## Contributing Code
 
-## Contributing to Development
+PySceneDetect development takes place at [github.com/Breakthrough/PySceneDetect](https://github.com/Breakthrough/PySceneDetect). Pull requests are welcome. When possible, link each pull request to an entry on [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues?q=).
 
-Development of PySceneDetect happens on [github.com/Breakthrough/PySceneDetect](https://github.com/Breakthrough/PySceneDetect). Pull requests are accepted and encouraged. Where possible, PRs should be submitted with a dedicated entry in [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues?q=). Issues and features are typically grouped into version milestones.
+Before submitting a pull request, check that your changes meet these requirements:
 
-The following checklist covers the basics of pre-submission requirements:
+- All unit tests pass (`pytest`).
+- Linting and formatting checks pass (`ruff check` and `ruff format`).
+- New public APIs include type hints and NumPy-style docstrings.
 
-- Code passes all unit tests (run `pytest`)
-- Code passes static analysis and formatting checks (`ruff check` and `ruff format`)
-- Follows the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
-
-Note that PySceneDetect is released under the BSD 3-Clause license, and submitted code should comply with this license (see [License & Copyright Information](copyright.md) for details).
+PySceneDetect is released under the BSD 3-Clause License, and all submitted code must comply with this license (see [License & Copyright](copyright.md)).
 
 ## Features That Need Help
 
-The following is a "wishlist" of features which PySceneDetect eventually should have, but does not currently due to lack of resources. Anyone who is able to contribute in any capacity to these items is encouraged to do so by starting a dialogue by opening a new issue on Github as per above.
+These areas are open for community contributions. Open an issue on GitHub to discuss an approach before writing a large change.
 
-### Flash Suppression
+### Flash suppression
 
-Some detection methods struggle with bright flashes and fast camera movement. The detection pipeline has some filters in place to deal with these cases, but there are still drawbacks. We are actively seeking methods which can improve both performance and accuracy in these cases.
+Bright flashes and fast camera movement can still trigger false cuts in some videos. Contributions that improve both accuracy and speed for these cases are welcome.
 
-### Automatic Thresholding
+### Automatic thresholding
 
-The `detect-content` command requires a manual threshold to be set currently. Methods to use peak detection to dynamically determine when scene cuts occur would allow for the program to work with a much wider amount of material without requiring manual tuning, but would require statistical analysis.
+`detect-content` currently requires a fixed threshold. Peak-detection methods that estimate a threshold automatically (for example, `--threshold=auto`) would reduce manual tuning across diverse videos.
 
-Ideally, this would be something like `--threshold=auto` as a default.
+### Dissolve detection
 
-### Dissolve Detection
+Detection accuracy on slow dissolves varies with transition length and detector settings. Better dissolve detection with low performance overhead remains an open problem.
 
-Depending on the length of the dissolve and parameters being used, detection accuracy for these types of cuts can vary widely. A method to improve accuracy with minimal performance loss is an open problem.
+### New detection methods
 
-### Advanced Strategies
+Research and prototypes for faster or more accurate detection algorithms are always welcome.
 
-Research into detection methods and performance are ongoing. All contributions in this regard are most welcome.
+### Graphical user interface (GUI)
 
-### GUI
-
-A graphical user interface will be crucial for making PySceneDetect approachable by a wider audience. There have been several suggested designs, but nothing concrete has been developed yet. Any proposed solution for the GUI should work across Windows, Linux, and OSX.
+A cross-platform GUI for Windows, Linux, and macOS would make PySceneDetect easier for non-technical users. No official GUI has been built yet.
 
 ### Localization
 
-PySceneDetect currently is not localized for other languages. Anyone who can help improve how localization can be approached for development material is encouraged to contribute in any way possible. Whether it is the GUI program, the command line interface, or documentation, localization will allow PySceneDetect to be used by much more users in their native languages.
+PySceneDetect is currently available only in English. Contributions to support localization in the CLI, documentation, or a future GUI will help more people use PySceneDetect in their own language.
+
+## Project Support and Credits
+
+PySceneDetect is built and distributed with help from the tools, services, and contributors below. Listing these services gives credit for their support and does not imply endorsement.
+
+### Tools and services
+
+- [GitHub](https://github.com/): Git hosting, website hosting, code review, issue tracking, and CI builds.
+- [AppVeyor](https://www.appveyor.com/): Windows portable and MSI builds.
+- [AdvancedInstaller](https://www.advancedinstaller.com/): Windows MSI installer packaging.
+- [SignPath](https://signpath.io/): free code signing for Windows builds.
+
+### Community contributions
+
+Thank you to everyone who has submitted bug reports, feature requests, documentation fixes, and pull requests. You can view the contributor list on [the GitHub contributors page](https://github.com/Breakthrough/PySceneDetect/graphs/contributors) or on [libraries.io](https://libraries.io/github/Breakthrough/PySceneDetect/contributors).
+
+### Donations
+
+PySceneDetect does not accept monetary donations. The best ways to support the project are reporting bugs, improving docs, and contributing code. If you can offer tools, hosting, or testing resources that help development, open an issue on GitHub or reach out through [bcastell.com/contact](https://bcastell.com/contact/).

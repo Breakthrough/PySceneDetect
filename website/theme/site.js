@@ -155,56 +155,61 @@ function initThemeToggle() {
 }
 
 /* -------------------------------------------------------------------------- *
- * 4. Hero Quickstart Code Tabs (accessible roving tabindex, selection-on-focus)
+ * 4. Accessible Tabs (roving tabindex, selection-on-focus, find-in-page sync)
  * -------------------------------------------------------------------------- */
-function initHeroTabs() {
-  const tablist = document.querySelector('[role="tablist"]');
-  if (!tablist) {
-    return;
-  }
-  const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
-  const hintEl = document.getElementById("hero-code-hint");
-  if (!tabs.length) {
-    return;
-  }
+function initTabGroups() {
+  for (const tablist of document.querySelectorAll('[role="tablist"]')) {
+    const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+    if (!tabs.length) {
+      continue;
+    }
+    const hintTargetId = tablist.dataset.hintTarget;
+    const hintEl = hintTargetId ? document.getElementById(hintTargetId) : null;
+    const panels = tabs.map((tab) =>
+      tab.id ? document.querySelector(`[role="tabpanel"][aria-labelledby="${CSS.escape(tab.id)}"]`) : null
+    );
 
-  const selectTab = (nextTab, moveFocus = false) => {
-    for (const tab of tabs) {
-      const isSelected = tab === nextTab;
-      tab.setAttribute("aria-selected", isSelected ? "true" : "false");
-      tab.tabIndex = isSelected ? 0 : -1;
-      const panelId = tab.id.replace("hero-tab-", "hero-panel-");
-      const panel = document.getElementById(panelId);
-      if (panel) {
-        panel.hidden = !isSelected;
+    const selectTab = (nextTab, moveFocus = false) => {
+      tabs.forEach((tab, idx) => {
+        const isSelected = tab === nextTab;
+        tab.setAttribute("aria-selected", isSelected ? "true" : "false");
+        tab.tabIndex = isSelected ? 0 : -1;
+        const panel = panels[idx];
+        if (panel) {
+          panel.hidden = isSelected ? false : "until-found";
+        }
+      });
+      if (hintEl && nextTab.dataset.hint) {
+        hintEl.textContent = nextTab.dataset.hint;
       }
-    }
-    if (hintEl && nextTab.dataset.hint) {
-      hintEl.textContent = nextTab.dataset.hint;
-    }
-    if (moveFocus) {
-      nextTab.focus();
       nextTab.scrollIntoView({ block: "nearest", inline: "nearest" });
-    }
-  };
-
-  for (const tab of tabs) {
-    tab.addEventListener("click", () => selectTab(tab, false));
-    tab.addEventListener("keydown", (event) => {
-      const idx = tabs.indexOf(tab);
-      let targetIdx = -1;
-      if (event.key === "ArrowRight") {
-        targetIdx = (idx + 1) % tabs.length;
-      } else if (event.key === "ArrowLeft") {
-        targetIdx = (idx - 1 + tabs.length) % tabs.length;
-      } else if (event.key === "Home") {
-        targetIdx = 0;
-      } else if (event.key === "End") {
-        targetIdx = tabs.length - 1;
+      if (moveFocus) {
+        nextTab.focus();
       }
-      if (targetIdx !== -1) {
-        event.preventDefault();
-        selectTab(tabs[targetIdx], true);
+    };
+
+    tabs.forEach((tab, idx) => {
+      tab.addEventListener("click", () => selectTab(tab, false));
+      tab.addEventListener("keydown", (event) => {
+        let targetIdx = -1;
+        if (event.key === "ArrowRight") {
+          targetIdx = (idx + 1) % tabs.length;
+        } else if (event.key === "ArrowLeft") {
+          targetIdx = (idx - 1 + tabs.length) % tabs.length;
+        } else if (event.key === "Home") {
+          targetIdx = 0;
+        } else if (event.key === "End") {
+          targetIdx = tabs.length - 1;
+        }
+        if (targetIdx !== -1) {
+          event.preventDefault();
+          selectTab(tabs[targetIdx], true);
+        }
+      });
+
+      const panel = panels[idx];
+      if (panel) {
+        panel.addEventListener("beforematch", () => selectTab(tab, false));
       }
     });
   }
@@ -363,7 +368,7 @@ function initSearchDialog() {
     const q = rawQuery.trim().toLowerCase();
     if (!q) {
       renderMessage(
-        "Type a keyword to search across all guides, CLI options, detectors, and FAQs."
+        "Type a keyword to search guides, CLI options, detectors, and FAQs."
       );
       return;
     }
@@ -508,7 +513,7 @@ function initSearchDialog() {
 initDialogLightDismissFallback();
 initResponsiveNavbar();
 initThemeToggle();
-initHeroTabs();
+initTabGroups();
 initCopyButtons();
 initTocHighlight();
 initSearchDialog();

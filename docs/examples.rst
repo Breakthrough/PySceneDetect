@@ -122,7 +122,7 @@ Python:
 Set a Minimum Scene Length
 --------------------------
 
-Cuts closer together than this are ignored. On the command line
+Cuts closer than this length are merged or ignored. On the command line
 :option:`-m/--min-scene-len <scenedetect -m>` applies to every detector and defaults to
 ``0.6s``; in Python each detector takes ``min_scene_len`` and defaults to ``15`` frames.
 
@@ -144,7 +144,7 @@ Analyze Only Part of the Video
 ------------------------------
 
 Skip the first 10 seconds and stop after one minute. Times can be given as frames (``100``),
-seconds (``10s``) or timecodes (``00:01:00``).
+seconds (``10s``), or timecodes (``00:01:00``).
 
 Command line:
 
@@ -163,8 +163,7 @@ Python:
 Save Per-Frame Statistics
 -------------------------
 
-Write the metric each detector computes for every frame to a CSV file, to help choose a
-threshold.
+Write each detector's per-frame metrics to a CSV stats file to help choose a threshold.
 
 Command line:
 

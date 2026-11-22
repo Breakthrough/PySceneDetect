@@ -1,28 +1,20 @@
 # Benchmarks
 
-PySceneDetect's detectors are benchmarked for accuracy against public
-shot-boundary-detection corpora. Scoring follows the
-[TRECVID-SBD convention](https://www-nlpir.nist.gov/projects/tv2007/pastdata/shot_boundary.07.html)
-(greedy 1-to-1 nearest-neighbor matching with a configurable frame tolerance for hard cuts;
-point-in-interval matching for fades), so numbers are comparable to published results.
-The benchmark harness, datasets, and full raw results live in
-[`benchmark/`](https://github.com/Breakthrough/PySceneDetect/tree/main/benchmark) on GitHub.
+PySceneDetect's detectors are tested for accuracy against three public shot-boundary detection datasets. Scoring follows the [TRECVID-SBD convention](https://www-nlpir.nist.gov/projects/tv2007/pastdata/shot_boundary.07.html) (greedy 1-to-1 nearest-neighbor matching with a configurable frame tolerance for hard cuts, and point-in-interval matching for fades), so results can be compared directly with published research. The benchmark code, dataset loaders, and raw results are in [`benchmark/`](https://github.com/Breakthrough/PySceneDetect/tree/main/benchmark) on GitHub.
 
-Three datasets are used, chosen to cover very different content:
+The three datasets cover different types of video:
 
-- **BBC Planet Earth** - 11 long-form broadcast episodes (hard cuts only)
-- **AutoShot** - short-form web/user-generated clips (hard cuts only)
-- **ClipShots** - 500 short web clips with hard cuts *and* typed gradual transitions
+- **BBC Planet Earth**: 11 long-form broadcast episodes (hard cuts only).
+- **AutoShot**: short web and user-generated clips (hard cuts only).
+- **ClipShots**: 500 short web clips with hard cuts and gradual transitions.
 
-## Accuracy at default settings
+## Accuracy at Default Settings
 
 <img src="img/benchmark-f1-defaults.svg" alt="Grouped bar chart of hard-cut F1 score per detector and dataset at default settings. AdaptiveDetector leads on BBC (92) and AutoShot (74); HistogramDetector trails, dropping to 20 on ClipShots.">
 
-Hard cuts, strict frame-exact matching (tolerance 0). F1 cells are shaded by score.
+Hard cuts with exact frame matching (tolerance 0). F1 cells are shaded by score.
 
-These results were measured with the v0.7 defaults. In v0.7.2 the `HistogramDetector` and
-`HashDetector` defaults changed to the swept-best values listed under
-[Parameter sweeps](#parameter-sweeps); the tables below will be regenerated with the new defaults.
+These tables were measured with v0.7 defaults. In v0.7.2, `HistogramDetector` and `HashDetector` defaults changed to the tuned values listed under [Parameter Sweeps](#parameter-sweeps); the default tables below will be updated with v0.7.2 measurements.
 
 ### BBC Planet Earth
 
@@ -84,19 +76,15 @@ These results were measured with the v0.7 defaults. In v0.7.2 the `HistogramDete
 </tbody>
 </table>
 
-\* ThresholdDetector detects fades to/from black, not shot-to-shot transitions; near-zero
-hard-cut scores are expected. Included for completeness.
+\* `ThresholdDetector` detects fades to and from black, not hard cuts, so near-zero hard-cut scores are expected. It is included here for completeness.
 
-## Parameter sweeps
+## Parameter Sweeps
 
-Beyond the default values, a sweep over each detector's key parameters shows how
-accuracy per dataset changes:
+Sweeping each detector's main parameters shows how accuracy changes across datasets:
 
 <img src="img/benchmark-sweep-curves.svg" alt="Four small-multiple line charts showing hard-cut F1 at 1-frame tolerance versus threshold for detect-content, detect-adaptive, detect-hash, and detect-hist. Each panel has one line per dataset with a dot at that dataset's optimum; BBC and AutoShot peak at lower thresholds than ClipShots in most panels.">
 
-Dots mark each dataset's optimum within the shown parameter slice. Long-form broadcast content (BBC)
-generally prefers lower thresholds than short web clips (ClipShots), so the defaults aim for a
-robust middle ground.
+Dots mark the highest score for each dataset in the tested range. Long-form broadcast video (BBC) generally works best at lower thresholds than short web clips (ClipShots), so default settings aim for a balanced middle ground.
 
 <img src="img/benchmark-f1-optimal.svg" alt="Grouped bar chart of hard-cut F1 at 1-frame tolerance after parameter tuning. Bars show the best single cross-dataset parameter set per detector and dataset, a black tick marks the v0.7 default, and a dot marks each dataset's own optimum. HistogramDetector shows the largest gap between default and tuned scores, most dramatically on ClipShots (20 vs 48); for ContentDetector and AdaptiveDetector on BBC the default tick sits slightly above the tuned bar.">
 
@@ -114,13 +102,11 @@ Scored by mean hard-cut F1 at 1-frame tolerance across all three datasets:
 </tbody>
 </table>
 
-Full per-dataset breakdowns are in
-[`benchmark/SWEEP_REPORT.md`](https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/SWEEP_REPORT.md).
+Full per-dataset breakdowns are in [`benchmark/SWEEP_REPORT.md`](https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/SWEEP_REPORT.md).
 
-## Benchmarking
+## Running Benchmarks
 
-See [`benchmark/README.md`](https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/README.md)
-for dataset download instructions and usage.
+See [`benchmark/README.md`](https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/README.md) for dataset setup instructions and full usage:
 
 ```bash
 # Score one detector on one dataset:

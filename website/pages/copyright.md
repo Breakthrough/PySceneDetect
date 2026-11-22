@@ -1,4 +1,4 @@
-# License and Copyright Information
+# License & Copyright
 
 ## PySceneDetect License Agreement
 
@@ -39,50 +39,49 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-## Ancillary Software Licenses
+## Third-Party Software Licenses
 
-This section contains links to the license agreements for all third-party software libraries used and distributed with PySceneDetect. You can find copies of all the relevant license agreements referenced below if you installed a copy of PySceneDetect by looking at the LICENSE files in the installation directory.
+This section lists the license links for third-party libraries used by or distributed with PySceneDetect. Copies of these licenses are also included in the `LICENSE` files in the installation directory.
 
 -----------------------------------------------------------------------
 
-### click
+### Click
 
 - Copyright (C) 2017, Armin Ronacher.
-- URL: [http://click.pocoo.org/license/](http://click.pocoo.org/license/)
+- License: [https://click.palletsprojects.com/en/stable/license/](https://click.palletsprojects.com/en/stable/license/)
 
 ### NumPy
 
 - Copyright (C) 2005-2016, NumPy Developers.
-- URL: [https://www.numpy.org/license.html](https://www.numpy.org/license.html)
+- License: [https://www.numpy.org/license.html](https://www.numpy.org/license.html)
 
 ### OpenCV
 
 - Copyright (C) 2017, Itseez.
-- URL: [https://opencv.org/license.html](https://opencv.org/license.html)
+- License: [https://opencv.org/license.html](https://opencv.org/license.html)
 
 ### PyAV
 
-- Copyright (C) 2017, Mike Boers and others
-- URL: [https://github.com/PyAV-Org/PyAV/blob/main/LICENSE.txt](https://github.com/PyAV-Org/PyAV/blob/main/LICENSE.txt)
+- Copyright (C) 2017, Mike Boers and others.
+- License: [https://github.com/PyAV-Org/PyAV/blob/main/LICENSE.txt](https://github.com/PyAV-Org/PyAV/blob/main/LICENSE.txt)
 
 ### simpletable
 
-- Copyright (C) 2014-2019, Matheus Vieira Portela and others
-- URL: [https://github.com/matheusportela/simpletable/blob/master/LICENSE](https://github.com/matheusportela/simpletable/blob/master/LICENSE)
+- Copyright (C) 2014-2019, Matheus Vieira Portela and others.
+- License: [https://github.com/matheusportela/simpletable/blob/master/LICENSE](https://github.com/matheusportela/simpletable/blob/master/LICENSE)
 
 ### tqdm
 
 - Copyright (C) 2013-2018, Casper da Costa-Luis, Google Inc., and Noam Yorav-Raphael.
-- URL: [https://raw.githubusercontent.com/tqdm/tqdm/master/LICENCE](https://raw.githubusercontent.com/tqdm/tqdm/master/LICENCE)
+- License: [https://raw.githubusercontent.com/tqdm/tqdm/master/LICENCE](https://raw.githubusercontent.com/tqdm/tqdm/master/LICENCE)
 
 -----------------------------------------------------------------------
 
 ### FFmpeg and mkvmerge
 
-This software may also invoke mkvmerge or FFmpeg, if available.
+PySceneDetect may also invoke `mkvmerge` or `ffmpeg` if they are installed.
 
 FFmpeg is a trademark of Fabrice Bellard.
 mkvmerge is Copyright (C) 2005-2016, Matroska.
 
-Certain distributions of PySceneDetect may include ffmpeg. See the
-`thirdparty/LICENSE-FFMPEG` file or visit [https://ffmpeg.org](https://ffmpeg.org).
+Some PySceneDetect distributions bundle `ffmpeg`. See `thirdparty/LICENSE-FFMPEG` or visit [ffmpeg.org](https://ffmpeg.org).

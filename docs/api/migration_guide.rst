@@ -5,7 +5,7 @@
 Migration Guide (v0.7)
 ----------------------
 
-PySceneDetect v0.7 is a major release that overhauls timestamp handling to support variable framerate (VFR) videos. While the high-level :func:`scenedetect.detect` workflow is largely unchanged, several internal APIs have been restructured. This guide covers the changes needed to update applications from v0.6 to v0.7.
+PySceneDetect v0.7 is a major release that updates timestamp handling to support variable frame rate (VFR) videos. While the high-level :func:`scenedetect.detect` workflow is largely unchanged, several internal APIs changed. This guide lists the updates needed when migrating from v0.6 to v0.7.
 
 The minimum supported Python version is now **Python 3.10**.
 
@@ -81,7 +81,7 @@ The ``frame_num`` parameter (``int``) has been replaced with ``timecode`` (:clas
         def process_frame(self, timecode: FrameTimecode, frame_img) -> List[FrameTimecode]:
             ...
 
-The same change applies to ``post_process()``. Using units of time instead of frame numbers is critical for temporal accuracy. If you need the frame number, use ``timecode.frame_num`` to convert the timecode to an integer.
+The same change applies to ``post_process()``. Using timecodes instead of frame numbers keeps timing accurate on VFR video. Use ``timecode.frame_num`` if you need an integer frame number.
 
 ``SceneDetector`` is Now Abstract
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -152,11 +152,11 @@ Removed Methods
 - ``previous_frame()`` - removed, use ``FrameTimecode(tc.frame_num - 1, tc)`` instead (passing a ``FrameTimecode`` as the ``fps`` argument reuses its rate)
 
 
-Framerate and Timestamp Changes
--------------------------------
+Frame Rate and Timestamp Changes
+--------------------------------
 
-Rational Framerates
-^^^^^^^^^^^^^^^^^^^
+Rational Frame Rates
+^^^^^^^^^^^^^^^^^^^^
 
 :attr:`~scenedetect.video_stream.VideoStream.frame_rate` now returns a ``Fraction`` instead of ``float``. Common NTSC rates (23.976, 29.97, 59.94) are automatically detected from float values:
 
@@ -199,7 +199,7 @@ The ``StatsManager`` methods :meth:`~scenedetect.stats_manager.StatsManager.get_
 ``SceneDetector`` Annotation Fixes
 ----------------------------------
 
-:meth:`~scenedetect.detector.SceneDetector.post_process` now declares its parameter as ``timecode: FrameTimecode`` (previously typed as ``int``). The method already received a ``FrameTimecode`` at runtime and concrete detectors (e.g. ``ThresholdDetector``, ``ContentDetector``) already used the ``FrameTimecode`` type - only the abstract-base-class annotation was inconsistent. No call-site changes are needed; this just brings the signature into agreement with the documented and actual behavior.
+:meth:`~scenedetect.detector.SceneDetector.post_process` now declares its parameter as ``timecode: FrameTimecode`` (previously typed as ``int``). The method already received a ``FrameTimecode`` at runtime and built-in detectors (such as ``ThresholdDetector`` and ``ContentDetector``) already used ``FrameTimecode``. Only the abstract base class annotation differed; no call-site changes are needed.
 
 
 ``SceneManager.detect_scenes()`` Time Arguments

@@ -1,76 +1,79 @@
-# API Reference
+# Python API
 
-The Python API is documented using Sphinx and [can be found here](docs.md).
+The complete Python API reference is in the [Reference Manual](/docs/latest/api.html). See [Documentation Versions](docs.md) for older releases.
 
 ## Scene Detection Algorithms
 
-This page discusses the scene detection methods/algorithms available for use in PySceneDetect, including details describing the operation of the detection method, as well as relevant command-line arguments and recommended values.
-
-### Content-Aware Detector
-
-The content-aware scene detector (`detect-content`) detects [jump cuts](https://en.wikipedia.org/wiki/Jump_cut) in the input video. This is typically what people think of as "cuts" between scenes in a movie - given two adjacent frames, do they belong to the same scene? The content-aware scene detector finds areas where the *difference* between two subsequent frames exceeds the threshold value that is set (a good value to start with is `--threshold 27`).
-
-Internally, this detector functions by converting the colorspace of each decoded frame from [RGB](https://en.wikipedia.org/wiki/RGB_color_space) into [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV). It then takes the average difference across all channels (or optionally just the *value* channel) from frame to frame. When this exceeds a set threshold, a scene change is triggered.
-
-`detect-content` also has edge detection, which can be enabled by providing a set of 4 numbers in the form (*delta_hue*, *delta_sat*, *delta_lum*, *delta_edges*). Changes in edges are typically larger than the other components, so threshold may need to be increased accordingly. For example, `-w 1.0 0.5 1.0 0.2 -t 32` is a good starting point to use with edge detection. The default weights are `--weights 1.0 1.0 1.0 0.0` which does not include edges, but this may change in the future.
-
-See [the documentation for `detect-content`](/docs/latest/cli.html#detect-content) for details.
+This page describes how each built-in detector works, along with its key CLI options and default values.
 
 ### Adaptive Content Detector
 
-The adaptive content detector (`detect-adaptive`) compares the difference in content between adjacent frames similar to `detect-content` but instead using a rolling average of adjacent frame changes. This helps mitigate false detections where there is fast camera motion.
+The adaptive detector (`AdaptiveDetector` / `detect-adaptive`, default in the CLI) scores adjacent frames the same way as `ContentDetector`, then compares each frame's score against a rolling average of nearby frames. This reduces false cuts during fast camera movement.
+
+Default settings: `--threshold 3.0`, `--frame-window 2`, `--min-content-val 15.0`. See [`detect-adaptive`](/docs/latest/cli.html#detect-adaptive) and [`AdaptiveDetector`](/docs/latest/api/detectors.html#adaptivedetector) for details.
+
+### Content-Aware Detector
+
+The content detector (`ContentDetector` / `detect-content`) finds fast cuts between scenes. It converts each frame from [RGB](https://en.wikipedia.org/wiki/RGB_color_space) to [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV), computes the average difference across hue, saturation, and value (brightness) between adjacent frames, and records a cut when that score exceeds `--threshold` (default: `27.0`).
+
+You can also enable edge detection by passing four weights (`delta_hue`, `delta_sat`, `delta_lum`, `delta_edges`). Edge differences are usually larger than color differences, so raise the threshold when enabling edges (for example, `-w 1.0 0.5 1.0 0.2 -t 32`). The default weights are `--weights 1.0 1.0 1.0 0.0` (edges disabled).
+
+See [`detect-content`](/docs/latest/cli.html#detect-content) and [`ContentDetector`](/docs/latest/api/detectors.html#contentdetector) for details.
 
 ### Threshold Detector
 
-The threshold-based scene detector (`detect-threshold`) is how most traditional scene detection methods work (e.g. the `ffmpeg blackframe` filter), by comparing the intensity/brightness of the current frame with a set threshold, and triggering a scene cut/break when this value crosses the threshold. In PySceneDetect, this value is computed by averaging the R, G, and B values for every pixel in the frame, yielding a single floating point number representing the average pixel value (from 0.0 to 255.0).
+The threshold detector (`ThresholdDetector` / `detect-threshold`) finds fades to and from black, similar to the `ffmpeg blackframe` filter. It averages the R, G, and B values of every pixel in each frame to get a brightness score from `0.0` to `255.0`, and records fade events when that score crosses `--threshold` (default: `12.0`).
+
+See [`detect-threshold`](/docs/latest/cli.html#detect-threshold) and [`ThresholdDetector`](/docs/latest/api/detectors.html#thresholddetector) for details.
 
 ### Histogram Detector
 
-The scene change detection algorithm uses histograms of the Y channel in the YCbCr color space to detect scene changes, which helps mitigate issues caused by lighting variations. Each frame of the video is converted from its original color space to the YCbCr color space. The Y channel, which represents luminance, is extracted from the YCbCr color space. This helps in focusing on intensity variations rather than color variations. A histogram of the Y channel is computed using the specified number of bins (`--bins`/`-b`). The histogram is normalized to ensure that it can be consistently compared with histograms from other frames. The normalized histogram of the current frame is compared with the normalized histogram of the previous frame using the correlation method (`cv2.HISTCMP_CORREL`). A scene change is detected if the correlation between the histograms of consecutive frames is below the specified threshold (`--threshold`/`-t`). This indicates a significant change in luminance, suggesting a scene change.
+The histogram detector (`HistogramDetector` / `detect-hist`) finds fast cuts using brightness histograms. It converts each frame to the YUV color space, extracts the Y (luminance) channel, and builds a normalized histogram with `--bins` bins (default: `128`).
+
+Adjacent frame histograms are compared using correlation (`cv2.HISTCMP_CORREL`). When the difference exceeds `--threshold` (default: `0.20`), the detector records a cut. Focusing on luminance makes this detector less sensitive to pure color shifts.
+
+See [`detect-hist`](/docs/latest/cli.html#detect-hist) and [`HistogramDetector`](/docs/latest/api/detectors.html#histogramdetector) for details.
 
 ### Perceptual Hash Detector
 
-The perceptual hash detector (`detect-hash`) calculates a hash for a frame and compares that hash to the previous frame's hash. If the hashes differ by more than the defined threshold, then a scene change is recorded. The hashing algorithm used for this detector is an implementation of `phash` from the [imagehash](https://github.com/JohannesBuchner/imagehash) library. In practice, this detector works similarly to `detect-content` in that it picks up large differences between adjacent frames. One important note is that the hashing algorithm converts the frames to grayscale, so this detector is insensitive to changes in colors if the brightness remains constant. In general, this algorithm is very computationally efficient compared to `detect-content` or `detect-adaptive`, especially if downscaling is not used. See [here](https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html) for an overview of how a perceptual hashing algorithm can be used for detecting similarity (or otherwise) of images and a visual depiction of the algorithm.
+The perceptual hash detector (`HashDetector` / `detect-hash`) computes a perceptual hash (`phash`, based on [imagehash](https://github.com/JohannesBuchner/imagehash)) for each frame and compares adjacent hashes using normalized Hamming distance. When the distance exceeds `--threshold` (default: `0.35`, with `--size 8` and `--lowpass 2`), it records a cut.
+
+Because `phash` converts frames to grayscale first, `HashDetector` ignores color changes when brightness stays constant. It is fast even without downscaling. See [Looks Like It](https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html) for a visual explanation of perceptual hashing.
+
+See [`detect-hash`](/docs/latest/cli.html#detect-hash) and [`HashDetector`](/docs/latest/api/detectors.html#hashdetector) for details.
 
 ## Creating New Detection Algorithms
 
-All scene detection algorithms must inherit from [the base `SceneDetector` class](/docs/latest/api/detector.html). Note that the current `SceneDetector` API is under development and expected to change somewhat before v1.0 is released, so make sure to pin your `scenedetect` dependency to the correct API version (e.g. `scenedetect < 0.6`, `scenedetect < 0.7`, etc.).
+Custom detectors must inherit from [`SceneDetector`](/docs/latest/api/detector.html). Because the `SceneDetector` interface may change before v1.0, pin your dependency to a minor version (for example, `scenedetect~=0.7`).
 
-Creating a new scene detection method can be as simple as implementing the `process_frame` function, and optionally `post_process`:
+To create a detector, implement `process_frame` and, if needed, `post_process`:
 
 ```python
-import typing as ty
 import numpy as np
 from scenedetect import FrameTimecode, SceneDetector
 
 
 class CustomDetector(SceneDetector):
-    """CustomDetector class to implement a scene detection algorithm."""
+    """Example custom scene detector."""
 
     def process_frame(
         self,
         timecode: FrameTimecode,
-        frame_im: np.ndarray,
-    ) -> ty.List[FrameTimecode]:
-        # Return a list of timecodes where we found cuts (either on this frame or previously).
+        frame_img: np.ndarray,
+    ) -> list[FrameTimecode]:
+        # Return a list of cut timecodes found on this frame or earlier.
         return []
 
-    def post_process(self, timecode: FrameTimecode) -> ty.List[FrameTimecode]:
-        # Called after the last frame has been read to handle pending events.
+    def post_process(self, timecode: FrameTimecode) -> list[FrameTimecode]:
+        # Called after the last frame to emit any pending cuts.
         return []
 ```
 
-`process_frame` is called on every frame in the input video, and `post_process` is called after the final frame of the video is passed to `process_frame`. This may be useful for multi-pass algorithms, or detectors which are waiting on some condition but still wish to output an event on the final frame.
+PySceneDetect calls `process_frame(timecode, frame_img)` for every frame in sequence:
 
-For example, a detector may output at most 1 cut for every call to `process_frame`, it may output the entire scene list in `post_process`, or a combination of both. Note that the latter will not work in cases where a live video stream or camera input device is being used. See the [API documentation for the `SceneDetector` class](/docs/latest/api/detector.html#scenedetect.detector.SceneDetector) for details. Alternatively, you can call `help(SceneDetector)` from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the `scenedetect/detectors/` directory (e.g. `threshold_detector.py`, `content_detector.py`).
+- `timecode`: `FrameTimecode` of the current frame.
+- `frame_img`: decoded video frame as a NumPy `ndarray`.
 
-Processing is done by calling the `process_frame(...)` function for all frames in the video, followed by `post_process(...)` (optional) after the final frame. Scene cuts are detected and returned as a list of `FrameTimecode` values in both cases.
+After the final frame, PySceneDetect calls `post_process(timecode)` so multi-pass detectors or detectors waiting on an end condition (such as `ThresholdDetector`) can emit remaining cuts. Both methods return a list of `FrameTimecode` cut locations. Note that detectors that emit cuts only in `post_process` will not report cuts live on continuous streams.
 
-`process_frame(...)` is called for each frame in sequence, passing the following arguments:
-
-- `timecode`: the `FrameTimecode` of the current frame being processed
-- `frame_img`: frame decoded from the video file or stream (accessible as a NumPy `ndarray`)
-
-`post_process(...)` is called **after** the final frame has been processed, to allow for any stored scene cuts to be emitted *if required* (e.g. in the case of the `ThresholdDetector`).
-
-You may also want to look into the implementation of current detectors to understand how frame metrics are saved/loaded to/from a [`StatsManager`](/docs/latest/api/stats_manager.html) for caching and allowing values to be written to a stats file for users to graph and find trends in to tweak detector options. Also see the documentation for the [`SceneManager`](/docs/latest/api/scene_manager.html) for details.
+To save or reuse frame metrics in a CSV stats file, integrate with [`StatsManager`](/docs/latest/api/stats_manager.html). See the built-in detectors in [`scenedetect/detectors/`](https://github.com/Breakthrough/PySceneDetect/tree/main/scenedetect/detectors), [`SceneDetector`](/docs/latest/api/detector.html#scenedetect.detector.SceneDetector), and [`SceneManager`](/docs/latest/api/scene_manager.html) for working examples.

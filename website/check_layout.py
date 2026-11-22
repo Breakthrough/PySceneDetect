@@ -486,6 +486,8 @@ def discover_routes(build_dir: Path, sphinx_dir: Path | None) -> list[str]:
     """Collect all built website HTML routes plus representative Sphinx routes when provided."""
     routes: list[str] = []
     for html_file in sorted(build_dir.rglob("*.html")):
+        if 'http-equiv="refresh"' in html_file.read_text(encoding="utf-8", errors="ignore"):
+            continue
         rel = html_file.relative_to(build_dir).as_posix()
         if rel == "index.html":
             routes.append("/")
@@ -679,7 +681,7 @@ SHOTS: list[tuple[str, str, str, str, Callable[[SimpleWS], None] | None]] = [
     ("desktop-download-dark.png", "/download/", "desktop", "dark", None),
     ("desktop-cli-light.png", "/cli/", "desktop", "light", None),
     ("desktop-benchmarks-dark.png", "/benchmarks/", "desktop", "dark", None),
-    ("desktop-gallery-light.png", "/gallery/", "desktop", "light", None),
+    ("desktop-projects-light.png", "/projects/", "desktop", "light", None),
     ("mobile-home-light.png", "/", "mobile", "light", None),
     ("mobile-home-dark.png", "/", "mobile", "dark", None),
     ("mobile-320-home-dark.png", "/", "mobile-320", "dark", None),
@@ -818,6 +820,27 @@ def run_checks(
     )
     if not tabs_ok:
         failures.append("[INTERACTIVE] Hero quickstart tabs failed on /")
+
+    install_tabs_ok = eval_js(
+        cdp,
+        """(() => {
+          const pip = document.getElementById('install-tab-pip');
+          const uv = document.getElementById('install-tab-uv');
+          const pipx = document.getElementById('install-tab-pipx');
+          if (!pip || !uv || !pipx) return false;
+          uv.click();
+          const uOk = !document.getElementById('install-panel-uv').hidden
+            && Boolean(document.getElementById('install-panel-pip').hidden);
+          pipx.click();
+          const pOk = !document.getElementById('install-panel-pipx').hidden
+            && Boolean(document.getElementById('install-panel-uv').hidden);
+          pip.click();
+          const noOverflow = document.documentElement.scrollWidth <= window.innerWidth + 1;
+          return uOk && pOk && noOverflow;
+        })()""",
+    )
+    if not install_tabs_ok:
+        failures.append("[INTERACTIVE] Install method tabs failed on /")
 
     theme_res = eval_js(
         cdp,

@@ -48,8 +48,8 @@ REPO_URL = "https://github.com/Breakthrough/PySceneDetect"
 PYPI_URL = "https://pypi.org/project/scenedetect/"
 RELEASE_DATE = "November 8, 2026"
 DEFAULT_DESCRIPTION = (
-    "Fast, frame-accurate video scene cut detection and splitting tool in Python "
-    "with command-line interface and API."
+    "Fast, frame-accurate video scene detection and splitting tool in Python "
+    "with a command-line interface and Python API."
 )
 
 PAGES_DIR = WEBSITE_DIR / "pages"
@@ -111,19 +111,11 @@ NAV_GROUPS: list[tuple[str, list[PageSpec]]] = [
         ],
     ),
     (
-        "Support",
+        "Community",
         [
             PageSpec("faq", "FAQ", is_primary=True),
-            PageSpec("contributing", "Bugs & Contributing", "Contributing"),
-            PageSpec("supporting", "Development & Support", "Support"),
-        ],
-    ),
-    (
-        "Resources",
-        [
-            PageSpec("gallery", "Project Gallery"),
-            PageSpec("similar", "Similar Projects"),
-            PageSpec("literature", "Research & Literature", "Literature"),
+            PageSpec("contributing", "Contributing & Support", "Contributing"),
+            PageSpec("projects", "Projects & Research", "Projects"),
             PageSpec("copyright", "License & Copyright", "License"),
         ],
     ),
@@ -131,6 +123,14 @@ NAV_GROUPS: list[tuple[str, list[PageSpec]]] = [
 
 PAGES: list[PageSpec] = [page for _, group in NAV_GROUPS for page in group]
 KNOWN_SLUGS: set[str] = {page.slug for page in PAGES}
+
+# Legacy URLs merged into consolidated pages -> (target path, link label).
+LEGACY_REDIRECTS: dict[str, tuple[str, str]] = {
+    "gallery": ("/projects/#projects-using-pyscenedetect", "Projects & Research"),
+    "literature": ("/projects/#research-and-literature", "Projects & Research"),
+    "similar": ("/projects/#similar-programs", "Projects & Research"),
+    "supporting": ("/contributing/#project-support-and-credits", "Contributing & Support"),
+}
 
 HERO_SNIPPETS: list[tuple[str, str, str, str, str]] = [
     (
@@ -142,7 +142,7 @@ HERO_SNIPPETS: list[tuple[str, str, str, str, str]] = [
             "from scenedetect import (\n"
             "    detect, AdaptiveDetector, split_video_ffmpeg,\n"
             ")\n\n"
-            "# Detect shot boundaries and split with ffmpeg\n"
+            "# Find scene cuts and split the video with ffmpeg\n"
             'scenes = detect("goldeneye.mp4", AdaptiveDetector())\n'
             'split_video_ffmpeg("goldeneye.mp4", scenes)\n'
         ),
@@ -153,9 +153,9 @@ HERO_SNIPPETS: list[tuple[str, str, str, str, str]] = [
         "scenedetect",
         "bash",
         (
-            "# Split footage on every detected shot cut\n"
+            "# Split a video at each detected cut\n"
             "scenedetect -i goldeneye.mp4 split-video\n\n"
-            "# Export CSV cut list, thumbnails, and HTML sheet\n"
+            "# Export a CSV scene list, still frames, and an HTML report\n"
             "scenedetect -i goldeneye.mp4 list-scenes save-images save-html\n"
         ),
     ),
@@ -165,7 +165,7 @@ HERO_SNIPPETS: list[tuple[str, str, str, str, str]] = [
         "ghcr.io",
         "bash",
         (
-            "# Full CLI + ffmpeg + mkvmerge + PyAV in one container\n"
+            "# CLI, ffmpeg, mkvmerge, and PyAV in one container\n"
             'docker run --rm -v "$(pwd):/files" \\\n'
             "    ghcr.io/breakthrough/pyscenedetect \\\n"
             "    -i /files/goldeneye.mp4 split-video -o /files\n"
@@ -263,11 +263,17 @@ def rewrite_internal_href(href: str, base_path: str = "") -> str:
             return f"{base_path}/{suffix}"
         if stem in KNOWN_SLUGS:
             return f"{base_path}/{stem}/{suffix}"
+        if stem in LEGACY_REDIRECTS:
+            target_path, _ = LEGACY_REDIRECTS[stem]
+            return f"{base_path}{target_path}"
 
     slug_candidate = clean_path.strip("/")
     if slug_candidate in KNOWN_SLUGS:
         target = f"{base_path}/" if slug_candidate == "" else f"{base_path}/{slug_candidate}/"
         return f"{target}{suffix}"
+    if slug_candidate in LEGACY_REDIRECTS:
+        target_path, _ = LEGACY_REDIRECTS[slug_candidate]
+        return f"{base_path}{target_path}"
 
     return href
 
@@ -470,8 +476,8 @@ def extract_search_entries(
                 "section": "Overview & Quickstart",
                 "url": f"{base_path}/",
                 "text": (
-                    "Fast, frame-accurate shot and scene cut detection for video. "
-                    "pip install scenedetect AdaptiveDetector ContentDetector HashDetector "
+                    "Fast, frame-accurate scene cut detection for video. Detect fast cuts and "
+                    "fades. pip install scenedetect AdaptiveDetector ContentDetector HashDetector "
                     "HistogramDetector ThresholdDetector split-video ffmpeg mkvmerge Docker."
                 ),
             },
@@ -619,6 +625,32 @@ def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
     )
     (out_dir / "404.html").write_text(rendered_404, encoding="utf-8")
 
+    for old_slug, (target_path, target_label) in LEGACY_REDIRECTS.items():
+        href = f"{base_path}{target_path}"
+        canonical = f"{SITE_URL}{target_path}"
+        safe_href = html.escape(href, quote=True)
+        safe_canonical = html.escape(canonical, quote=True)
+        safe_label = html.escape(target_label)
+        stub = (
+            "<!DOCTYPE html>\n"
+            '<html lang="en">\n'
+            "<head>\n"
+            '  <meta charset="utf-8">\n'
+            "  <title>Redirecting | PySceneDetect</title>\n"
+            '  <meta name="robots" content="noindex">\n'
+            f'  <link rel="canonical" href="{safe_canonical}">\n'
+            f'  <meta http-equiv="refresh" content="0; url={safe_href}">\n'
+            "</head>\n"
+            "<body>\n"
+            "  <h1>Redirecting...</h1>\n"
+            f'  <p>This page moved to <a href="{safe_href}">{safe_label}</a>.</p>\n'
+            "</body>\n"
+            "</html>\n"
+        )
+        stub_file = out_dir / old_slug / "index.html"
+        stub_file.parent.mkdir(parents=True, exist_ok=True)
+        stub_file.write_text(stub, encoding="utf-8")
+
     (out_dir / "search_index.json").write_text(
         json.dumps(search_index, ensure_ascii=True, separators=(",", ":")),
         encoding="utf-8",
@@ -703,7 +735,9 @@ def verify_build(base_path: str = "", build_dir: Path = BUILD_DIR) -> list[str]:
     """Strictly validate routes, internal links, #fragment anchors, and asset paths."""
     base_path = normalize_base_path(base_path)
     errors: list[str] = []
-    required_files = [build_dir / spec.out_rel_path for spec in PAGES] + [
+    required_files = [
+        *(build_dir / spec.out_rel_path for spec in PAGES),
+        *(build_dir / slug / "index.html" for slug in LEGACY_REDIRECTS),
         build_dir / "404.html",
         build_dir / "assets" / "site.css",
         build_dir / "assets" / "site.js",

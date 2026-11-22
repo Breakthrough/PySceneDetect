@@ -5,9 +5,9 @@
 Video Backends
 ***********************************************************************
 
-PySceneDetect supports multiple backends for video input. Some can be configured by using :ref:`a config file <scenedetect_cli-config_file>`. Installed backends can be verified by running ``scenedetect version``.
+PySceneDetect supports modular video input backends. You can configure backend options in a :ref:`config file <scenedetect_cli-config_file>`. Run ``scenedetect version`` to see which backends are installed.
 
-Note that the `scenedetect` command output is generated as a post-processing step, after scene detection completes. Most commands require the ability for the input to be replayed, and preferably it should also support seeking. Network streams and other input types are supported with certain backends, however integration with live streams requires use of the Python API.
+The ``scenedetect`` command generates outputs after scene detection finishes. Most output commands require an input that can be replayed, and preferably seeked. Some backends support network streams and other input types, but live streams require the Python API.
 
 
 .. _cli-backend-opencv:
@@ -19,13 +19,13 @@ OpenCV
 .. seealso:: Python API: :class:`~scenedetect.backends.opencv.VideoStreamCv2` | Config file: :ref:`[backend-opencv] <config-backend-opencv>`
 
 *[Default]*
-The `OpenCV <https://opencv.org/>`_ backend (usually `opencv-python <https://pypi.org/project/opencv-python/>`_) uses OpenCV's ``VideoCapture`` for video input. Can be used by specifying ``-b opencv`` via command line, or setting ``backend = opencv`` under the ``[global]`` section of your :ref:`config file <scenedetect_cli-config_file>`.
+The `OpenCV <https://opencv.org/>`_ backend (usually `opencv-python <https://pypi.org/project/opencv-python/>`_) uses OpenCV's ``VideoCapture`` to decode video. Select it with ``-b opencv`` on the command line, or set ``backend = opencv`` under ``[global]`` in your :ref:`config file <scenedetect_cli-config_file>`.
 
-It is mostly reliable and fast, although can occasionally run into issues processing videos with multiple audio tracks or small amounts of frame corruption. You can use a custom version of the ``cv2`` package, or install either the `opencv-python` or `opencv-python-headless` packages from `pip`.
+OpenCV is fast and reliable for most files, though it can occasionally fail on videos with multiple audio tracks or minor frame corruption. You can use ``opencv-python``, ``opencv-python-headless``, or a custom ``cv2`` build.
 
-The OpenCV backend also supports image sequences as inputs (e.g. ``frame%02d.jpg`` if you want to load frame001.jpg, frame002.jpg, frame003.jpg...). Make sure to specify the framerate manually (``-f``/``--frame-rate``) to ensure accurate timing calculations.
+The OpenCV backend also supports image sequences (for example, ``frame%02d.jpg`` to load ``frame001.jpg``, ``frame002.jpg``, ``frame003.jpg``, and so on). Set the frame rate manually with ``-f`` / ``--frame-rate`` so timecodes are accurate.
 
-Variable framerate (VFR) video is supported. Scene detection uses PTS-derived timestamps from ``CAP_PROP_POS_MSEC`` for accurate timecodes. Seeking compensates for OpenCV's average-fps-based internal seek approximation, so output timecodes remain accurate across the full video.
+Variable frame rate (VFR) video is supported. Scene detection uses PTS-derived timestamps from ``CAP_PROP_POS_MSEC`` for accurate timecodes. Seeking compensates for OpenCV's average-fps seek approximation so output timecodes stay accurate across the full video.
 
 
 .. _cli-backend-pyav:
@@ -36,11 +36,11 @@ PyAV
 
 .. seealso:: Python API: :class:`~scenedetect.backends.pyav.VideoStreamAv` | Config file: :ref:`[backend-pyav] <config-backend-pyav>`
 
-The `PyAV <https://github.com/PyAV-Org/PyAV>`_ backend (`av package <https://pypi.org/project/av/>`_) is a more robust backend that handles multiple audio tracks and frame decode errors gracefully.
+The `PyAV <https://github.com/PyAV-Org/PyAV>`_ backend (`av package <https://pypi.org/project/av/>`_) handles multiple audio tracks and frame decode errors more reliably than OpenCV.
 
-Variable framerate (VFR) video is fully supported. PyAV uses native PTS timestamps directly from the container, giving the most accurate timecodes for VFR content.
+Variable frame rate (VFR) video is fully supported. PyAV reads native PTS timestamps directly from the video container, giving the most accurate timecodes for VFR content.
 
-This backend can be used by specifying ``-b pyav`` via command line, or setting ``backend = pyav`` under the ``[global]`` section of your :ref:`config file <scenedetect_cli-config_file>`.
+Select this backend with ``-b pyav`` on the command line, or set ``backend = pyav`` under ``[global]`` in your :ref:`config file <scenedetect_cli-config_file>`.
 
 
 .. _cli-backend-moviepy:
@@ -51,12 +51,12 @@ MoviePy
 
 .. seealso:: Python API: :class:`~scenedetect.backends.moviepy.VideoStreamMoviePy`
 
-MoviePy launches ffmpeg as a subprocess, and can be used with various types of inputs. If the input supports seeking it should work fine with most operations, for example, image sequences or AviSynth scripts.
+MoviePy runs ``ffmpeg`` as a subprocess and supports many input types. Inputs that support seeking, such as image sequences or AviSynth scripts, work with most commands.
 
 .. warning::
 
-    The MoviePy backend is still under development and is not included with current Windows distribution. To enable MoviePy support, you must install PySceneDetect using `python` and `pip`.
+    The MoviePy backend is experimental and is not included in the Windows installer. To use it, install PySceneDetect with ``pip`` (``pip install "scenedetect[moviepy]"``).
 
-    Variable framerate (VFR) video is **not supported**. MoviePy assumes a fixed framerate, so timecodes for VFR content will be inaccurate. Use the PyAV or OpenCV backend instead.
+    Variable frame rate (VFR) video is **not supported**. MoviePy assumes a constant frame rate, so timecodes for VFR content will be inaccurate. Use the PyAV or OpenCV backend instead.
 
-This backend can be used by specifying ``-b moviepy`` via command line, or setting ``backend = moviepy`` under the ``[global]`` section of your :ref:`config file <scenedetect_cli-config_file>`.
+Select this backend with ``-b moviepy`` on the command line, or set ``backend = moviepy`` under ``[global]`` in your :ref:`config file <scenedetect_cli-config_file>`.

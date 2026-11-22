@@ -4,63 +4,67 @@
 
 !!! note "Content-Aware Scene Detection"
 
-    Detects breaks in-between *content*, not only when the video fades to black (although a threshold mode is available as well for those cases).
+    PySceneDetect finds cuts between scenes by comparing frame content, not only fades to black. A threshold mode is also included for detecting fades.
 
-!!! important "Compatible With Many External Tools"
+!!! important "Standard Export Formats"
 
-    The detected scene boundaries/cuts can be exported in a variety of formats, with the default type (comma-separated `HH:MM:SS.nnn` values) being ready to copy-and-paste directly into other tools (such as `ffmpeg`, `mkvmerge`, etc.) for splitting and/or re-encoding the video.
+    Export detected scene cuts in formats that work directly with video editors and command-line tools. The default comma-separated `HH:MM:SS.nnn` format can be pasted directly into `ffmpeg` or `mkvmerge`.
 
-!!! note "Statistical Video Analysis"
+!!! note "Per-Frame Video Analysis"
 
-    Can output a spreadsheet-compatible file for analyzing trends in a particular video file, to determine the optimal threshold values to use with specific scene detection methods/algorithms.
+    Export frame-by-frame metrics to a CSV stats file so you can plot trends in a spreadsheet and pick the best threshold for your video.
 
-!!! important "Extendible and Embeddable"
+!!! important "Modular Python API"
 
-    Written in Python, and designed with an easy-to-use and extendable API, PySceneDetect is ideal for embedding into other programs, or to implement custom methods/algorithms of scene detection for specific applications (e.g. analyzing security camera footage).
+    PySceneDetect is written in Python with an extensible API. You can embed it in your own applications or write custom detection methods for specialized video workflows.
 
 ------------------------------------------------------------------------
 
 ## Key Capabilities
 
-- exports timecodes in standard format (`HH:MM:SS.nnn`), comma-separated for easy copy-and-paste into external tools and analysis with spreadsheet software
-- statistics/analysis mode to export frame-by-frame video metrics via the `-s [FILE]`/`--stats [FILE]` argument (e.g. `--stats metrics.csv`)
-- output-suppression (quiet) mode for better automation with external scripts/programs (`-q`/`--quiet`)
-- save an image of the first and last frame of each detected scene via the `save-images` command
-- split the input video automatically if `ffmpeg` or `mkvmerge` is available via the `split-video` command
+- Export timecodes in comma-separated `HH:MM:SS.nnn` format for external tools and spreadsheets.
+- Save frame-by-frame video metrics to a CSV stats file with `-s FILE` / `--stats FILE` (for example, `--stats metrics.csv`).
+- Hide terminal output with `-q` / `--quiet` when automating scripts.
+- Save still frames from each scene with the `save-images` command.
+- Split the input video into separate scene clips with `split-video` using `ffmpeg` or `mkvmerge`.
 
 ## Output Formats
 
-- **Chapters**: `save-chapters` command (save as FFmetadata chapters, which can be added to a video with ffmpeg)
-- **EDL**: `save-edl` command (save as edit decision list in CMX 3600 format, compatible with most editors)
-- **HTML**: `save-html` command (save HTML table that can be viewed with browser)
-- **OTIO**: `save-otio` command (save as [OpenTimelineIO](https://github.com/AcademySoftwareFoundation/OpenTimelineIO) file)
-- **QP**: `save-qp` command (can be used with x264 `--qpfile`)
+- **CSV** (`list-scenes`): save a scene list table and comma-separated cut times (`HH:MM:SS.nnn`).
+- **Chapters** (`save-chapters`): save FFmetadata chapters to add to a video with `ffmpeg`.
+- **EDL** (`save-edl`): save a CMX 3600 edit decision list for most video editors.
+- **Final Cut Pro XML** (`save-fcp`): save a Final Cut Pro X (FCPXML) or Final Cut Pro 7 (xmeml) timeline.
+- **HTML** (`save-html`): save an HTML scene table to view in a web browser, with optional preview images.
+- **Images** (`save-images`): save still frames from each scene as JPEG, PNG, or WebP files.
+- **Keyframes** (`save-keyframes`): save cut frame numbers in keyframe format v1 (for example, for Aegisub).
+- **OpenTimelineIO** (`save-otio`): save an [OpenTimelineIO](https://github.com/AcademySoftwareFoundation/OpenTimelineIO) timeline file.
+- **QP** (`save-qp`): save cut frame numbers for use with x264 and x265 `--qpfile`.
+- **Video Clips** (`split-video`): split the input video into one file per scene with `ffmpeg` or `mkvmerge`.
 
 ## Detection Methods
 
-PySceneDetect implements a variety of different detection algorithms which can be used independently or combined depending on the source material being analyzed.
+PySceneDetect includes five detection methods. You can run them alone or combine more than one for the same video:
 
-- **adaptive content scene detection** (`detect-adaptive`): uses rolling average of differences in HSL colorspace combined with thresholding to detect shot changes (fast cut)
-- **content-aware scene detection** (`detect-content`): uses differences in HSL colorspace combined with filtering to detect shot changes (fast cut)
-- **content-aware scene detection** (`detect-hash`): uses perceptual hashing to determine differences between frames to find shot changes (fast cut)
-- **content-aware scene detection** (`detect-hist`): uses differences in histograms of Y channel of frames after conversion to YUV (fast cut)
-- **threshold scene detection** (`detect-threshold`): uses average frame intensity (brightness) to detect slow transitions (fade in/out)
+- **Adaptive detector** (`detect-adaptive`, default): compares each frame's HSV content score against a rolling average of nearby frames to find fast cuts while reducing false cuts during camera motion.
+- **Content detector** (`detect-content`): compares differences in the HSV color space (and optional edges) between adjacent frames to find fast cuts.
+- **Perceptual hash detector** (`detect-hash`): computes a perceptual hash for each frame and compares adjacent hashes to find fast cuts.
+- **Histogram detector** (`detect-hist`): compares Y-channel (brightness) histograms in the YUV color space between adjacent frames to find fast cuts.
+- **Threshold detector** (`detect-threshold`): measures average RGB frame brightness to find fades to and from black.
 
-By default, detection methods are tuned to provide high performance during processing, while maintaining reasonable accuracy. Each detection method is configurable, and different parameters can be changed for specific use cases. See [the documentation](docs.md) for details, and [the benchmarks page](benchmarks.md) for how each detector scores on public shot-boundary-detection datasets.
+Each detection method uses default settings tuned for both speed and accuracy. You can adjust every parameter from the command line, a config file, or Python. See the [Reference Manual](/docs/latest/) for option details and the [Benchmarks](benchmarks.md) page for accuracy scores across public datasets.
 
 ------------------------------------------------------------------------
 
 ## Version Roadmap
 
-Future version roadmaps are now [tracked as milestones (link)](https://github.com/Breakthrough/PySceneDetect/milestones). Specific issues/features that are queued up for the very next release will have [the `backlog` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22), and issues/features being worked on will have [the `status: in progress` tag](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22). Also note that bug reports as well as additional feature requests can be submitted via [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues); read [the Bug Reports and Contributing page](contributing.md) for details.
+Planned releases are tracked in [GitHub milestones](https://github.com/Breakthrough/PySceneDetect/milestones). Items queued for the next release use [the `backlog` label](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+backlog%22), and active work uses [the `status: in progress` label](https://github.com/Breakthrough/PySceneDetect/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+in+progress%22). You can submit bug reports and feature requests on [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues); see [Contributing & Support](contributing.md) for guidelines.
 
-### Planned Features
+### Planned features
 
-The following features are under consideration for future releases. Any contributions towards completing these features are most welcome (pull requests may be accepted via Github).
+The following features are under consideration for future releases. Pull requests on GitHub are welcome:
 
-- graphical interface (GUI)
-- automatic threshold detection for the current scene detection methods (or just output message indicating "Predicted Threshold: X")
-- suppression of short-length flashes/bursts of light [#35](https://github.com/Breakthrough/PySceneDetect/issues/35)
-- histogram-based detection algorithm in HSV/HSL color space [#53](https://github.com/Breakthrough/PySceneDetect/issues/53)
-- [perceptual hash](https://en.wikipedia.org/wiki/Perceptual_hashing) based scene detection ([prototype by @wjs018 in PR#290](https://github.com/Breakthrough/PySceneDetect/pull/290))
-- adaptive bias for fade in/out interpolation
+- Graphical user interface (GUI).
+- Automatic threshold selection for scene detectors.
+- Better suppression of short bright flashes ([#35](https://github.com/Breakthrough/PySceneDetect/issues/35)).
+- Improved dissolve detection.
+- Adaptive bias for fade-in and fade-out detection.
