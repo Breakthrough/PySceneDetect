@@ -201,19 +201,19 @@ def detect(
         ValueError: `start_time` or `end_time` are incorrectly formatted.
         TypeError: `start_time` or `end_time` are invalid types.
     """
-    video = open_video(video_path, backend=backend)
-    if start_time is not None:
-        video.seek(FrameTimecode(start_time, video.frame_rate))
-    end_timecode = FrameTimecode(end_time, video.frame_rate) if end_time is not None else None
-    # To reduce memory consumption when not required, we only add a StatsManager if we
-    # need to save frame metrics to disk.
-    scene_manager = SceneManager(StatsManager() if stats_file_path else None)
-    scene_manager.add_detector(detector)
-    scene_manager.detect_scenes(
-        video=video,
-        show_progress=show_progress,
-        end_time=end_timecode,
-    )
+    with open_video(video_path, backend=backend) as video:
+        if start_time is not None:
+            video.seek(FrameTimecode(start_time, video.frame_rate))
+        end_timecode = FrameTimecode(end_time, video.frame_rate) if end_time is not None else None
+        # To reduce memory consumption when not required, we only add a StatsManager if we
+        # need to save frame metrics to disk.
+        scene_manager = SceneManager(StatsManager() if stats_file_path else None)
+        scene_manager.add_detector(detector)
+        scene_manager.detect_scenes(
+            video=video,
+            show_progress=show_progress,
+            end_time=end_timecode,
+        )
     if scene_manager.stats_manager is not None and stats_file_path is not None:
         scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)
     return scene_manager.get_scene_list(start_in_scene=start_in_scene)
