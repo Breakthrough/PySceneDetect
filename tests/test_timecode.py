@@ -21,7 +21,9 @@ or string HH:MM:SS[.nnn]. timecode format.
 """
 
 # Third-Party Library Imports
+import math
 import numbers
+import random
 from fractions import Fraction
 
 import pytest
@@ -370,6 +372,91 @@ def test_precision():
     assert FrameTimecode(990, fps).get_timecode(precision=1, use_rounding=False) == "00:00:00.9"
     assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=True) == "00:00:01"
     assert FrameTimecode(990, fps).get_timecode(precision=0, use_rounding=False) == "00:00:00"
+
+
+def test_precision_truncation():
+    """Truncating must drop the extra digits, never round up into the last digit that is kept."""
+    # 1.99996667s, e.g. a frame position from a 90 kHz time base.
+    tc = FrameTimecode(Timecode(pts=179997, time_base=Fraction(1, 90000)), Fraction(30000, 1001))
+    assert tc.get_timecode(precision=3, use_rounding=False) == "00:00:01.999"
+    assert tc.get_timecode(precision=2, use_rounding=False) == "00:00:01.99"
+    assert tc.get_timecode(precision=0, use_rounding=False) == "00:00:01"
+    assert tc.get_timecode(precision=3, use_rounding=True) == "00:00:02.000"
+
+    # Frame 911 is at 37.996s.
+    tc = FrameTimecode(911, Fraction(24000, 1001))
+    assert tc.get_timecode(precision=1, use_rounding=False) == "00:00:37.9"
+    assert tc.get_timecode(precision=1, use_rounding=True) == "00:00:38.0"
+
+    tc = FrameTimecode(59.99996, 24.0)
+    assert tc.get_timecode(use_rounding=False, nearest_frame=False) == "00:00:59.999"
+
+    # Float error must not truncate exact values down, e.g. 504 / (24000 / 1001) == 21.021.
+    tc = FrameTimecode(504, Fraction(24000, 1001))
+    assert tc.get_timecode(precision=3, use_rounding=False) == "00:00:21.021"
+    tc = FrameTimecode(61.29, 24.0)
+    assert tc.get_timecode(precision=2, use_rounding=False, nearest_frame=False) == "00:01:01.29"
+
+
+def test_precision_truncation_matches_exact_arithmetic():
+    """Truncation must give the exact answer at any precision, including large timestamps."""
+    # Float error is larger for big values at high precision: 8192.826s at 1/1000 time base.
+    tc = FrameTimecode(Timecode(pts=8192826, time_base=Fraction(1, 1000)), Fraction(30000, 1001))
+    assert tc.get_timecode(precision=3, use_rounding=False) == "02:16:32.826"
+    assert tc.get_timecode(precision=6, use_rounding=False) == "02:16:32.826000"
+
+    def exact(secs: Fraction, precision: int) -> str:
+        units = math.floor(secs * 10**precision)
+        secs, fraction = divmod(units, 10**precision)
+        hrs, secs = divmod(secs, 3600)
+        mins, secs = divmod(secs, 60)
+        return f"{hrs:02d}:{mins:02d}:{secs:02d}" + (
+            f".{fraction:0{precision}d}" if precision else ""
+        )
+
+    rng = random.Random(0)
+    precisions = (0, 1, 3, 6)
+    for time_base in (
+        Fraction(1, 1000),
+        Fraction(1, 90000),
+        Fraction(1, 24000),
+        Fraction(1001, 30000),
+    ):
+        for _ in range(500):
+            pts = rng.randrange(0, 400_000_000)
+            tc = FrameTimecode(Timecode(pts=pts, time_base=time_base), Fraction(30000, 1001))
+            for precision in precisions:
+                assert tc.get_timecode(precision=precision, use_rounding=False) == exact(
+                    pts * time_base, precision
+                ), (pts, time_base, precision)
+
+    # Frame number timecodes.
+    for fps in (Fraction(24000, 1001), Fraction(30000, 1001), Fraction(25)):
+        for _ in range(500):
+            frame = rng.randrange(0, 10_000_000)
+            tc = FrameTimecode(frame, fps)
+            for precision in precisions:
+                assert tc.get_timecode(precision=precision, use_rounding=False) == exact(
+                    Fraction(frame) / fps, precision
+                ), (frame, fps, precision)
+
+
+def test_negative_time_is_shown_as_zero():
+    """A negative PTS gives a zero timecode, whether rounding or truncating."""
+    tc = FrameTimecode(Timecode(pts=-1, time_base=Fraction(1, 1000)), Fraction(30000, 1001))
+    assert tc.get_timecode(use_rounding=False) == "00:00:00.000"
+    assert tc.get_timecode(use_rounding=True) == "00:00:00.000"
+    tc = FrameTimecode(Timecode(pts=-4_000_000, time_base=Fraction(1, 1000)), Fraction(30000, 1001))
+    assert tc.get_timecode(use_rounding=False) == "00:00:00.000"
+    assert tc.get_timecode(use_rounding=True) == "00:00:00.000"
+
+
+@pytest.mark.parametrize("use_rounding", [True, False])
+def test_negative_precision_is_rejected(use_rounding: bool):
+    """A negative precision gives a clear error, whether rounding or truncating."""
+    tc = FrameTimecode(10, 24.0)
+    with pytest.raises(ValueError, match="precision must not be negative"):
+        tc.get_timecode(precision=-1, use_rounding=use_rounding)
 
 
 @pytest.mark.parametrize(

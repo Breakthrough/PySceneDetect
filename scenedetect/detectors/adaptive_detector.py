@@ -58,7 +58,8 @@ class AdaptiveDetector(ContentDetector):
                 calculates frame score based on `weights`/`luma_only`/`kernel_size`.
             weights: Weight to place on each component when calculating frame score
                 (`content_val` in a statsfile, the value `threshold` is compared against).
-                If omitted, the default ContentDetector weights are used.
+                If omitted, the default ContentDetector weights are used. Each weight must be
+                finite and non-negative, and at least one must be non-zero.
             luma_only: If True, only considers changes in the luminance channel of the video.
                 Equivalent to specifying `weights` as
                 :attr:`~scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS`.

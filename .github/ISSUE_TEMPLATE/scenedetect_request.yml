@@ -1,5 +1,6 @@
 name: Feature or Enhancement
 description: Submit an idea or feature request to make PySceneDetect better.
+type: Feature
 body:
   - type: textarea
     id: problem

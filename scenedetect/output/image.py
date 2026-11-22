@@ -70,18 +70,21 @@ def _generate_timecode_list(
     scene_list: SceneList,
     num_images_per_scene: list[int],
     frame_margin: TimecodeLike,
+    frame_rate: Fraction,
 ) -> list[list[Timecode]]:
-    """Generate per-scene image timecodes using PTS-accurate seconds-based timing.
+    """Generate per-scene image targets using timestamps and frame-rate estimates.
 
     `num_images_per_scene` is the number of images to generate for each scene in `scene_list`.
     `frame_margin` accepts any :data:`TimecodeLike` value (e.g. ``int`` frames, ``float``
     seconds, or ``str`` such as ``"0.1s"``).
-    Frame-count margins currently use zero padding pending the VFR selection policy.
+    Frame-count margins and the final-frame clamp use ``frame_rate`` and are
+    approximate for VFR sources.
     """
     # TODO: Define VFR sampling and padding semantics. Handle any frame-count
     # margins during extraction without FPS conversion.
     parsed_margin = parse_frame_or_time(frame_margin)
-    margin_secs = parsed_margin if isinstance(parsed_margin, Fraction) else 0
+    margin_secs = parsed_margin / frame_rate if isinstance(parsed_margin, int) else parsed_margin
+    frame_secs = 1 / frame_rate
     result = []
     for (start, end), num_images in zip(scene_list, num_images_per_scene, strict=True):
         duration_secs = (end - start).elapsed
@@ -89,6 +92,8 @@ def _generate_timecode_list(
             result.append([start.timecode] * num_images)
             continue
         segment_secs = duration_secs / num_images
+        # Estimate the final frame time using the frame rate, without going before scene start.
+        last_frame_secs = max(end.timecode.seconds - frame_secs, start.timecode.seconds)
         timecodes = []
         for j in range(num_images):
             seg_start = start.timecode.seconds + j * segment_secs
@@ -98,9 +103,10 @@ def _generate_timecode_list(
             elif j == 0:
                 t = min(seg_start + margin_secs, seg_end)
             elif j == num_images - 1:
-                t = max(seg_end - margin_secs, seg_start)
+                t = max(last_frame_secs - margin_secs, seg_start)
             else:
                 t = (seg_start + seg_end) / 2
+            t = min(t, last_frame_secs)
             timecodes.append(Timecode(pts=t.numerator, time_base=Fraction(1, t.denominator)))
         result.append(timecodes)
     return result
@@ -175,7 +181,7 @@ class _ImageExtractor:
                 selecting which frames to extract. Accepts an int (frames), float (seconds),
                 or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0, but some video files
                 may then fail to extract the very last frame.
-                Frame-count margins currently use zero padding pending the VFR selection policy.
+                Frame-count margins use the video's frame rate and are approximate for VFR.
             image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
             encoder_param: Quality/compression efficiency, based on type of image:
                 'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
@@ -229,7 +235,7 @@ class _ImageExtractor:
             output_dir: Directory to write files to.
             show_progress: If `true` and tqdm is available, shows a progress bar.
         """
-        timecode_list = self.generate_timecode_list(scene_list)
+        timecode_list = self.generate_timecode_list(scene_list, video.frame_rate)
         total_images = sum(len(timecodes) for timecodes in timecode_list)
         max_scene_images = max(len(timecodes) for timecodes in timecode_list)
 
@@ -388,7 +394,9 @@ class _ImageExtractor:
             if progress_bar is not None:
                 progress_bar.update(1)
 
-    def generate_timecode_list(self, scene_list: SceneList) -> list[list[Timecode]]:
+    def generate_timecode_list(
+        self, scene_list: SceneList, frame_rate: Fraction
+    ) -> list[list[Timecode]]:
         """Generates a list of timecodes for each scene in `scene_list` based on the current config
         parameters.
 
@@ -397,7 +405,9 @@ class _ImageExtractor:
         num_images_per_scene = _get_num_images(
             scene_list, self._num_images, self._interval, self._min_images, self._max_images
         )
-        return _generate_timecode_list(scene_list, num_images_per_scene, self._frame_margin)
+        return _generate_timecode_list(
+            scene_list, num_images_per_scene, self._frame_margin, frame_rate
+        )
 
     def resize_image(
         self,
@@ -442,7 +452,7 @@ def save_images(
             selecting which frames to extract. Accepts an int (frames), float (seconds),
             or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0, but some video files
             may then fail to extract the very last frame.
-            Frame-count margins currently use zero padding pending the VFR selection policy.
+            Frame-count margins use the video's frame rate and are approximate for VFR.
         image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
         encoder_param: Quality/compression efficiency, based on type of image:
             'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
@@ -537,6 +547,7 @@ def save_images(
         scene_list,
         _get_num_images(scene_list, num_images, interval, min_images, max_images),
         frame_margin,
+        video.frame_rate,
     )
     total_images = sum(len(timecodes) for timecodes in timecode_list)
     max_scene_images = max(len(timecodes) for timecodes in timecode_list)
