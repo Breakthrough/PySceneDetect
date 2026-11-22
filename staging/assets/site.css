@@ -885,23 +885,84 @@
     margin-block-end: 1.4rem;
   }
 
-  .install-strip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
+  .install-box {
+    display: inline-grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-inline-size: min(100%, 22rem);
     max-inline-size: 100%;
-    padding-block: 0.5rem;
-    padding-inline: 0.85rem;
-    background: var(--code-bg);
     border: 1px solid var(--border);
     border-radius: 0.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
+    background: var(--code-bg);
+    overflow: clip;
     margin-block-end: 1.35rem;
+  }
+
+  .install-tabs {
+    display: flex;
     overflow-x: auto;
+    gap: 0.15rem;
+    padding-inline: 0.5rem;
+    background: var(--surface);
+    border-block-end: 1px solid var(--border);
+  }
+
+  .install-tab {
+    position: relative;
+    flex: none;
+    min-inline-size: 2.25rem;
+    min-block-size: 2rem;
+    padding-block: 0.3rem;
+    padding-inline: 0.6rem;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .install-tab:hover {
+    color: var(--fg);
+  }
+
+  .install-tab[aria-selected="true"] {
+    color: var(--fg);
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      border-block-end: 2px solid var(--brand);
+    }
+  }
+
+  .install-panels {
+    display: grid;
+  }
+
+  .install-panel {
+    grid-area: 1 / 1;
+    min-inline-size: 0;
+  }
+
+  .install-strip {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    max-inline-size: 100%;
+    padding-block: 0.5rem;
+    padding-inline: 0.8rem 0.6rem;
+    background: var(--code-bg);
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
   }
 
   .install-strip code {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
     white-space: nowrap;
   }
 
@@ -1053,6 +1114,15 @@
     }
   }
 
+  .code-panels {
+    display: grid;
+  }
+
+  .code-panel {
+    grid-area: 1 / 1;
+    min-inline-size: 0;
+  }
+
   .code-window .codehilite {
     margin: 0;
     border: 0;
@@ -1135,15 +1205,40 @@
 
   .feature-meta {
     margin-block-start: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.1rem 0.45rem;
     font-family: var(--font-mono);
     font-size: 0.78rem;
     font-weight: 500;
+  }
+
+  .feature-meta a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.5rem;
     color: var(--brand);
     text-decoration: none;
   }
 
-  .feature-meta:hover {
+  .feature-meta a:hover {
     text-decoration: underline;
+  }
+
+  .feature-meta-sep {
+    color: var(--muted);
+    user-select: none;
+  }
+
+  @media (pointer: coarse) {
+    .install-tab {
+      min-block-size: 2.5rem;
+    }
+
+    .feature-meta a {
+      min-block-size: 2.25rem;
+    }
   }
 
   /* Home lower prose & quick navigation grid */

@@ -226,23 +226,7 @@
     <main id="main-content" class="docs-main" tabindex="-1">
       <article class="prose">
         <h1 id="download">Download</h1>
-<p>PySceneDetect is free, open-source software released under the BSD 3-Clause License (see <a href="/staging/copyright/">License &amp; Copyright</a>). It requires Python 3.10 or newer when installed with <code>pip</code>.</p>
-<p>If you have trouble running PySceneDetect, verify that you have the packages listed under <a href="#dependencies">Dependencies</a>.</p>
-<h2 id="install-via-pip">Install via pip</h2>
-<p>Standard install (recommended):</p>
-<div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>scenedetect
-</code></pre></div>
-
-<p>Headless install (for servers and containers without GUI libraries):</p>
-<div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>scenedetect-headless
-</code></pre></div>
-
-<p>PySceneDetect is published on PyPI as two packages:</p>
-<ul>
-<li><a href="https://pypi.org/project/scenedetect/"><code>scenedetect</code></a>: full package with CLI, depends on <code>opencv-python</code>.</li>
-<li><a href="https://pypi.org/project/scenedetect-headless/"><code>scenedetect-headless</code></a>: full package with CLI, depends on <code>opencv-python-headless</code>.</li>
-</ul>
-<p>Both packages provide the same <code>scenedetect</code> Python module. Install only one of them.</p>
+<p>PySceneDetect is free, open-source software released under the BSD 3-Clause License (see <a href="/staging/copyright/">License &amp; Copyright</a>). If you have trouble running PySceneDetect, verify that you have the packages listed under <a href="#dependencies">Dependencies</a>.</p>
 <h2 id="windows-build-64-bit-only">Windows Build (64-bit Only)</h2>
 <div class="download-card">
   <div class="download-card-header">
@@ -272,6 +256,33 @@
 </div>
 
 <p>The <code>.msi</code> installer is recommended for most Windows users. Both Windows builds bundle <code>ffmpeg</code> and <code>mkvmerge</code>. After installing, see the <a href="/staging/cli/">Command-Line Guide</a> to get started.</p>
+<h2 id="install-with-pip-uv-or-pipx">Install with pip, uv, or pipx</h2>
+<p>Installing from PyPI requires Python 3.10 or newer.</p>
+<p>Standard install with <code>pip</code> (CLI and Python API):</p>
+<div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>scenedetect
+</code></pre></div>
+
+<p>Headless install (for servers and containers without GUI libraries):</p>
+<div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>scenedetect-headless
+</code></pre></div>
+
+<p>Isolated CLI install with <code>uv</code> or <code>pipx</code>:</p>
+<div class="codehilite"><pre tabindex="0"><code><span class="c1"># uv (isolated CLI tool)</span>
+uv<span class="w"> </span>tool<span class="w"> </span>install<span class="w"> </span>scenedetect
+
+<span class="c1"># uv (add to a Python project)</span>
+uv<span class="w"> </span>add<span class="w"> </span>scenedetect
+
+<span class="c1"># pipx (isolated CLI tool)</span>
+pipx<span class="w"> </span>install<span class="w"> </span>scenedetect
+</code></pre></div>
+
+<p>PySceneDetect is published on PyPI as two packages:</p>
+<ul>
+<li><a href="https://pypi.org/project/scenedetect/"><code>scenedetect</code></a>: full package with CLI, depends on <code>opencv-python</code>.</li>
+<li><a href="https://pypi.org/project/scenedetect-headless/"><code>scenedetect-headless</code></a>: full package with CLI, depends on <code>opencv-python-headless</code>.</li>
+</ul>
+<p>Both packages provide the same <code>scenedetect</code> Python module. Install only one of them.</p>
 <h2 id="docker-image">Docker Image</h2>
 <p>Official container images are published on GitHub Container Registry at <a href="https://github.com/Breakthrough/PySceneDetect/pkgs/container/pyscenedetect">ghcr.io/breakthrough/pyscenedetect</a>. Each image includes the CLI, all optional video backends (PyAV and MoviePy), <code>ffmpeg</code>, and <code>mkvmerge</code>:</p>
 <div class="codehilite"><pre tabindex="0"><code>docker<span class="w"> </span>pull<span class="w"> </span>ghcr.io/breakthrough/pyscenedetect
@@ -342,10 +353,10 @@ docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </
         <div class="toc-title">On this page</div>
         <ul class="toc-list" role="list">
           <li>
-            <a href="#install-via-pip">Install via pip</a>
+            <a href="#windows-build-64-bit-only">Windows Build (64-bit Only)</a>
           </li>
           <li>
-            <a href="#windows-build-64-bit-only">Windows Build (64-bit Only)</a>
+            <a href="#install-with-pip-uv-or-pipx">Install with pip, uv, or pipx</a>
           </li>
           <li>
             <a href="#docker-image">Docker Image</a>
