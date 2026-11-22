@@ -76,7 +76,7 @@ from scenedetect.backends import (
 )
 from scenedetect.stats_manager import StatsManager as StatsManager
 from scenedetect.stats_manager import StatsFileCorrupt as StatsFileCorrupt
-from scenedetect.scene_manager import SceneManager
+from scenedetect.scene_manager import SceneManager as SceneManager
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
