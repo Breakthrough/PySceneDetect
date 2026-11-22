@@ -211,12 +211,12 @@ def test_save_images_resizes_each_frame(tmp_path: Path, threading, resize, expec
         **resize,
     )
 
-    shapes = [
-        cv2.imdecode(np.fromfile(tmp_path / filename, dtype=np.uint8), cv2.IMREAD_UNCHANGED).shape[
-            :2
-        ]
-        for filename in filenames[0]
-    ]
+    shapes = []
+    for filename in filenames[0]:
+        data = np.fromfile(tmp_path / filename, dtype=np.uint8)
+        image = cv2.imdecode(data, cv2.IMREAD_UNCHANGED)
+        assert image is not None, f"Could not decode {filename}"
+        shapes.append(image.shape[:2])
     assert shapes == expected_shapes
 
 
