@@ -168,10 +168,14 @@ object has a defined framerate, otherwise has no effect.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The current time in the form <code class="docutils literal notranslate"><span class="pre">&quot;HH:MM:SS[.nnn]&quot;</span></code>.</p>
+<dd class="field-even"><p>The current time in the form <code class="docutils literal notranslate"><span class="pre">&quot;HH:MM:SS[.nnn]&quot;</span></code>. A negative time (e.g. from a
+negative PTS) is shown as zero.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><em>str</em></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – <cite>precision</cite> is negative.</p>
 </dd>
 </dl>
 </dd></dl>
