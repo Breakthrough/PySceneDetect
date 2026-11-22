@@ -18,6 +18,7 @@ import math
 import numbers
 import re
 import typing as ty
+import warnings
 from dataclasses import dataclass
 from enum import Enum
 from fractions import Fraction
@@ -213,7 +214,11 @@ def parse_frame_or_time(value: TimecodeLike) -> int | Fraction:
 
 @dataclass(frozen=True)
 class FramePosition:
-    """Represents a frame's position, including its timecode and frame number."""
+    """Represents a frame's position, including its timecode and frame number.
+
+    Ordering compares frame numbers within the same stream and numbering sequence.
+    Equality uses both fields. String conversion formats the presentation timestamp.
+    """
 
     timecode: Timecode
     frame_number: int
@@ -229,6 +234,61 @@ class FramePosition:
             raise ValueError("Cannot subtract FramePosition objects with negative result")
 
         return FrameDuration(frames=frames, elapsed=elapsed)
+
+    def get_timecode(self, precision: int = 3, use_rounding: bool = True) -> str:
+        """Return the timecode as a string in HH:MM:SS[.nnn] format."""
+        return self.timecode.get_timecode(precision=precision, use_rounding=use_rounding)
+
+    @property
+    def pts(self) -> int:
+        """Presentation timestamp in units of time_base."""
+        return self.timecode.pts
+
+    @property
+    def time_base(self) -> Fraction:
+        """Timestamp unit expressed in seconds."""
+        return self.timecode.time_base
+
+    def __str__(self) -> str:
+        return self.timecode.get_timecode()
+
+    @property
+    def seconds(self) -> float:
+        """Return the timecode in seconds as a float. This is a convenience property for
+        compatibility with legacy code that expects a float value. Use `timecode.seconds` for
+        the underlying Fraction value."""
+        return float(self.timecode.seconds)
+
+    @property
+    def frame_num(self) -> int:
+        """Deprecated alias for frame_number"""
+        warnings.warn(
+            "`frame_num` is deprecated; use `frame_number` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.frame_number
+
+    def get_frames(self) -> int:
+        """Return the frame number. This is a convenience method for compatibility with legacy
+        code that expects a `get_frames()` method. Use `frame_number` for the underlying value."""
+        return self.frame_number
+
+    def get_seconds(self) -> float:
+        """Return the timecode in seconds as a float. This is a convenience method for
+        compatibility with legacy code that expects a `get_seconds()` method. Use
+        `timecode.seconds` for the underlying Fraction value."""
+        return float(self.timecode.seconds)
+
+    def __lt__(self, other: "FramePosition") -> bool:
+        if not isinstance(other, FramePosition):
+            return NotImplemented
+        return self.frame_number < other.frame_number
+
+    def __gt__(self, other: "FramePosition") -> bool:
+        if not isinstance(other, FramePosition):
+            return NotImplemented
+        return self.frame_number > other.frame_number
 
 
 @dataclass(frozen=True)
