@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: gh-pages
+  group: gh-pages-docs
   cancel-in-progress: false
 
 jobs:
@@ -93,7 +93,7 @@ jobs:
           DOCS_DEST: ${{ env.scenedetect_docs_dest }}
         run: |
           git fetch origin gh-pages
-          git checkout gh-pages
+          git checkout -B gh-pages origin/gh-pages
           git clean -ffdx
           git rm "docs/${DOCS_DEST}" -r -f --ignore-unmatch
           mkdir -p "docs/${DOCS_DEST}"
@@ -121,5 +121,17 @@ jobs:
             git commit -a -m "[docs] @${TRIGGER_ACTOR}: Generate Documentation" \
               -m "Source: ${GITHUB_REF_NAME} (${GITHUB_SHA})" \
               -m "Destination: ${DOCS_DEST}"
-            git push
+            for attempt in 1 2 3 4 5; do
+              if git push origin gh-pages; then
+                break
+              fi
+              if [[ "${attempt}" -eq 5 ]]; then
+                echo "Failed to push to gh-pages after ${attempt} attempts." >&2
+                exit 1
+              fi
+              echo "Push failed (attempt ${attempt}/5); rebasing onto origin/gh-pages and retrying..."
+              sleep $((attempt * 2))
+              git fetch origin gh-pages
+              git pull --rebase origin gh-pages
+            done
           fi

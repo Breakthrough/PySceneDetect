@@ -24,7 +24,7 @@ on:
           - clear-staging
 
 concurrency:
-  group: gh-pages
+  group: gh-pages-website
   cancel-in-progress: false
 
 jobs:
@@ -94,7 +94,7 @@ jobs:
         shell: bash
         run: |
           git fetch origin gh-pages
-          git checkout gh-pages
+          git checkout -B gh-pages origin/gh-pages
           git clean -ffdx
 
           if [[ "${DEPLOY_TARGET}" == "production" ]]; then
@@ -126,7 +126,19 @@ jobs:
             git commit -a -m "[docs] @${TRIGGER_ACTOR}: Generate Website (${DEPLOY_TARGET})" \
               -m "Source: ${GITHUB_REF_NAME} (${GITHUB_SHA})" \
               -m "Target: ${DEPLOY_TARGET}"
-            git push
+            for attempt in 1 2 3 4 5; do
+              if git push origin gh-pages; then
+                break
+              fi
+              if [[ "${attempt}" -eq 5 ]]; then
+                echo "Failed to push to gh-pages after ${attempt} attempts." >&2
+                exit 1
+              fi
+              echo "Push failed (attempt ${attempt}/5); rebasing onto origin/gh-pages and retrying..."
+              sleep $((attempt * 2))
+              git fetch origin gh-pages
+              git pull --rebase origin gh-pages
+            done
           fi
         env:
           DEPLOY_TARGET: ${{ env.deploy_target }}
