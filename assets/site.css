@@ -1315,8 +1315,8 @@
     gap: 0.4rem 0.6rem;
     min-block-size: 2.65rem;
     padding: 0.4rem 0.95rem;
-    background: var(--surface);
-    border-block-end: 1px solid var(--border);
+    background: var(--surface-elevated);
+    border-block-end: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
   }
 
   .code-panels {
