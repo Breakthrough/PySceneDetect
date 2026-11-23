@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <title>Python API | PySceneDetect</title>
+  <meta name="description" content="Learn how PySceneDetect&#39;s built-in detectors work and how to build custom scene detectors using the Python API.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/staging/img/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&text=PySceneDetect&display=swap">
+  <link rel="stylesheet" href="/staging/assets/site.css">
+  <script type="module" src="/staging/assets/site.js"></script>
+</head>
+<body>
+  <a class="skip-link visually-hidden" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand-link" href="/staging/" aria-label="PySceneDetect">
+        <svg
+          class="brand-mark"
+          aria-hidden="true"
+          width="34"
+          height="34"
+          viewBox="132.5 147.6 34.3 33.8"
+          fill="currentColor"
+        >
+          <path d="m 162.79836,148.30595 -26.75195,7.1034 c -1.11468,0.29597 -1.11468,0.84972 -1.11468,1.47987 0,0.63014 -0.0163,-0.0781 0,1.74004 -1.39332,0 -1.67017,1.8036 -1.67199,2.77477 -0.002,1.10991 0.27879,2.77476 1.67199,2.77476 v 15.53868 c 0,0.55495 0,0.55495 0.55734,0.55495 h 30.09596 c 0.55733,0 0.55733,0 0.55733,-0.55495 v -18.31344 c 0,-0.55495 0,-0.55495 -0.55733,-0.55495 h -22.71131 c 0,0 -0.008,0 22.15397,-5.88462 0.24588,-0.0653 0.50023,-0.3963 0.41801,-0.63608 l -1.95067,-5.68826 c -0.0833,-0.2429 -0.44761,-0.4003 -0.69667,-0.33417 z m -26.47328,12.26565 c 0.4617,1.1e-4 0.8359,0.37286 0.83582,0.8326 -7e-5,0.45962 -0.37425,0.83218 -0.83582,0.83227 -0.46172,8e-5 -0.83607,-0.37253 -0.83617,-0.83227 -9e-5,-0.45986 0.37432,-0.83268 0.83617,-0.8326 z m 4.19772,2.49729 h 2.74995 l -2.24706,3.32972 h -2.74996 z m 5.02074,0 h 2.74996 l -2.24706,3.32972 h -2.74998 z m 5.02073,0 h 2.74995 l -2.24707,3.32972 h -2.74996 z m 5.02072,0 h 2.74995 l -2.24703,3.32972 h -2.74997 z m 5.02072,0 h 2.74999 l -2.24706,3.32972 h -2.74998 z m -22.32998,6.10448 h 24.52263 v 7.76934 h -24.52263 z m -0.6491,-12.14838 2.65361,-0.71842 3.01149,2.08035 -2.65363,0.71842 z m 4.84486,-1.31166 2.65362,-0.71842 3.01147,2.08036 -2.65364,0.71842 z m 4.84484,-1.31165 2.65361,-0.71841 3.01147,2.08035 -2.65363,0.71842 z m 4.84484,-1.31165 2.65361,-0.71842 3.0115,2.08036 -2.65364,0.71841 z m 4.84483,-1.31164 2.65364,-0.71843 3.01149,2.08035 -2.65365,0.71843 z"/>
+        </svg>
+        <span class="brand-wordmark">PySceneDetect</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <button
+          class="menu-button"
+          type="button"
+          popovertarget="site-menu"
+          popovertargetaction="toggle"
+          aria-controls="site-menu"
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+          <span>Menu</span>
+        </button>
+
+        <ul id="site-menu" class="site-menu" popover="auto">
+          <li>
+            <a href="/staging/">Home</a>
+          </li>
+          <li>
+            <a href="/staging/features/">Features</a>
+          </li>
+          <li>
+            <a href="/staging/download/">Download</a>
+          </li>
+          <li>
+            <a href="/staging/cli/">CLI</a>
+          </li>
+          <li>
+            <a href="/staging/api/" aria-current="page">Python API</a>
+          </li>
+          <li>
+            <a href="/staging/benchmarks/">Benchmarks</a>
+          </li>
+          <li>
+            <a href="/staging/faq/">FAQ</a>
+          </li>
+          <li>
+            <a href="/docs/latest/">
+              <span>Reference Manual</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/changelog/">Changelog</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/docs/">Documentation Versions</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/contributing/">Contributing</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/projects/">Projects</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/copyright/">License</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="https://github.com/Breakthrough/PySceneDetect">
+              <span>GitHub</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="search-trigger"
+        >
+          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+          <span class="search-trigger-label">Search</span>
+          <kbd class="kbd" aria-hidden="true">Ctrl K</kbd>
+        </button>
+
+        <button type="button" class="theme-toggle">
+          <svg class="theme-option-dark" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+          <span class="visually-hidden theme-option-dark">Switch to dark theme</span>
+          <svg class="theme-option-light" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <span class="visually-hidden theme-option-light">Switch to light theme</span>
+        </button>
+
+        <a class="icon-link" href="https://github.com/Breakthrough/PySceneDetect">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+          <span class="github-label">GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <search>
+    <dialog id="search-dialog" class="search-dialog" closedby="any" aria-label="Search PySceneDetect">
+      <form method="dialog" class="search-header">
+        <label for="search-input" class="visually-hidden">Search this site</label>
+        <svg class="search-input-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m20 20-3.5-3.5"/>
+        </svg>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search this site"
+          autocomplete="off"
+          autofocus
+        >
+        <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
+        <span id="search-status" class="visually-hidden" role="status" aria-live="polite"></span>
+      </form>
+      <div id="search-results" class="search-results" role="region" aria-label="Search results">
+        <p class="search-empty">Type a keyword to search guides, CLI options, detectors, and FAQs.</p>
+      </div>
+    </dialog>
+  </search>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar" aria-label="Site navigation">
+      <div class="side-group-title">PySceneDetect</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/">Home</a>
+        </li>
+        <li>
+          <a href="/staging/features/">Features</a>
+        </li>
+        <li>
+          <a href="/staging/download/">Download</a>
+        </li>
+        <li>
+          <a href="/staging/changelog/">Changelog</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Guides</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/docs/">Documentation Versions</a>
+        </li>
+        <li>
+          <a href="/staging/cli/">Command-Line Interface</a>
+        </li>
+        <li>
+          <a href="/staging/api/" aria-current="page">Python API</a>
+        </li>
+        <li>
+          <a href="/staging/benchmarks/">Benchmarks</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Community</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/faq/">Frequently Asked Questions</a>
+        </li>
+        <li>
+          <a href="/staging/contributing/">Contributing &amp; Support</a>
+        </li>
+        <li>
+          <a href="/staging/projects/">Projects &amp; Research</a>
+        </li>
+        <li>
+          <a href="/staging/copyright/">License &amp; Copyright</a>
+        </li>
+      </ul>
+    </aside>
+
+    <main id="main-content" class="docs-main" tabindex="-1">
+      <article class="prose">
+        <h1 id="python-api">Python API</h1>
+<p>The complete Python API reference is in the <a href="/docs/latest/api.html">Reference Manual</a>. See <a href="/staging/docs/">Documentation Versions</a> for older releases.</p>
+<h2 id="detectors">Detectors</h2>
+<p>This page describes how each built-in detector works, along with its key CLI options and default values.</p>
+<h3 id="adaptive-detector">Adaptive detector</h3>
+<p>The adaptive detector (<code>AdaptiveDetector</code> / <code>detect-adaptive</code>, default in the CLI) scores adjacent frames the same way as <code>ContentDetector</code>, then compares each frame's score against a rolling average of nearby frames. This reduces false cuts during fast camera movement.</p>
+<p>Default settings: <code>--threshold 3.0</code>, <code>--frame-window 2</code>, <code>--min-content-val 15.0</code>. See <a href="/docs/latest/cli.html#detect-adaptive"><code>detect-adaptive</code></a> and <a href="/docs/latest/api/detectors.html#adaptivedetector"><code>AdaptiveDetector</code></a> for details.</p>
+<h3 id="content-detector">Content detector</h3>
+<p>The content detector (<code>ContentDetector</code> / <code>detect-content</code>) finds fast cuts between scenes. It converts each frame from <a href="https://en.wikipedia.org/wiki/RGB_color_space">RGB</a> to <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a>, computes the average difference across hue, saturation, and value (brightness) between adjacent frames, and records a cut when that score exceeds <code>--threshold</code> (default: <code>27.0</code>).</p>
+<p>You can also enable edge detection by passing four weights (<code>delta_hue</code>, <code>delta_sat</code>, <code>delta_lum</code>, <code>delta_edges</code>). Edge differences are usually larger than color differences, so raise the threshold when enabling edges (for example, <code>-w 1.0 0.5 1.0 0.2 -t 32</code>). The default weights are <code>--weights 1.0 1.0 1.0 0.0</code> (edges disabled).</p>
+<p>See <a href="/docs/latest/cli.html#detect-content"><code>detect-content</code></a> and <a href="/docs/latest/api/detectors.html#contentdetector"><code>ContentDetector</code></a> for details.</p>
+<h3 id="perceptual-hash-detector">Perceptual hash detector</h3>
+<p>The perceptual hash detector (<code>HashDetector</code> / <code>detect-hash</code>) computes a perceptual hash (<code>phash</code>, based on <a href="https://github.com/JohannesBuchner/imagehash">imagehash</a>) for each frame and compares adjacent hashes using normalized Hamming distance. When the distance exceeds <code>--threshold</code> (default: <code>0.35</code>, with <code>--size 8</code> and <code>--lowpass 2</code>), it records a cut.</p>
+<p>Because <code>phash</code> converts frames to grayscale first, <code>HashDetector</code> ignores color changes when brightness stays constant. It is fast even without downscaling. See <a href="https://www.hackerfactor.com/blog/index.php?/archives/432-Looks-Like-It.html">Looks Like It</a> for a visual explanation of perceptual hashing.</p>
+<p>See <a href="/docs/latest/cli.html#detect-hash"><code>detect-hash</code></a> and <a href="/docs/latest/api/detectors.html#hashdetector"><code>HashDetector</code></a> for details.</p>
+<h3 id="histogram-detector">Histogram detector</h3>
+<p>The histogram detector (<code>HistogramDetector</code> / <code>detect-hist</code>) finds fast cuts using brightness histograms. It converts each frame to the YUV color space, extracts the Y (luminance) channel, and builds a normalized histogram with <code>--bins</code> bins (default: <code>128</code>).</p>
+<p>Adjacent frame histograms are compared using correlation (<code>cv2.HISTCMP_CORREL</code>). When the difference exceeds <code>--threshold</code> (default: <code>0.20</code>), the detector records a cut. Focusing on luminance makes this detector less sensitive to pure color shifts.</p>
+<p>See <a href="/docs/latest/cli.html#detect-hist"><code>detect-hist</code></a> and <a href="/docs/latest/api/detectors.html#histogramdetector"><code>HistogramDetector</code></a> for details.</p>
+<h3 id="threshold-detector">Threshold detector</h3>
+<p>The threshold detector (<code>ThresholdDetector</code> / <code>detect-threshold</code>) finds fades to and from black, similar to the <code>ffmpeg blackframe</code> filter. It averages the R, G, and B values of every pixel in each frame to get a brightness score from <code>0.0</code> to <code>255.0</code>, and records fade events when that score crosses <code>--threshold</code> (default: <code>12.0</code>).</p>
+<p>See <a href="/docs/latest/cli.html#detect-threshold"><code>detect-threshold</code></a> and <a href="/docs/latest/api/detectors.html#thresholddetector"><code>ThresholdDetector</code></a> for details.</p>
+<h2 id="creating-custom-detectors">Creating Custom Detectors</h2>
+<p>Custom detectors must inherit from <a href="/docs/latest/api/detector.html"><code>SceneDetector</code></a>. Because the <code>SceneDetector</code> interface may change before v1.0, pin your dependency to a minor version (for example, <code>scenedetect~=0.7.0</code>).</p>
+<p>To create a detector, implement <code>process_frame</code> and, if needed, <code>post_process</code>:</p>
+<div class="codehilite"><pre tabindex="0"><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameTimecode</span><span class="p">,</span> <span class="n">SceneDetector</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomDetector</span><span class="p">(</span><span class="n">SceneDetector</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Example custom scene detector."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_frame</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">timecode</span><span class="p">:</span> <span class="n">FrameTimecode</span><span class="p">,</span>
+        <span class="n">frame_img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FrameTimecode</span><span class="p">]:</span>
+        <span class="c1"># Return a list of cut timecodes found on this frame or earlier.</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timecode</span><span class="p">:</span> <span class="n">FrameTimecode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">FrameTimecode</span><span class="p">]:</span>
+        <span class="c1"># Called after the last frame to emit any pending cuts.</span>
+        <span class="k">return</span> <span class="p">[]</span>
+</code></pre></div>
+
+<p>PySceneDetect calls <code>process_frame(timecode, frame_img)</code> for every frame in sequence:</p>
+<ul>
+<li><code>timecode</code>: <code>FrameTimecode</code> of the current frame.</li>
+<li><code>frame_img</code>: decoded video frame as a NumPy <code>ndarray</code>.</li>
+</ul>
+<p>After the final frame, PySceneDetect calls <code>post_process(timecode)</code> so multi-pass detectors or detectors waiting on an end condition (such as <code>ThresholdDetector</code>) can emit remaining cuts. Both methods return a list of <code>FrameTimecode</code> cut locations. Note that detectors that emit cuts only in <code>post_process</code> will not report cuts live on continuous streams.</p>
+<p>To save or reuse frame metrics in a CSV stats file, integrate with <a href="/docs/latest/api/stats_manager.html"><code>StatsManager</code></a>. See the built-in detectors in <a href="https://github.com/Breakthrough/PySceneDetect/tree/main/scenedetect/detectors"><code>scenedetect/detectors/</code></a>, <a href="/docs/latest/api/detector.html#scenedetect.detector.SceneDetector"><code>SceneDetector</code></a>, and <a href="/docs/latest/api/scene_manager.html"><code>SceneManager</code></a> for working examples.</p>
+      </article>
+
+      <div class="doc-meta-bar">
+        <a class="edit-link" href="https://github.com/Breakthrough/PySceneDetect/blob/main/website/pages/api.md">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+          </svg>
+          <span>Edit this page on GitHub</span>
+        </a>
+      </div>
+
+      <nav class="pagination-nav" aria-label="Pagination">
+        <a class="pagination-link pagination-prev" href="/staging/cli/">
+          <span class="pagination-hint">&larr; Previous</span>
+          <span class="pagination-title">Command-Line Interface</span>
+        </a>
+        <a class="pagination-link pagination-next" href="/staging/benchmarks/">
+          <span class="pagination-hint">Next &rarr;</span>
+          <span class="pagination-title">Benchmarks</span>
+        </a>
+      </nav>
+    </main>
+
+    <aside class="docs-toc" aria-label="On this page">
+      <div class="toc-sticky">
+        <div class="toc-title">On this page</div>
+        <ul class="toc-list" role="list">
+          <li>
+            <a href="#detectors">Detectors</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#adaptive-detector">Adaptive detector</a></li>
+              <li><a href="#content-detector">Content detector</a></li>
+              <li><a href="#perceptual-hash-detector">Perceptual hash detector</a></li>
+              <li><a href="#histogram-detector">Histogram detector</a></li>
+              <li><a href="#threshold-detector">Threshold detector</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#creating-custom-detectors">Creating Custom Detectors</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-copy">
+        Copyright &copy; 2014 Brandon Castellano. Licensed under the
+        <a href="/staging/copyright/">BSD 3-Clause License</a>.
+      </p>
+      <ul class="footer-links" role="list">
+        <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+        <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+        <li><a href="/docs/latest/">Reference Manual</a></li>
+        <li><a href="/staging/changelog/">Changelog</a></li>
+        <li><a href="/staging/copyright/">License</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>

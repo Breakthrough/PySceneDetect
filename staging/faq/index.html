@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <title>Frequently Asked Questions | PySceneDetect</title>
+  <meta name="description" content="Answers to common PySceneDetect questions on installation, OpenCV, threshold tuning, variable frame rate video, and video splitting.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/staging/img/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&text=PySceneDetect&display=swap">
+  <link rel="stylesheet" href="/staging/assets/site.css">
+  <script type="module" src="/staging/assets/site.js"></script>
+</head>
+<body>
+  <a class="skip-link visually-hidden" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand-link" href="/staging/" aria-label="PySceneDetect">
+        <svg
+          class="brand-mark"
+          aria-hidden="true"
+          width="34"
+          height="34"
+          viewBox="132.5 147.6 34.3 33.8"
+          fill="currentColor"
+        >
+          <path d="m 162.79836,148.30595 -26.75195,7.1034 c -1.11468,0.29597 -1.11468,0.84972 -1.11468,1.47987 0,0.63014 -0.0163,-0.0781 0,1.74004 -1.39332,0 -1.67017,1.8036 -1.67199,2.77477 -0.002,1.10991 0.27879,2.77476 1.67199,2.77476 v 15.53868 c 0,0.55495 0,0.55495 0.55734,0.55495 h 30.09596 c 0.55733,0 0.55733,0 0.55733,-0.55495 v -18.31344 c 0,-0.55495 0,-0.55495 -0.55733,-0.55495 h -22.71131 c 0,0 -0.008,0 22.15397,-5.88462 0.24588,-0.0653 0.50023,-0.3963 0.41801,-0.63608 l -1.95067,-5.68826 c -0.0833,-0.2429 -0.44761,-0.4003 -0.69667,-0.33417 z m -26.47328,12.26565 c 0.4617,1.1e-4 0.8359,0.37286 0.83582,0.8326 -7e-5,0.45962 -0.37425,0.83218 -0.83582,0.83227 -0.46172,8e-5 -0.83607,-0.37253 -0.83617,-0.83227 -9e-5,-0.45986 0.37432,-0.83268 0.83617,-0.8326 z m 4.19772,2.49729 h 2.74995 l -2.24706,3.32972 h -2.74996 z m 5.02074,0 h 2.74996 l -2.24706,3.32972 h -2.74998 z m 5.02073,0 h 2.74995 l -2.24707,3.32972 h -2.74996 z m 5.02072,0 h 2.74995 l -2.24703,3.32972 h -2.74997 z m 5.02072,0 h 2.74999 l -2.24706,3.32972 h -2.74998 z m -22.32998,6.10448 h 24.52263 v 7.76934 h -24.52263 z m -0.6491,-12.14838 2.65361,-0.71842 3.01149,2.08035 -2.65363,0.71842 z m 4.84486,-1.31166 2.65362,-0.71842 3.01147,2.08036 -2.65364,0.71842 z m 4.84484,-1.31165 2.65361,-0.71841 3.01147,2.08035 -2.65363,0.71842 z m 4.84484,-1.31165 2.65361,-0.71842 3.0115,2.08036 -2.65364,0.71841 z m 4.84483,-1.31164 2.65364,-0.71843 3.01149,2.08035 -2.65365,0.71843 z"/>
+        </svg>
+        <span class="brand-wordmark">PySceneDetect</span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <button
+          class="menu-button"
+          type="button"
+          popovertarget="site-menu"
+          popovertargetaction="toggle"
+          aria-controls="site-menu"
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+          <span>Menu</span>
+        </button>
+
+        <ul id="site-menu" class="site-menu" popover="auto">
+          <li>
+            <a href="/staging/">Home</a>
+          </li>
+          <li>
+            <a href="/staging/features/">Features</a>
+          </li>
+          <li>
+            <a href="/staging/download/">Download</a>
+          </li>
+          <li>
+            <a href="/staging/cli/">CLI</a>
+          </li>
+          <li>
+            <a href="/staging/api/">Python API</a>
+          </li>
+          <li>
+            <a href="/staging/benchmarks/">Benchmarks</a>
+          </li>
+          <li>
+            <a href="/staging/faq/" aria-current="page">FAQ</a>
+          </li>
+          <li>
+            <a href="/docs/latest/">
+              <span>Reference Manual</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/changelog/">Changelog</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/docs/">Documentation Versions</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/contributing/">Contributing</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/projects/">Projects</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/staging/copyright/">License</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="https://github.com/Breakthrough/PySceneDetect">
+              <span>GitHub</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="search-trigger"
+        >
+          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+          <span class="search-trigger-label">Search</span>
+          <kbd class="kbd" aria-hidden="true">Ctrl K</kbd>
+        </button>
+
+        <button type="button" class="theme-toggle">
+          <svg class="theme-option-dark" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+          <span class="visually-hidden theme-option-dark">Switch to dark theme</span>
+          <svg class="theme-option-light" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <span class="visually-hidden theme-option-light">Switch to light theme</span>
+        </button>
+
+        <a class="icon-link" href="https://github.com/Breakthrough/PySceneDetect">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+          <span class="github-label">GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <search>
+    <dialog id="search-dialog" class="search-dialog" closedby="any" aria-label="Search PySceneDetect">
+      <form method="dialog" class="search-header">
+        <label for="search-input" class="visually-hidden">Search this site</label>
+        <svg class="search-input-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m20 20-3.5-3.5"/>
+        </svg>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search this site"
+          autocomplete="off"
+          autofocus
+        >
+        <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
+        <span id="search-status" class="visually-hidden" role="status" aria-live="polite"></span>
+      </form>
+      <div id="search-results" class="search-results" role="region" aria-label="Search results">
+        <p class="search-empty">Type a keyword to search guides, CLI options, detectors, and FAQs.</p>
+      </div>
+    </dialog>
+  </search>
+
+  <div class="docs-shell">
+    <aside class="docs-sidebar" aria-label="Site navigation">
+      <div class="side-group-title">PySceneDetect</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/">Home</a>
+        </li>
+        <li>
+          <a href="/staging/features/">Features</a>
+        </li>
+        <li>
+          <a href="/staging/download/">Download</a>
+        </li>
+        <li>
+          <a href="/staging/changelog/">Changelog</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Guides</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/docs/">Documentation Versions</a>
+        </li>
+        <li>
+          <a href="/staging/cli/">Command-Line Interface</a>
+        </li>
+        <li>
+          <a href="/staging/api/">Python API</a>
+        </li>
+        <li>
+          <a href="/staging/benchmarks/">Benchmarks</a>
+        </li>
+      </ul>
+      <div class="side-group-title">Community</div>
+      <ul class="side-list" role="list">
+        <li>
+          <a href="/staging/faq/" aria-current="page">Frequently Asked Questions</a>
+        </li>
+        <li>
+          <a href="/staging/contributing/">Contributing &amp; Support</a>
+        </li>
+        <li>
+          <a href="/staging/projects/">Projects &amp; Research</a>
+        </li>
+        <li>
+          <a href="/staging/copyright/">License &amp; Copyright</a>
+        </li>
+      </ul>
+    </aside>
+
+    <main id="main-content" class="docs-main" tabindex="-1">
+      <article class="prose">
+        <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
+<h2 id="installation-and-setup">Installation and Setup</h2>
+<h3 id="how-do-i-fix-importerror-no-module-named-cv2">How do I fix <code>ImportError: No module named cv2</code>?</h3>
+<p>Since PySceneDetect 0.7, OpenCV is installed automatically. Install the standard package:</p>
+<div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>scenedetect
+</code></pre></div>
+
+<p>For servers or containers without GUI libraries, install the headless package instead:</p>
+<div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>scenedetect-headless
+</code></pre></div>
+
+<p>Both packages provide the same <code>scenedetect</code> Python module. Install only one of them.</p>
+<p>If your project needs a different OpenCV package (such as <code>opencv-contrib-python</code>), install the exact same version that <code>scenedetect</code> installed so both packages share identical <code>cv2</code> files:</p>
+<div class="codehilite"><pre tabindex="0"><code>pip<span class="w"> </span>install<span class="w"> </span>scenedetect
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"opencv-contrib-python==</span><span class="k">$(</span>pip<span class="w"> </span>show<span class="w"> </span>opencv-python<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>^Version<span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="s1">' '</span><span class="w"> </span>-f2<span class="k">)</span><span class="s2">"</span>
+</code></pre></div>
+
+<p>Mixing different versions of OpenCV packages can break your <code>cv2</code> install. See <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">Issue #558</a> for background.</p>
+<h3 id="how-do-i-enable-video-splitting">How do I enable video splitting?</h3>
+<p>PySceneDetect uses <a href="https://ffmpeg.org/download.html">FFmpeg</a> or <code>mkvmerge</code> from <a href="https://mkvtoolnix.download/downloads.html">MKVToolNix</a> to split videos. Make sure the executable is on your system <code>PATH</code> or in the same folder as <code>scenedetect</code>. The Windows builds include <code>ffmpeg</code>. The Docker image includes both tools. See <a href="/staging/cli/#video-splitting-requirements">Video Splitting Requirements</a> for setup steps.</p>
+<h2 id="detection-and-splitting">Detection and Splitting</h2>
+<h3 id="how-do-i-tune-the-detection-threshold">How do I tune the detection threshold?</h3>
+<p>Generate a per-frame stats file with <code>-s</code> / <code>--stats</code>:</p>
+<div class="codehilite"><pre tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>video.mp4<span class="w"> </span>-s<span class="w"> </span>video.stats.csv<span class="w"> </span>detect-adaptive
+</code></pre></div>
+
+<p>Open <code>video.stats.csv</code> in a spreadsheet tool and inspect the metric column for your detector (<code>adaptive_ratio (w=2)</code> for <code>detect-adaptive</code>, where the <code>w=</code> suffix matches <code>--frame-window</code>; <code>content_val</code> for <code>detect-content</code>; or <code>average_rgb</code> for <code>detect-threshold</code>).</p>
+<ul>
+<li>For fast-cut detectors (<code>detect-adaptive</code>, <code>detect-content</code>, <code>detect-hash</code>, <code>detect-hist</code>), lower the threshold (<code>-t</code>) if PySceneDetect misses real cuts, or raise <code>-t</code> to reduce false cuts.</li>
+<li>For <code>detect-threshold</code>, do the opposite: raise <code>-t</code> to find more fades and lower <code>-t</code> to reduce false detections.</li>
+</ul>
+<p>See <a href="/staging/cli/#detector-options">Detector Options</a> for a walkthrough and <a href="/staging/benchmarks/">Benchmarks</a> for parameter sweep results across datasets.</p>
+<h3 id="does-pyscenedetect-support-variable-frame-rate-vfr-videos">Does PySceneDetect support variable frame rate (VFR) videos?</h3>
+<p>Yes. Both the default OpenCV backend and the PyAV backend support VFR videos using presentation timestamps (PTS) instead of assuming a constant frame rate.</p>
+<p>For difficult VFR files, use the PyAV backend (<code>pip install av</code>, then pass <code>-b pyav</code>), which reads native PTS timestamps directly from the video container. The MoviePy backend does not support VFR video. See <a href="/docs/latest/cli/backends.html">Video Backends</a> for details.</p>
+<h3 id="should-i-use-stream-copy-or-re-encoding-when-splitting-video">Should I use stream copy or re-encoding when splitting video?</h3>
+<ul>
+<li><strong>Default re-encoding (<code>split-video</code>)</strong>: uses <code>ffmpeg</code> to re-encode each clip. Cuts are frame-accurate, and you can adjust quality with <code>-hq</code> / <code>--high-quality</code>, <code>-crf</code>, or <code>-p</code> / <code>--preset</code>.</li>
+<li><strong>Stream copy (<code>split-video --copy</code> or <code>split-video --mkvmerge</code>)</strong>: copies the compressed video and audio streams without re-encoding. This is much faster and preserves original quality, but splits can only happen on keyframes, so clip start and end times may shift slightly.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="how-do-i-fix-cannot-split-video-due-to-too-many-scenes">How do I fix <code>Cannot split video due to too many scenes</code>?</h3>
+<p>On Windows, passing hundreds of scene timecodes to an external command can exceed the operating system's command-line length limit.</p>
+<p>To work around this limit, export the scene list with <code>list-scenes</code> and split the video in smaller batches using <code>ffmpeg</code> or <code>mkvmerge</code> directly. See <a href="https://github.com/Breakthrough/PySceneDetect/issues/164">Issue #164</a> for details.</p>
+<h3 id="how-do-i-fix-failed-to-read-any-frames-from-video-file">How do I fix <code>Failed to read any frames from video file</code>?</h3>
+<p>The active video backend could not decode the file. Install PyAV (<code>pip install av</code>) and run PySceneDetect with <code>-b pyav</code> to test another backend.</p>
+<p>Videos with multiple audio tracks can also cause decode failures in OpenCV (see <a href="https://github.com/Breakthrough/PySceneDetect/issues/179">Issue #179</a>). If PyAV does not help, make a copy of the video without its audio tracks. Then run detection on the copy:</p>
+<div class="codehilite"><pre tabindex="0"><code>ffmpeg<span class="w"> </span>-i<span class="w"> </span>input.mp4<span class="w"> </span>-c<span class="w"> </span>copy<span class="w"> </span>-an<span class="w"> </span>output.mp4
+</code></pre></div>
+
+<p>Or with <code>mkvmerge</code>:</p>
+<div class="codehilite"><pre tabindex="0"><code>mkvmerge<span class="w"> </span>-o<span class="w"> </span>output.mkv<span class="w"> </span>--no-audio<span class="w"> </span>input.mp4
+</code></pre></div>
+      </article>
+
+      <div class="doc-meta-bar">
+        <a class="edit-link" href="https://github.com/Breakthrough/PySceneDetect/blob/main/website/pages/faq.md">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+          </svg>
+          <span>Edit this page on GitHub</span>
+        </a>
+      </div>
+
+      <nav class="pagination-nav" aria-label="Pagination">
+        <a class="pagination-link pagination-prev" href="/staging/benchmarks/">
+          <span class="pagination-hint">&larr; Previous</span>
+          <span class="pagination-title">Benchmarks</span>
+        </a>
+        <a class="pagination-link pagination-next" href="/staging/contributing/">
+          <span class="pagination-hint">Next &rarr;</span>
+          <span class="pagination-title">Contributing &amp; Support</span>
+        </a>
+      </nav>
+    </main>
+
+    <aside class="docs-toc" aria-label="On this page">
+      <div class="toc-sticky">
+        <div class="toc-title">On this page</div>
+        <ul class="toc-list" role="list">
+          <li>
+            <a href="#installation-and-setup">Installation and Setup</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#how-do-i-fix-importerror-no-module-named-cv2">How do I fix ImportError: No module named cv2 ?</a></li>
+              <li><a href="#how-do-i-enable-video-splitting">How do I enable video splitting?</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#detection-and-splitting">Detection and Splitting</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#how-do-i-tune-the-detection-threshold">How do I tune the detection threshold?</a></li>
+              <li><a href="#does-pyscenedetect-support-variable-frame-rate-vfr-videos">Does PySceneDetect support variable frame rate (VFR) videos?</a></li>
+              <li><a href="#should-i-use-stream-copy-or-re-encoding-when-splitting-video">Should I use stream copy or re-encoding when splitting video?</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="#troubleshooting">Troubleshooting</a>
+            <ul class="toc-sublist" role="list">
+              <li><a href="#how-do-i-fix-cannot-split-video-due-to-too-many-scenes">How do I fix Cannot split video due to too many scenes ?</a></li>
+              <li><a href="#how-do-i-fix-failed-to-read-any-frames-from-video-file">How do I fix Failed to read any frames from video file ?</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-copy">
+        Copyright &copy; 2014 Brandon Castellano. Licensed under the
+        <a href="/staging/copyright/">BSD 3-Clause License</a>.
+      </p>
+      <ul class="footer-links" role="list">
+        <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+        <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+        <li><a href="/docs/latest/">Reference Manual</a></li>
+        <li><a href="/staging/changelog/">Changelog</a></li>
+        <li><a href="/staging/copyright/">License</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>
