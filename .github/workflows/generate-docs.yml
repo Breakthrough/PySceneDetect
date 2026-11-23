@@ -10,7 +10,12 @@ on:
       - 'docs/**'
       - 'scenedetect/**'
       - 'scenedetect.cfg'
+      - 'website/pages/docs.md'
   workflow_dispatch:
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
 
 jobs:
   update_docs:
@@ -36,32 +41,38 @@ jobs:
           cache: 'pip'
 
       - name: Set Destination (Releases)
-        if: ${{ contains(github.ref_name, 'releases') }}
+        if: ${{ startsWith(github.ref, 'refs/heads/releases/') }}
+        shell: bash
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          echo "scenedetect_docs_dest=$(echo ${{ github.ref_name }} | cut -b 10-)" >> "$GITHUB_ENV"
+          echo "scenedetect_docs_dest=${REF_NAME#releases/}" >> "$GITHUB_ENV"
 
       - name: Set Destination (Head)
-        if: ${{ contains(github.ref_name, 'main') }}
+        if: ${{ github.ref == 'refs/heads/main' }}
+        shell: bash
         run: |
           echo "scenedetect_docs_dest=head" >> "$GITHUB_ENV"
 
       - name: Check Destination
         if: ${{ env.scenedetect_docs_dest == '' }}
+        shell: bash
         run: |
           echo "Failing build: destination must be set!"
+          exit 1
 
       - name: Setup Environment
         run: |
-          python -m pip install --upgrade pip build wheel virtualenv
-          pip install .[docs]
-          pip install -r packaging/windows/requirements.txt
+          pip install ".[docs,pyav,moviepy]"
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
 
       - name: Check CLI Documentation
         shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
         run: |
-          python docs/generate_cli_docs.py
+          python -B docs/generate_cli_docs.py
           if [[ $(git status --porcelain=1 -- docs | wc -l) -ne 0 ]]; then
             git --no-pager diff -- docs
             echo 'CLI documentation is out of date: the generated docs do not match the output of docs/generate_cli_docs.py!'
@@ -70,29 +81,45 @@ jobs:
           fi
 
       - name: Generate Docs
+        shell: bash
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
         run: |
-          sphinx-build -b html docs build
+          sphinx-build -b html -d "${RUNNER_TEMP}/doctrees" docs "${RUNNER_TEMP}/docs-build"
 
       - name: Update gh-pages Branch
+        shell: bash
+        env:
+          DOCS_DEST: ${{ env.scenedetect_docs_dest }}
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
-          git rm "docs/${{ env.scenedetect_docs_dest }}" -r -f --ignore-unmatch
-          git add build/
-          git mv build "docs/${{ env.scenedetect_docs_dest }}"
+          git clean -ffdx
+          git rm "docs/${DOCS_DEST}" -r -f --ignore-unmatch
+          mkdir -p "docs/${DOCS_DEST}"
+          cp -a "${RUNNER_TEMP}/docs-build/." "docs/${DOCS_DEST}/"
+          git add -A "docs/${DOCS_DEST}"
 
       - name: Update Latest
         if: ${{ env.scenedetect_docs_dest == env.scenedetect_docs_latest }}
+        shell: bash
+        env:
+          DOCS_DEST: ${{ env.scenedetect_docs_dest }}
         run: |
           git rm "docs/latest" -r -f --ignore-unmatch
-          mkdir -p latest
-          cp -r -f "docs/${{ env.scenedetect_docs_dest }}" docs/latest
-          git add docs/latest
-          echo "scenedetect_docs_dest='${{ env.scenedetect_docs_dest }} (latest)'" >> "$GITHUB_ENV"
+          cp -a "docs/${DOCS_DEST}" docs/latest
+          git add -A docs/latest
+          echo "scenedetect_docs_dest=${DOCS_DEST} (latest)" >> "$GITHUB_ENV"
 
       - name: Commit and Push
+        shell: bash
+        env:
+          DOCS_DEST: ${{ env.scenedetect_docs_dest }}
+          TRIGGER_ACTOR: ${{ github.triggering_actor }}
         run: |
-          git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Documentation" \
-            -m "Source: ${{ github.ref_name }} (${{ github.sha }})" \
-            -m "Destination: ${{ env.scenedetect_docs_dest }}"
-          git push
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            git commit -a -m "[docs] @${TRIGGER_ACTOR}: Generate Documentation" \
+              -m "Source: ${GITHUB_REF_NAME} (${GITHUB_SHA})" \
+              -m "Destination: ${DOCS_DEST}"
+            git push
+          fi

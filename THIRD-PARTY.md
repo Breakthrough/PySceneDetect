@@ -14,16 +14,16 @@ In no particular order:
 -----------------------------------------------------------------------
 
 > click [Copyright (C) 2017, Armin Ronacher]:
-    This software uses OpenCV; see thirdparty/LICENSE-CLICK or visit:
-    [ http://click.pocoo.org/license/ ]
+    This software uses click; see thirdparty/LICENSE-CLICK or visit:
+    [ https://click.palletsprojects.com/en/stable/license/ ]
 
 > NumPy [Copyright (C) 2005-2016, Numpy Developers]:
-    This software uses Numpy; see thirdparty/LICENSE-NUMPY or visit:
-    [ http://www.numpy.org/license.html ]
+    This software uses NumPy; see thirdparty/LICENSE-NUMPY or visit:
+    [ https://numpy.org/doc/stable/license.html ]
 
 > OpenCV [Copyright (C) 2017, Itseez]:
     This software uses OpenCV; see thirdparty/LICENSE-OPENCV or visit:
-    [ http://opencv.org/license.html ]
+    [ https://opencv.org/license/ ]
 
 > PyAV [Copyright (C) 2017, Mike Boers and others]:
     This software uses PyAV; see thirdparty/LICENSE-PYAV or visit:
@@ -42,9 +42,13 @@ In no particular order:
     This software uses tqdm; see thirdparty/LICENSE-TQDM or visit:
     [ https://github.com/tqdm/tqdm/blob/master/LICENCE ]
 
-> MoviePy [ Copyright (C) 2015 Zulko ]
-    This software uses tqdm; see thirdparty/LICENSE-TQDM or visit:
+> MoviePy [Copyright (C) 2015 Zulko]:
+    This software uses MoviePy; see thirdparty/LICENSE-MOVIEPY or visit:
     [ https://github.com/Zulko/moviepy/blob/master/LICENCE.txt ]
+
+> platformdirs [Copyright (C) The platformdirs developers]:
+    This software uses platformdirs; visit:
+    [ https://github.com/tox-dev/platformdirs/blob/main/LICENSE ]
 
 -----------------------------------------------------------------------
 
@@ -61,7 +65,7 @@ Certain distributions of PySceneDetect may include ffmpeg. See
 thirdparty/LICENSE-FFMPEG file or visit [ https://ffmpeg.org ]
 
 FFmpeg is a trademark of Fabrice Bellard
-mkvmerge is Copyright (C) 2005-2016, Matroska
+mkvmerge is part of MKVToolNix by Moritz Bunkus (GNU General Public License v2)
 
 Windows distributions may include a compiled Python distribution. For license
 information regarding the distributed version of Python, see the

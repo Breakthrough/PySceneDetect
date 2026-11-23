@@ -41,6 +41,7 @@ class LogoOutput(NamedTuple):
     width: int
     height: int
     source: Path
+    darkmode: bool = False
 
 
 # Colors matching the SVG design
@@ -104,10 +105,21 @@ LOGO_OUTPUTS: list[LogoOutput] = [
         REPO_DIR / "docs" / "_static" / "pyscenedetect_logo_small.png", 300, 141, LOGO_BG_SVG
     ),
     LogoOutput(
-        REPO_DIR / "website" / "pages" / "img" / "pyscenedetect_logo.png", 640, 300, LOGO_BG_SVG
+        REPO_DIR / "docs" / "_static" / "pyscenedetect_logo_small_darkmode.png",
+        462,
+        217,
+        LOGO_SVG,
+        darkmode=True,
     ),
     LogoOutput(
         REPO_DIR / "website" / "pages" / "img" / "pyscenedetect_logo_small.png", 462, 217, LOGO_SVG
+    ),
+    LogoOutput(
+        REPO_DIR / "website" / "pages" / "img" / "pyscenedetect_logo_small_darkmode.png",
+        462,
+        217,
+        LOGO_SVG,
+        darkmode=True,
     ),
 ]
 
@@ -184,13 +196,24 @@ def render_svg(inkscape: str, svg: Path, output: Path, width: int, height: int):
     )
 
 
-def render_logos(inkscape: str):
+def render_logos(inkscape: str, work_dir: Path):
     """Render the logo SVG to all required PNG outputs."""
     print("Rendering logo PNGs...")
+    dark_svg: Path | None = None
     for entry in LOGO_OUTPUTS:
         rel_path = entry.path.relative_to(REPO_DIR)
-        print(f"  {rel_path} ({entry.width}x{entry.height}) [source: {entry.source.name}]...")
-        render_svg(inkscape, entry.source, entry.path, entry.width, entry.height)
+        source = entry.source
+        if entry.darkmode:
+            if dark_svg is None:
+                dark_svg = work_dir / f"{source.stem}_darkmode.svg"
+                dark_svg.write_text(
+                    source.read_text(encoding="utf-8").replace("#2a3545", "#e0e8f0"),
+                    encoding="utf-8",
+                )
+            source = dark_svg
+        mode = " (darkmode)" if entry.darkmode else ""
+        print(f"  {rel_path} ({entry.width}x{entry.height}) [source: {entry.source.name}{mode}]...")
+        render_svg(inkscape, source, entry.path, entry.width, entry.height)
     print(f"  Done ({len(LOGO_OUTPUTS)} files).")
 
 
@@ -394,7 +417,7 @@ def main():
         for dest in FAVICON_OUTPUTS:
             shutil.copy2(ICO_PATH, dest)
             print(f"  {dest.relative_to(REPO_DIR)}")
-        render_logos(inkscape)
+        render_logos(inkscape, Path(work))
         print("Rendering installer branding (static assets)...")
         render_installer_static(inkscape, Path(work))
         print("Rendering installer JPGs...")

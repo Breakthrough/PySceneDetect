@@ -6,8 +6,8 @@
 The root document has one named toctree per section. For every page inside a section, the
 sidebar template gets ``section_toctree()``, which renders that section's toctree fully
 expanded (other pages to the section's ``maxdepth``, the current page to ``current_maxdepth``),
-plus ``sidebar_section`` and ``sidebar_sections`` for a switch between sections. The root
-document itself renders every labelled section's tree, each pruned to
+plus ``sidebar_section`` and ``sidebar_sections`` so templates can highlight the active section
+in the top bar. The root document itself renders every top-level section's tree, each pruned to
 ``section_sidebar_root_depth`` (by default the section's ``maxdepth``). Pages in no section
 (genindex, search, py-modindex) and the singlehtml builder fall back to the regular global
 toctree.
@@ -15,15 +15,13 @@ toctree.
 Configure with ``section_sidebar_sections`` in conf.py::
 
     section_sidebar_sections = {
-        "clitoc": ("CLI", "cli", 2, 2),  # toctree name: (label, landing doc, depth, cur depth)
-        "reftoc": (None, None, 2, 2),  # no label: every page in the section is a small link
+        "clitoc": (True, 2, 3),  # toctree name: (show_on_root, depth, current-page depth)
+        "reftoc": (False, 2, 2),  # standalone page: show only current page's headings
     }
     section_sidebar_root_depth = {"apitoc": 1}  # on the root document: page titles only
 
-A section whose label is ``None`` is not part of the switch; the template gets its pages as
-``sidebar_section_docs[name]`` (a list of ``(title, docname)``) and draws them as a row of
-smaller links. Its tree is only drawn on its own pages, and then holds just the current page's
-headings, since the row already lists the pages.
+A section with ``show_on_root=False`` is omitted from the root document's sidebar tree. Its tree
+is only drawn on its own pages, and then holds just the current page's headings.
 
 ``section_sidebar_summary`` trims what a page contributes to the tree when it is NOT the
 current page: only entries (at any depth) whose text matches one of the glob patterns are
@@ -122,8 +120,8 @@ def _prune_depth(top: nodes.list_item, maxdepth: int) -> None:
 def _keep_current_headings(tree: nodes.Element) -> None:
     """Replace the section's page list with the headings of the current page, one level up.
 
-    For sections without a switch label: the link row under the switch already lists their
-    pages, so the tree repeats neither the current page's title nor its siblings.
+    For standalone sections (``show_on_root=False``), the top bar already links to the page,
+    so the sidebar lists only the current page's headings under an "On this page" caption.
     """
     for top in list(tree.findall(nodes.list_item)):
         if "toctree-l1" not in top["classes"] or not top.get("iscurrent"):
@@ -172,7 +170,7 @@ def _prune_tree(
 def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doctree) -> None:
     sections = app.config.section_sidebar_sections
     if app.builder.name == "singlehtml":
-        # Everything is one page: the switch would link to itself, so hide it.
+        # Everything is one page: fall back to the global toctree instead of per-section trees.
         sections = {}
     node = _section_toctree_node(app, pagename) if sections else None
     names = node.parent.get("names", []) if node is not None else []
@@ -185,10 +183,9 @@ def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doct
                 root_nodes.append((name, root_node))
     context["sidebar_section"] = section
     context["sidebar_sections"] = sections
-    context["sidebar_section_docs"] = _section_docs(app, sections) if sections else {}
 
     def render(name: str, toctree_node: addnodes.toctree) -> str:
-        _, _, maxdepth, current_maxdepth = sections[name]
+        show_on_root, maxdepth, current_maxdepth = sections[name]
         current_maxdepth = app.config.section_sidebar_page_depth.get(pagename, current_maxdepth)
         tree = TocTree(app.env).resolve(
             pagename,
@@ -201,11 +198,11 @@ def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doct
         )
         if tree is None:
             return ""
-        # The switch and link row above the tree already name the sections; the toctree
-        # caption would only repeat them (the captions still head the global toctree used by
-        # the fallback pages and the singlehtml build).
-        for child in [c for c in tree.children if isinstance(c, nodes.title)]:
-            tree.remove(child)
+        # The top bar names the active section on section pages; keep the toctree caption only on
+        # the root page (where every section's tree is listed sequentially) and in fallback builds.
+        if pagename != app.env.config.root_doc:
+            for child in [c for c in tree.children if isinstance(c, nodes.title)]:
+                tree.remove(child)
         root_depth = app.config.section_sidebar_root_depth
         if pagename == app.env.config.root_doc and name in root_depth:
             # The root page has no current entry; one depth for every page, no summaries.
@@ -217,7 +214,7 @@ def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doct
             for docname, patterns in app.config.section_sidebar_summary.items()
         }
         _prune_tree(tree, maxdepth, current_maxdepth, summary)
-        if sections[name][0] is None:
+        if not show_on_root:
             _keep_current_headings(tree)
         return app.builder.render_partial(tree)["fragment"]
 
@@ -229,19 +226,6 @@ def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doct
         )
 
     context["section_toctree"] = section_toctree
-
-
-def _section_docs(app: Sphinx, sections: dict) -> dict[str, list[tuple[str, str]]]:
-    """(title, docname) of every page listed by each section's toctree, in order."""
-    env = app.env
-    docs: dict[str, list[tuple[str, str]]] = {}
-    for node in env.get_doctree(env.config.root_doc).findall(addnodes.toctree):
-        name = next((n for n in node.parent.get("names", []) if n in sections), None)
-        if name is not None:
-            docs[name] = [
-                (env.titles[d].astext(), d) for d in node["includefiles"] if d in env.titles
-            ]
-    return docs
 
 
 def _check_config(app: Sphinx, env) -> None:
