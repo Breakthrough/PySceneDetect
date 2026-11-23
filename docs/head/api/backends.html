@@ -20,6 +20,234 @@
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Common" href="common.html" />
     <link rel="prev" title="Output" href="output.html" />
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <!-- Google tag (gtag.js) -->
+  <script>
+    if (
+      location.protocol.startsWith("http") &&
+      location.hostname !== "localhost" &&
+      location.hostname !== "127.0.0.1" &&
+      location.hostname !== "[::1]" &&
+      !navigator.webdriver
+    ) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", "G-EWBNLVRWW0");
+      const ga = document.createElement("script");
+      ga.async = true;
+      ga.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(ga);
+    }
+  </script>
+  <script type="module">
+    if (!Object.hasOwn(HTMLElement.prototype, "popover")) {
+      import("https://unpkg.com/@oddbird/popover-polyfill@0.6.1/dist/popover.min.js").catch(() => {});
+    }
+
+    (() => {
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (meta) {
+        document.addEventListener("click", (e) => {
+          if (!(e.target instanceof Element) || !e.target.closest(".psd-theme-toggle")) return;
+          let stored = null;
+          try {
+            const v = localStorage.getItem("color-scheme");
+            stored = v === "light" || v === "dark" ? v : null;
+          } catch (err) {}
+          const sys = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          const cur = meta.content === "light" || meta.content === "dark" ? meta.content : (stored ?? sys);
+          const next = cur === "dark" ? "light" : "dark";
+          if (next === sys) {
+            try { localStorage.removeItem("color-scheme"); } catch (err) {}
+            meta.content = "light dark";
+          } else {
+            try { localStorage.setItem("color-scheme", next); } catch (err) {}
+            meta.content = next;
+          }
+        });
+        window.addEventListener("storage", (e) => {
+          if (e.key === "color-scheme" || e.key === null) {
+            const v = e.newValue;
+            meta.content = v === "light" || v === "dark" ? v : "light dark";
+          }
+        });
+      }
+
+      const initVersionSwitcher = () => {
+        const switcher = document.querySelector(".psd-version-switcher");
+        const trigger = switcher?.querySelector(".psd-version-btn");
+        const labelEl = switcher?.querySelector(".psd-version-label");
+        const menu = document.getElementById("psd-version-menu");
+        const listEl = menu?.querySelector(".psd-version-list");
+        if (!switcher || !trigger || !menu || !listEl) return;
+
+        const release = switcher.getAttribute("data-release") || "";
+        const pageRel = switcher.getAttribute("data-page-rel") || "";
+        let latestVersion = switcher.getAttribute("data-latest-version") || "";
+        const pathMatch = window.location.pathname.match(/\/docs\/([^/]+)(?:\/|$)/);
+        const activeSlug = pathMatch ? pathMatch[1] : (release.includes("dev") ? "head" : release);
+
+        const isMenuOpen = () => {
+          try {
+            return menu.matches(":popover-open, .\\:popover-open");
+          } catch {
+            return menu.classList.contains(":popover-open");
+          }
+        };
+
+        const syncActiveLink = () => {
+          let matchedLabel = "";
+          const hasExactMatch = Boolean(
+            listEl.querySelector(`a[data-version-slug="${CSS.escape(activeSlug)}"]`)
+          );
+          for (const link of listEl.querySelectorAll("a[data-version-slug]")) {
+            const slug = link.getAttribute("data-version-slug");
+            const isCurrent =
+              slug === activeSlug ||
+              (!hasExactMatch && slug === "latest" && Boolean(latestVersion) && activeSlug === latestVersion);
+            if (isCurrent) {
+              link.setAttribute("aria-current", "true");
+              matchedLabel = link.querySelector(".psd-version-item-label")?.textContent?.trim() || "";
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          }
+          if (pathMatch && matchedLabel && labelEl) {
+            labelEl.textContent = matchedLabel;
+          }
+        };
+        syncActiveLink();
+
+        const supportsAnchorArea =
+          typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("position-area: block-end");
+
+        const positionFallback = () => {
+          if (supportsAnchorArea) return;
+          const rect = trigger.getBoundingClientRect();
+          const menuWidth = menu.offsetWidth || 210;
+          const menuHeight = menu.offsetHeight || 260;
+          const pad = 8;
+          let left = rect.right - menuWidth;
+          left = Math.max(pad, Math.min(left, window.innerWidth - menuWidth - pad));
+          let top = rect.bottom + 6;
+          if (top + menuHeight > window.innerHeight - pad && rect.top - menuHeight - 6 >= pad) {
+            top = rect.top - menuHeight - 6;
+          }
+          menu.style.left = `${Math.round(left)}px`;
+          menu.style.top = `${Math.round(top)}px`;
+        };
+
+        let fetchedVersions = false;
+        const maybeLoadRemoteVersions = async () => {
+          if (fetchedVersions) return;
+          fetchedVersions = true;
+          try {
+            const resp = await fetch("/versions.json", { headers: { Accept: "application/json" } });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (!data || !Array.isArray(data.versions) || data.versions.length === 0) return;
+
+            const frag = document.createDocumentFragment();
+            const seen = new Set();
+            let prevGroup = "";
+            let added = 0;
+
+            for (const entry of data.versions) {
+              if (!entry || typeof entry.slug !== "string" || !entry.slug || seen.has(entry.slug)) {
+                continue;
+              }
+              seen.add(entry.slug);
+              const group = typeof entry.group === "string" ? entry.group : "";
+              if (prevGroup && group && prevGroup !== group) {
+                const divLi = document.createElement("li");
+                divLi.className = "psd-version-divider";
+                divLi.setAttribute("role", "presentation");
+                frag.appendChild(divLi);
+              }
+              if (group) prevGroup = group;
+
+              const li = document.createElement("li");
+              const a = document.createElement("a");
+              const hasPage =
+                Boolean(entry.same_layout) &&
+                !(pageRel === "examples.html" && ["0.7", "0.7.1", "0.7.2"].includes(entry.slug));
+              const suffix = hasPage ? pageRel : "";
+              a.href = `https://www.scenedetect.com/docs/${encodeURIComponent(entry.slug)}/${suffix}`;
+              a.setAttribute("data-version-slug", entry.slug);
+              const span = document.createElement("span");
+              span.className = "psd-version-item-label";
+              span.textContent = typeof entry.label === "string" && entry.label ? entry.label : `v${entry.slug}`;
+              a.appendChild(span);
+              a.insertAdjacentHTML(
+                "beforeend",
+                '<svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+              );
+              li.appendChild(a);
+              frag.appendChild(li);
+              added += 1;
+            }
+
+            if (added === 0) return;
+
+            const tailDivider = document.createElement("li");
+            tailDivider.className = "psd-version-divider";
+            tailDivider.setAttribute("role", "presentation");
+            frag.appendChild(tailDivider);
+
+            const allLi = document.createElement("li");
+            const allLink = document.createElement("a");
+            allLink.className = "psd-version-all";
+            allLink.href = "https://www.scenedetect.com/docs/";
+            allLink.innerHTML = '<span>All versions</span><span aria-hidden="true">&rarr;</span>';
+            allLi.appendChild(allLink);
+            frag.appendChild(allLi);
+
+            listEl.replaceChildren(frag);
+            if (typeof data.latest === "string" && data.latest) {
+              latestVersion = data.latest;
+            }
+            syncActiveLink();
+          } catch (err) {
+            // Local builds without /versions.json safely keep the static build-time version list.
+          }
+        };
+
+        menu.addEventListener("toggle", () => {
+          const isOpen = isMenuOpen();
+          trigger.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) {
+            positionFallback();
+            maybeLoadRemoteVersions();
+          }
+        });
+
+        window.addEventListener("resize", () => {
+          if (isMenuOpen()) {
+            positionFallback();
+          }
+        });
+
+        switcher.addEventListener("focusout", (e) => {
+          if (!(e.relatedTarget instanceof Node) || switcher.contains(e.relatedTarget)) return;
+          if (isMenuOpen()) {
+            menu.hidePopover?.();
+          }
+        });
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initVersionSwitcher, { once: true });
+      } else {
+        initVersionSwitcher();
+      }
+    })();
+  </script>
+  
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -28,6 +256,112 @@
   
 
   </head><body>
+<header class="psd-topbar">
+  <div class="psd-topbar-inner">
+    <nav class="psd-topbar-nav" aria-label="Documentation navigation">
+      <a class="psd-backlink" href="https://www.scenedetect.com/">&larr; scenedetect.com</a>
+      <span class="psd-sep" aria-hidden="true">/</span>
+      <a href="../index.html">Reference Manual</a>
+      <a href="../cli.html">CLI Reference</a>
+      <a href="../api.html" class="current">Python API</a>
+      <a href="../examples.html">Examples</a>
+    </nav>
+    <div class="psd-topbar-meta">
+      <div class="psd-version-switcher" data-release="0.7.4-dev0" data-page-rel="api/backends.html" data-latest-version="0.7.3">
+        <button
+          type="button"
+          class="psd-version-btn"
+          popovertarget="psd-version-menu"
+          aria-controls="psd-version-menu"
+          aria-expanded="false"
+        >
+          <span class="psd-sr-only">Documentation version: </span>
+          <span class="psd-version-label">dev (0.7.4-dev0)</span>
+          <svg class="psd-version-chevron" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="psd-version-menu" class="psd-version-menu" popover="auto">
+          <nav aria-label="Documentation versions">
+            <ul class="psd-version-list">
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/latest/api/backends.html"
+                  data-version-slug="latest"
+                >
+                  <span class="psd-version-item-label">v0.7.3 (latest)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/head/api/backends.html"
+                  data-version-slug="head" aria-current="true"
+                >
+                  <span class="psd-version-item-label">dev (head)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.2/api/backends.html"
+                  data-version-slug="0.7.2"
+                >
+                  <span class="psd-version-item-label">v0.7.2</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.1/api/backends.html"
+                  data-version-slug="0.7.1"
+                >
+                  <span class="psd-version-item-label">v0.7.1</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7/api/backends.html"
+                  data-version-slug="0.7"
+                >
+                  <span class="psd-version-item-label">v0.7</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.6.7/"
+                  data-version-slug="0.6.7"
+                >
+                  <span class="psd-version-item-label">v0.6.7 (legacy)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a class="psd-version-all" href="https://www.scenedetect.com/docs/">
+                  <span>All versions</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <button type="button" class="psd-theme-toggle">
+        <svg class="psd-icon-sun" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="psd-icon-moon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span class="psd-sr-only psd-label-dark">Switch to dark theme</span>
+        <span class="psd-sr-only psd-label-light">Switch to light theme</span>
+      </button>
+      <a class="psd-gh-link" href="https://github.com/Breakthrough/PySceneDetect">
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
   
 
     <div class="document">
@@ -49,18 +383,18 @@ backed by various Python multimedia libraries. In addition to creating backend o
 <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a> can be used to open a video with a specified backend, falling
 back to OpenCV if not available.</p>
 <p>All backends available on the current system can be found via <a class="reference internal" href="#scenedetect.backends.AVAILABLE_BACKENDS" title="scenedetect.backends.AVAILABLE_BACKENDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">AVAILABLE_BACKENDS</span></code></a>.</p>
-<p>If you already have a <cite>cv2.VideoCapture</cite> object you want to use for scene detection, you can
+<p>If you already have a <code class="docutils literal notranslate"><span class="pre">cv2.VideoCapture</span></code> object you want to use for scene detection, you can
 use a <a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter" title="scenedetect.backends.opencv.VideoCaptureAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a> instead
 of a backend. This is useful when working with devices or streams, for example.</p>
 <p class="rubric" id="video-files">Video Files</p>
-<p>Assuming we have a file <cite>video.mp4</cite> in our working directory, we can load it and perform scene
+<p>Assuming we have a file <code class="docutils literal notranslate"><span class="pre">video.mp4</span></code> in our working directory, we can load it and perform scene
 detection on it using <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_video</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>An optional backend from <a class="reference internal" href="#scenedetect.backends.AVAILABLE_BACKENDS" title="scenedetect.backends.AVAILABLE_BACKENDS"><code class="xref py py-data docutils literal notranslate"><span class="pre">AVAILABLE_BACKENDS</span></code></a> can be passed to <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a>
-(e.g. <cite>backend=”opencv”</cite>). Additional keyword arguments passed to <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a>
+(e.g. <code class="docutils literal notranslate"><span class="pre">backend=&quot;opencv&quot;</span></code>). Additional keyword arguments passed to <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a>
 will be forwarded to the backend constructor. If the specified backend is unavailable, or
 loading the video fails, <code class="docutils literal notranslate"><span class="pre">opencv</span></code> will be tried as a fallback.</p>
 <p>Lastly, to use a specific backend directly:</p>
@@ -85,7 +419,7 @@ decoders they hold, or used as a context manager to close them automatically:</p
 </pre></div>
 </div>
 <p class="rubric" id="devices-cameras-pipes">Devices / Cameras / Pipes</p>
-<p>You can use an existing <cite>cv2.VideoCapture</cite> object with the PySceneDetect API using a
+<p>You can use an existing <code class="docutils literal notranslate"><span class="pre">cv2.VideoCapture</span></code> object with the PySceneDetect API using a
 <a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter" title="scenedetect.backends.opencv.VideoCaptureAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a>. For example,
 to use a <a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a> with a webcam device:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">SceneManager</span><span class="p">,</span> <span class="n">ContentDetector</span>
@@ -109,7 +443,7 @@ examples for details.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.backends.AVAILABLE_BACKENDS">
 <span class="sig-name descname"><span class="pre">AVAILABLE_BACKENDS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'moviepy':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.moviepy.VideoStreamMoviePy'&gt;,</span> <span class="pre">'opencv':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.opencv.VideoStreamCv2'&gt;,</span> <span class="pre">'pyav':</span> <span class="pre">&lt;class</span> <span class="pre">'scenedetect.backends.pyav.VideoStreamAv'&gt;}</span></em><a class="headerlink" href="#scenedetect.backends.AVAILABLE_BACKENDS" title="Permalink to this definition">¶</a></dt>
-<dd><p>All available backends that <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a> can consider for the <cite>backend</cite>
+<dd><p>All available backends that <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a> can consider for the <code class="docutils literal notranslate"><span class="pre">backend</span></code>
 parameter. These backends must support construction with the following signature:</p>
 <blockquote>
 <div><p>BackendType(path: str, frame_rate: ty.Optional[float | Fraction])</p>
@@ -123,32 +457,32 @@ parameter. These backends must support construction with the following signature
 <p class="admonition-title">See also</p>
 <p>CLI: <a class="reference internal" href="../cli/backends.html#cli-backend-opencv"><span class="std std-ref">-b opencv</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-backend-opencv"><span class="std std-ref">[backend-opencv]</span></a></p>
 </div>
-<span class="target" id="module-scenedetect.backends.opencv"></span><p><a class="reference internal" href="#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a> is backed by the OpenCV <cite>VideoCapture</cite> object. This is the default
+<span class="target" id="module-scenedetect.backends.opencv"></span><p><a class="reference internal" href="#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a> is backed by the OpenCV <code class="docutils literal notranslate"><span class="pre">VideoCapture</span></code> object. This is the default
 backend. Works with video files, image sequences, and network streams/URLs.</p>
 <p>For wrapping input devices or pipes, there is also <a class="reference internal" href="#scenedetect.backends.opencv.VideoCaptureAdapter" title="scenedetect.backends.opencv.VideoCaptureAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a> which can be
-constructed from an existing <cite>cv2.VideoCapture</cite>. This allows performing scene detection on inputs
+constructed from an existing <code class="docutils literal notranslate"><span class="pre">cv2.VideoCapture</span></code>. This allows performing scene detection on inputs
 which do not support seeking.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStreamCv2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_decode_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_or_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2" title="Permalink to this definition">¶</a></dt>
-<dd><p>OpenCV <cite>cv2.VideoCapture</cite> backend.</p>
+<dd><p>OpenCV <code class="docutils literal notranslate"><span class="pre">cv2.VideoCapture</span></code> backend.</p>
 <p>Open a video file, image sequence, or network stream.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – Path to the video. Can be a file, image sequence (<cite>‘folder/DSC_%04d.jpg’</cite>),
+<li><p><strong>path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – Path to the video. Can be a file, image sequence (<code class="docutils literal notranslate"><span class="pre">'folder/DSC_%04d.jpg'</span></code>),
 or network stream.</p></li>
 <li><p><strong>frame_rate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – If set, overrides the detected frame rate. Takes precedence over
-<cite>framerate</cite>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">framerate</span></code>.</p></li>
 <li><p><strong>max_decode_attempts</strong> (<em>int</em>) – Number of attempts to continue decoding the video
 after a frame fails to decode. This allows processing videos that
 have a few corrupted frames or metadata (in which case accuracy
 of detection algorithms may be lower). Once this limit is passed,
 decoding will stop and emit an error.</p></li>
-<li><p><strong>path_or_device</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>int</em><em> | </em><em>None</em>) – [DEPRECATED] Specify <cite>path</cite> for files, image sequences, or
-network streams/URLs.  Use <cite>VideoCaptureAdapter</cite> for devices/pipes.</p></li>
-<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] Use <cite>frame_rate</cite> instead. Retained as a deprecated
-alias for backwards compatibility; ignored when <cite>frame_rate</cite> is provided.</p></li>
+<li><p><strong>path_or_device</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>int</em><em> | </em><em>None</em>) – [DEPRECATED] Specify <code class="docutils literal notranslate"><span class="pre">path</span></code> for files, image sequences, or
+network streams/URLs.  Use <code class="docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code> for devices/pipes.</p></li>
+<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] Use <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> instead. Retained as a deprecated
+alias for backwards compatibility; ignored when <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> is provided.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -162,7 +496,7 @@ alias for backwards compatibility; ignored when <cite>frame_rate</cite> is provi
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.close">
 <span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.close" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close the video, releasing the underlying <cite>cv2.VideoCapture</cite>. Has no effect if the
+<dd><p>Close the video, releasing the underlying <code class="docutils literal notranslate"><span class="pre">cv2.VideoCapture</span></code>. Has no effect if the
 stream is already closed. See
 <a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream.close" title="scenedetect.video_stream.VideoStream.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VideoStream.close()</span></code></a> for details.</p>
 <dl class="field-list simple">
@@ -198,7 +532,7 @@ If decode = False, a bool indicating if advancing to the the next frame succeede
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close and re-open the VideoStream (should be equivalent to calling <cite>seek(0)</cite>).</p>
+<dd><p>Close and re-open the VideoStream (should be equivalent to calling <code class="docutils literal notranslate"><span class="pre">seek(0)</span></code>).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -210,8 +544,8 @@ pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of
 to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
 seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
 by read(), at which point frame_number will be 5.</p>
-<p>May not be supported on all backend types or inputs (e.g. cameras). If <cite>SeekError</cite> is
-raised, the stream position is undefined. <cite>reset()</cite> can be called to restore the stream.</p>
+<p>May not be supported on all backend types or inputs (e.g. cameras). If <code class="docutils literal notranslate"><span class="pre">SeekError</span></code> is
+raised, the stream position is undefined. <code class="docutils literal notranslate"><span class="pre">reset()</span></code> can be called to restore the stream.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>target</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Target position in video stream to seek to.
@@ -221,7 +555,7 @@ If int, interpreted as frame number.</p>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.SeekError" title="scenedetect.video_stream.SeekError"><strong>SeekError</strong></a> – An error occurs while seeking, or seeking is not supported.</p></li>
-<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative), or the stream is
+<li><p><strong>ValueError</strong> – <code class="docutils literal notranslate"><span class="pre">target</span></code> is not a valid value (i.e. it is negative), or the stream is
     closed.</p></li>
 </ul>
 </dd>
@@ -247,7 +581,7 @@ If int, interpreted as frame number.</p>
 <p>Prefer to use this property only to take ownership of the underlying cv2.VideoCapture object
 backing this object. Seeking or using the read/grab methods through this property are
 unsupported and will leave this object in an inconsistent state. Closing this object (e.g.
-by leaving a <cite>with</cite> block) releases the capture.</p>
+by leaving a <code class="docutils literal notranslate"><span class="pre">with</span></code> block) releases the capture.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -260,7 +594,7 @@ by leaving a <cite>with</cite> block) releases the capture.</p>
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoStreamCv2.frame_number">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.frame_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as the frame number.</p>
-<p>Will return 0 until the first frame is <cite>read</cite>.</p>
+<p>Will return 0 until the first frame is <code class="docutils literal notranslate"><span class="pre">read</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -299,7 +633,7 @@ by leaving a <cite>with</cite> block) releases the capture.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoStreamCv2.position" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as FrameTimecode.</p>
 <p>This can be interpreted as presentation time stamp, thus frame 1 corresponds
-to the presentation time 0.  Returns 0 even if <cite>frame_number</cite> is 1.</p>
+to the presentation time 0.  Returns 0 even if <code class="docutils literal notranslate"><span class="pre">frame_number</span></code> is 1.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -322,24 +656,24 @@ milliseconds. The first frame has a PTS of 0.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoCaptureAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_read_attempts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adapter for existing VideoCapture objects. Unlike VideoStreamCv2, this class supports
 VideoCaptures which may not support seeking.</p>
-<p>The VideoCapture remains owned by the caller: closing the adapter (e.g. by leaving a <cite>with</cite>
+<p>The VideoCapture remains owned by the caller: closing the adapter (e.g. by leaving a <code class="docutils literal notranslate"><span class="pre">with</span></code>
 block) does not release it.</p>
 <p>Create from an existing OpenCV VideoCapture object. Used for webcams, live streams,
 pipes, or other inputs which may not support seeking.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cap</strong> (<em>VideoCapture</em>) – The <cite>cv2.VideoCapture</cite> object to wrap. Must already be opened and ready to
-have <cite>cap.read()</cite> called on it.</p></li>
+<li><p><strong>cap</strong> (<em>VideoCapture</em>) – The <code class="docutils literal notranslate"><span class="pre">cv2.VideoCapture</span></code> object to wrap. Must already be opened and ready to
+have <code class="docutils literal notranslate"><span class="pre">cap.read()</span></code> called on it.</p></li>
 <li><p><strong>frame_rate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – If set, overrides the detected frame rate. Takes precedence over
-<cite>framerate</cite>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">framerate</span></code>.</p></li>
 <li><p><strong>max_read_attempts</strong> (<em>int</em>) – Number of attempts to continue decoding the video
 after a frame fails to decode. This allows processing videos that
 have a few corrupted frames or metadata (in which case accuracy
 of detection algorithms may be lower). Once this limit is passed,
 decoding will stop and emit an error.</p></li>
-<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] Use <cite>frame_rate</cite> instead. Retained as a deprecated
-alias for backwards compatibility; ignored when <cite>frame_rate</cite> is provided.</p></li>
+<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] Use <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> instead. Retained as a deprecated
+alias for backwards compatibility; ignored when <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> is provided.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -417,7 +751,7 @@ will leave this object in an inconsistent state.</p>
 <dt class="sig sig-object py" id="scenedetect.backends.opencv.VideoCaptureAdapter.frame_number">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.frame_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as the frame number.</p>
-<p>Will return 0 until the first frame is <cite>read</cite>.</p>
+<p>Will return 0 until the first frame is <code class="docutils literal notranslate"><span class="pre">read</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -455,7 +789,7 @@ will leave this object in an inconsistent state.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.opencv.VideoCaptureAdapter.position" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as FrameTimecode.</p>
 <p>This can be interpreted as presentation time stamp, thus frame 1 corresponds
-to the presentation time 0.  Returns 0 even if <cite>frame_number</cite> is 1.</p>
+to the presentation time 0.  Returns 0 even if <code class="docutils literal notranslate"><span class="pre">frame_number</span></code> is 1.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -478,11 +812,11 @@ milliseconds. The first frame has a PTS of 0.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStreamAv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_or_io</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threading_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv" title="Permalink to this definition">¶</a></dt>
-<dd><p>PyAV <cite>av.InputContainer</cite> backend.</p>
+<dd><p>PyAV <code class="docutils literal notranslate"><span class="pre">av.InputContainer</span></code> backend.</p>
 <p>Open a video by path.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Using <cite>threading_mode</cite> with <cite>suppress_output = True</cite> can cause lockups in your
+<p>Using <code class="docutils literal notranslate"><span class="pre">threading_mode</span></code> with <code class="docutils literal notranslate"><span class="pre">suppress_output</span> <span class="pre">=</span> <span class="pre">True</span></code> can cause lockups in your
 application. See the PyAV documentation for details:
 <a class="reference external" href="https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters">https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters</a></p>
 </div>
@@ -491,19 +825,19 @@ application. See the PyAV documentation for details:
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path_or_io</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>BinaryIO</em>) – Path to the video, or a file-like object.</p></li>
 <li><p><strong>frame_rate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – If set, overrides the detected frame rate. Takes precedence over
-<cite>framerate</cite>.</p></li>
-<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Overrides the <cite>name</cite> property derived from the video path. Should be set if
-<cite>path_or_io</cite> is a file-like object.</p></li>
-<li><p><strong>threading_mode</strong> (<em>str</em><em> | </em><em>None</em>) – The PyAV video stream <cite>thread_type</cite>. See av.codec.context.ThreadType
+<code class="docutils literal notranslate"><span class="pre">framerate</span></code>.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em> | </em><em>None</em>) – Overrides the <code class="docutils literal notranslate"><span class="pre">name</span></code> property derived from the video path. Should be set if
+<code class="docutils literal notranslate"><span class="pre">path_or_io</span></code> is a file-like object.</p></li>
+<li><p><strong>threading_mode</strong> (<em>str</em><em> | </em><em>None</em>) – The PyAV video stream <code class="docutils literal notranslate"><span class="pre">thread_type</span></code>. See av.codec.context.ThreadType
 for valid threading modes (‘AUTO’, ‘FRAME’, ‘NONE’, and ‘SLICE’). If this mode is
 ‘AUTO’ or ‘FRAME’ and not all frames have been decoded, the video will be reopened
 if seekable, and the remaining frames decoded in single-threaded mode.</p></li>
 <li><p><strong>suppress_output</strong> (<em>bool</em>) – If False, ffmpeg output will be sent to stdout/stderr by calling
-<cite>av.logging.restore_default_callback()</cite> before any other library calls. If True
+<code class="docutils literal notranslate"><span class="pre">av.logging.restore_default_callback()</span></code> before any other library calls. If True
 the application may deadlock if threading_mode is set. See the PyAV documentation
 for details: <a class="reference external" href="https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters">https://pyav.org/docs/stable/overview/caveats.html#sub-interpeters</a></p></li>
-<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – [DEPRECATED] Use <cite>frame_rate</cite> instead. Retained as a deprecated
-alias for backwards compatibility; ignored when <cite>frame_rate</cite> is provided.</p></li>
+<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – [DEPRECATED] Use <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> instead. Retained as a deprecated
+alias for backwards compatibility; ignored when <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> is provided.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -518,7 +852,7 @@ alias for backwards compatibility; ignored when <cite>frame_rate</cite> is provi
 <dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.close">
 <span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Close the video, releasing the decoder, the container, and the file handle opened if
-<cite>path_or_io</cite> is a path. File-like objects passed by the caller are left open. Has no
+<code class="docutils literal notranslate"><span class="pre">path_or_io</span></code> is a path. File-like objects passed by the caller are left open. Has no
 effect if the stream is already closed. See
 <a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream.close" title="scenedetect.video_stream.VideoStream.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VideoStream.close()</span></code></a> for details.</p>
 <dl class="field-list simple">
@@ -554,7 +888,7 @@ If decode = False, a bool indicating if advancing to the the next frame succeede
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close and re-open the VideoStream (should be equivalent to calling <cite>seek(0)</cite>).</p>
+<dd><p>Close and re-open the VideoStream (should be equivalent to calling <code class="docutils literal notranslate"><span class="pre">seek(0)</span></code>).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -566,9 +900,9 @@ pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of
 to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
 seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
 by read(), at which point frame_number will be 5.</p>
-<p>May not be supported on all input codecs (see <cite>is_seekable</cite>). Elementary streams usually
-cannot be seeked, and may raise <cite>SeekError</cite>, after which the stream position is undefined
-until <cite>reset()</cite> is called.</p>
+<p>May not be supported on all input codecs (see <code class="docutils literal notranslate"><span class="pre">is_seekable</span></code>). Elementary streams usually
+cannot be seeked, and may raise <code class="docutils literal notranslate"><span class="pre">SeekError</span></code>, after which the stream position is undefined
+until <code class="docutils literal notranslate"><span class="pre">reset()</span></code> is called.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>target</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Target position in video stream to seek to.
@@ -579,7 +913,7 @@ If int, interpreted as frame number.</p>
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.SeekError" title="scenedetect.video_stream.SeekError"><strong>SeekError</strong></a> – Stream does not support seeking, target cannot be seeked to, or the video
     could not be re-opened to read forward from the start.</p></li>
-<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative), or the stream is
+<li><p><strong>ValueError</strong> – <code class="docutils literal notranslate"><span class="pre">target</span></code> is not a valid value (i.e. it is negative), or the stream is
     closed.</p></li>
 </ul>
 </dd>
@@ -611,8 +945,8 @@ If int, interpreted as frame number.</p>
 <dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.frame_number">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.frame_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as the frame number (CFR-equivalent).</p>
-<p>Will return 0 until the first frame is <cite>read</cite>. For VFR video this is an approximation
-derived from PTS * framerate; use <cite>position</cite> for accurate PTS-based timing.</p>
+<p>Will return 0 until the first frame is <code class="docutils literal notranslate"><span class="pre">read</span></code>. For VFR video this is an approximation
+derived from PTS * framerate; use <code class="docutils literal notranslate"><span class="pre">position</span></code> for accurate PTS-based timing.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -650,7 +984,7 @@ derived from PTS * framerate; use <cite>position</cite> for accurate PTS-based t
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.position" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as FrameTimecode.</p>
 <p>This can be interpreted as presentation time stamp, thus frame 1 corresponds
-to the presentation time 0.  Returns 0 even if <cite>frame_number</cite> is 1.</p>
+to the presentation time 0.  Returns 0 even if <code class="docutils literal notranslate"><span class="pre">frame_number</span></code> is 1.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -663,7 +997,7 @@ milliseconds. The first frame has a PTS of 0.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="scenedetect.backends.pyav.VideoStreamAv.rate">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.backends.pyav.VideoStreamAv.rate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Frame rate reported by the stream (PyAV <cite>guessed_rate</cite>), or None if unavailable.</p>
+<dd><p>Frame rate reported by the stream (PyAV <code class="docutils literal notranslate"><span class="pre">guessed_rate</span></code>), or None if unavailable.</p>
 </dd></dl>
 
 </dd></dl>
@@ -675,24 +1009,24 @@ milliseconds. The first frame has a PTS of 0.</p>
 <p class="admonition-title">See also</p>
 <p>CLI: <a class="reference internal" href="../cli/backends.html#cli-backend-moviepy"><span class="std std-ref">-b moviepy</span></a></p>
 </div>
-<span class="target" id="module-scenedetect.backends.moviepy"></span><p><a class="reference internal" href="#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a> provides an adapter for MoviePy’s <cite>FFMPEG_VideoReader</cite>.</p>
+<span class="target" id="module-scenedetect.backends.moviepy"></span><p><a class="reference internal" href="#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a> provides an adapter for MoviePy’s <code class="docutils literal notranslate"><span class="pre">FFMPEG_VideoReader</span></code>.</p>
 <p>MoviePy launches ffmpeg as a subprocess, and can be used with various types of inputs. Generally,
 the input should support seeking, but does not necessarily have to be a video. For example,
 image sequences or AviSynth scripts are supported as inputs.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStreamMoviePy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_infos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">framerate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy" title="Permalink to this definition">¶</a></dt>
-<dd><p>MoviePy <cite>FFMPEG_VideoReader</cite> backend.</p>
+<dd><p>MoviePy <code class="docutils literal notranslate"><span class="pre">FFMPEG_VideoReader</span></code> backend.</p>
 <p>Open a video or device.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em>) – Path to video,.</p></li>
 <li><p><strong>frame_rate</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – If set, overrides the detected frame rate. Takes precedence over
-<cite>framerate</cite>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">framerate</span></code>.</p></li>
 <li><p><strong>print_infos</strong> (<em>bool</em>) – If True, prints information about the opened video to stdout.</p></li>
-<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] Use <cite>frame_rate</cite> instead. Retained as a deprecated
-alias for backwards compatibility; ignored when <cite>frame_rate</cite> is provided.</p></li>
+<li><p><strong>framerate</strong> (<em>float</em><em> | </em><em>None</em>) – [DEPRECATED] Use <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> instead. Retained as a deprecated
+alias for backwards compatibility; ignored when <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> is provided.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -742,7 +1076,7 @@ If decode = False, a bool indicating if advancing to the the next frame succeede
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">print_infos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close and re-open the VideoStream (should be equivalent to calling <cite>seek(0)</cite>).</p>
+<dd><p>Close and re-open the VideoStream (should be equivalent to calling <code class="docutils literal notranslate"><span class="pre">seek(0)</span></code>).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -764,7 +1098,7 @@ If int, interpreted as frame number.</p>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.SeekError" title="scenedetect.video_stream.SeekError"><strong>SeekError</strong></a> – An error occurs while seeking, or seeking is not supported.</p></li>
-<li><p><strong>ValueError</strong> – <cite>target</cite> is not a valid value (i.e. it is negative), or the stream is
+<li><p><strong>ValueError</strong> – <code class="docutils literal notranslate"><span class="pre">target</span></code> is not a valid value (i.e. it is negative), or the stream is
     closed.</p></li>
 </ul>
 </dd>
@@ -793,7 +1127,7 @@ If int, interpreted as frame number.</p>
 <dt class="sig sig-object py" id="scenedetect.backends.moviepy.VideoStreamMoviePy.frame_number">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.frame_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream in frames as an int.</p>
-<p>0 indicates that no frames have been <cite>read</cite>, 1 indicates the first frame was just read.</p>
+<p>0 indicates that no frames have been <code class="docutils literal notranslate"><span class="pre">read</span></code>, 1 indicates the first frame was just read.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -832,8 +1166,8 @@ construction if one was provided; otherwise the rate reported by MoviePy’s rea
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><span class="pre">FrameTimecode</span></a></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.position" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as FrameTimecode.</p>
 <p>This can be interpreted as presentation time stamp of the last frame which was decoded by
-calling <cite>read</cite>. This will always return 0 (e.g. be equal to <cite>base_timecode</cite>) if no frames
-have been <cite>read</cite> yet.</p>
+calling <code class="docutils literal notranslate"><span class="pre">read</span></code>. This will always return 0 (e.g. be equal to <code class="docutils literal notranslate"><span class="pre">base_timecode</span></code>) if no frames
+have been <code class="docutils literal notranslate"><span class="pre">read</span></code> yet.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -841,7 +1175,7 @@ have been <cite>read</cite> yet.</p>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">position_ms</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.backends.moviepy.VideoStreamMoviePy.position_ms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Current position within stream as a float of the presentation time in milliseconds.
 The first frame has a time of 0.0 ms.</p>
-<p>This method will always return 0.0 if no frames have been <cite>read</cite>.</p>
+<p>This method will always return 0.0 if no frames have been <code class="docutils literal notranslate"><span class="pre">read</span></code>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -862,17 +1196,17 @@ backend-agnostic. The easiest way to construct one is by passing a list of paths
 <p>The resulting stream can be used anywhere a single-video stream can, e.g. with a
 <a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a>. All videos must have the same
 resolution. Framerates may differ, in which case reported frame numbers may be inaccurate -
-use <cite>position</cite> for accurate PTS-based timing.</p>
+use <code class="docutils literal notranslate"><span class="pre">position</span></code> for accurate PTS-based timing.</p>
 <p><a class="reference internal" href="#scenedetect.backends.concat.VideoStreamConcat.map_span" title="scenedetect.backends.concat.VideoStreamConcat.map_span"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VideoStreamConcat.map_span()</span></code></a> maps a span of the global timeline back to per-source local
-times (e.g. for use as ffmpeg <cite>-ss</cite>/<cite>-t</cite> arguments).</p>
+times (e.g. for use as ffmpeg <code class="docutils literal notranslate"><span class="pre">-ss</span></code>/<code class="docutils literal notranslate"><span class="pre">-t</span></code> arguments).</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VideoStreamConcat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'opencv'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenates multiple videos into a single, contiguous video stream with a
 monotonic PTS-based global timeline.</p>
 <p>The concatenation logic is backend-agnostic: frames are read through any PySceneDetect
-<cite>VideoStream</cite> backend, selected by name (default <cite>opencv</cite>). For the most accurate seam
-timing, use <cite>backend=”pyav”</cite> if available.</p>
+<code class="docutils literal notranslate"><span class="pre">VideoStream</span></code> backend, selected by name (default <code class="docutils literal notranslate"><span class="pre">opencv</span></code>). For the most accurate seam
+timing, use <code class="docutils literal notranslate"><span class="pre">backend=&quot;pyav&quot;</span></code> if available.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoOpenFailure" title="scenedetect.video_stream.VideoOpenFailure"><strong>VideoOpenFailure</strong></a> – Failed to open a video, or video parameters don’t match.</p>
@@ -958,7 +1292,7 @@ A span which straddles one or more file boundaries yields multiple entries.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.seek">
 <span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.seek" title="Permalink to this definition">¶</a></dt>
-<dd><p>Seek to <cite>target</cite> on the global timeline. Supports seeking across sources in
+<dd><p>Seek to <code class="docutils literal notranslate"><span class="pre">target</span></code> on the global timeline. Supports seeking across sources in
 either direction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1007,7 +1341,7 @@ either direction.</p>
 <dt class="sig sig-object py" id="scenedetect.backends.concat.VideoStreamConcat.frame_rate">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span></em><a class="headerlink" href="#scenedetect.backends.concat.VideoStreamConcat.frame_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Average framerate of the first input video. Individual sources may vary; use
-<cite>position</cite> for accurate timing.</p>
+<code class="docutils literal notranslate"><span class="pre">position</span></code> for accurate timing.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1060,7 +1394,7 @@ of the first video has a presentation time of 0).</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SourceSpan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.backends.concat.SourceSpan" title="Permalink to this definition">¶</a></dt>
 <dd><p>Portion of a single input video covered by a time span on the global timeline of a
 <a class="reference internal" href="#scenedetect.backends.concat.VideoStreamConcat" title="scenedetect.backends.concat.VideoStreamConcat"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a>. Local times are relative to the start of that video, directly
-usable as seek targets or ffmpeg <cite>-ss</cite>/<cite>-t</cite> values.</p>
+usable as seek targets or ffmpeg <code class="docutils literal notranslate"><span class="pre">-ss</span></code>/<code class="docutils literal notranslate"><span class="pre">-t</span></code> values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1079,7 +1413,7 @@ usable as seek targets or ffmpeg <cite>-ss</cite>/<cite>-t</cite> values.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="scenedetect.backends.pyav.MAX_CONSECUTIVE_DECODE_FAILURES">
 <span class="sig-name descname"><span class="pre">MAX_CONSECUTIVE_DECODE_FAILURES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#scenedetect.backends.pyav.MAX_CONSECUTIVE_DECODE_FAILURES" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of consecutive frame decode failures after which <cite>VideoStreamAv.read()</cite> gives up.
+<dd><p>Number of consecutive frame decode failures after which <code class="docutils literal notranslate"><span class="pre">VideoStreamAv.read()</span></code> gives up.
 Isolated corrupt frames are skipped; this bound ensures a truncated file still terminates.</p>
 </dd></dl>
 
@@ -1113,48 +1447,19 @@ Isolated corrupt frames are skipped; this bound ensures a truncated file still t
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<p class="logo">
+        <div class="sphinxsidebarwrapper"><p class="logo">
   <a href="../index.html">
-    <img class="logo" src="../_static/pyscenedetect_logo.png" alt="Logo" />
-    
+    <img class="logo psd-logo-light" src="../_static/pyscenedetect_logo_small.png" alt="PySceneDetect" width="300" height="141" />
+    <img class="logo psd-logo-dark" src="../_static/pyscenedetect_logo_small_darkmode.png" alt="PySceneDetect" width="462" height="217" />
   </a>
 </p>
-
-
-
-<p class="blurb">Version: [0.7.4-dev0]</p>
-
-
-
-
-<p>
-<iframe src="https://ghbtns.com/github-btn.html?user=Breakthrough&repo=PySceneDetect&type=star&count=true&size=large&v=2"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-
-
-
-
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-<nav class="section-switch" aria-label="Documentation section">
-  <a href="../cli.html">CLI</a><span class="sep" aria-hidden="true">|</span>
-  <a href="../api.html" class="current" aria-current="location">Python API</a>
-  <span class="section-links">
-  <a href="../examples.html">Examples</a>
-  </span>
-</nav>
+<p class="psd-sidebar-subtitle">Reference Manual &middot; 0.7.4-dev0</p>
+<search class="psd-searchbox">
+  <form class="search" action="../search.html" method="get">
+    <input type="search" name="q" aria-label="Search documentation" placeholder="Search docs..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+  </form>
+</search>
+<nav class="psd-sidebar-toc" aria-label="Section navigation">
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#usage">Usage</a></li>
@@ -1242,25 +1547,26 @@ Isolated corrupt frames are skipped; this bound ensures a truncated file still t
 <li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
 
+</nav>
 
         </div>
       </div>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2014, Brandon Castellano.
-      
-      |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
-      
-      |
-      <a href="../_sources/api/backends.rst.txt"
-          rel="nofollow">Page source</a>
+      <div class="psd-footer-inner">
+        <span class="psd-footer-meta">&#169;2014, Brandon Castellano. | 
+          Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+          &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a> | 
+          <a href="../_sources/api/backends.rst.txt" rel="nofollow">Page source</a>
+        </span>
+        <ul class="psd-footer-links" role="list">
+          <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+          <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+          <li><a href="https://www.scenedetect.com/changelog/">Changelog</a></li>
+          <li><a href="https://www.scenedetect.com/copyright/">License</a></li>
+        </ul>
+      </div>
     </div>
-
-    
-
-    
   </body>
 </html>

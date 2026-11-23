@@ -5,31 +5,31 @@
 
 .. seealso:: For the ``scenedetect`` command, see the :doc:`CLI reference <cli>`.
 
-The `scenedetect` API is easy to integrate with most application workflows, while also being highly extensible. See the `Usage`_ section below for some common use cases and integrations. The `scenedetect` package is organized into several sub-modules:
+The ``scenedetect`` API integrates into Python applications and supports custom detectors and video backends. See `Usage`_ below for common examples. The ``scenedetect`` package is organized into these submodules:
 
-    * :ref:`Functions <scenedetect-functions>`: high-level functions like :func:`scenedetect.detect() <scenedetect.detect>` to quickly analyze a video with any :ref:`detection algorithm <scenedetect-detectors>` (:ref:`example <scenedetect-usage>`) and get a list of timecode pairs as a result
+    * :ref:`Functions <scenedetect-functions>`: high-level functions such as :func:`scenedetect.detect() <scenedetect.detect>` to analyze a video with any :ref:`detector <scenedetect-detectors>` (:ref:`example <scenedetect-usage>`) and return a list of timecode pairs
 
-    * :doc:`api/detectors`: detection algorithms:
+    * :doc:`api/detectors`: built-in detectors:
 
-        * :class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`: finds fast cuts using rolling average of HSL changes
+        * :class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`: finds fast cuts using a rolling average of HSV content changes
 
-        * :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`: detects fast cuts using weighted average of HSV changes
-
-        * :class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`: finds fades in/out using average pixel intensity changes in RGB
-
-        * :class:`HistogramDetector <scenedetect.detectors.histogram_detector.HistogramDetector>`: finds fast cuts using HSV histogram changes
+        * :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`: finds fast cuts using a weighted average of HSV color and optional edge changes
 
         * :class:`HashDetector <scenedetect.detectors.hash_detector.HashDetector>`: finds fast cuts using perceptual image hashing
 
-    * :doc:`api/output`: Output formats:
+        * :class:`HistogramDetector <scenedetect.detectors.histogram_detector.HistogramDetector>`: finds fast cuts using Y-channel (brightness) histogram changes in YUV
 
-        * :func:`split_video_ffmpeg <scenedetect.output.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.output.split_video_mkvmerge>` split a video based on the detected scenes
+        * :class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`: finds fades in and out using average RGB pixel brightness
 
-        * :func:`save_images <scenedetect.output.save_images>` can save an arbitrary number of images from each scene
+    * :doc:`api/output`: output helpers:
 
-        * :func:`write_scene_list <scenedetect.output.write_scene_list>` can be used to save scene/cut info as CSV, :func:`write_scene_list_html <scenedetect.output.write_scene_list_html>` for HTML
+        * :func:`split_video_ffmpeg <scenedetect.output.split_video_ffmpeg>` and :func:`split_video_mkvmerge <scenedetect.output.split_video_mkvmerge>` split a video into clips for each detected scene
 
-    * :doc:`api/backends`: PySceneDetect supports multiple libraries as an input backend:
+        * :func:`save_images <scenedetect.output.save_images>` saves still frames from each scene
+
+        * :func:`write_scene_list <scenedetect.output.write_scene_list>` writes scene lists as CSV, :func:`write_scene_list_html <scenedetect.output.write_scene_list_html>` writes HTML reports, and additional helpers export EDL, Final Cut Pro XML, OpenTimelineIO, and FFmetadata chapters
+
+    * :doc:`api/backends`: modular video input backends:
 
         * OpenCV: :class:`VideoStreamCv2 <scenedetect.backends.opencv.VideoStreamCv2>`
 
@@ -37,30 +37,30 @@ The `scenedetect` API is easy to integrate with most application workflows, whil
 
         * MoviePy: :class:`VideoStreamMoviePy <scenedetect.backends.moviepy.VideoStreamMoviePy>`
 
-        * Multiple videos can be treated as a single continuous stream using :class:`VideoStreamConcat <scenedetect.backends.concat.VideoStreamConcat>` (e.g. ``open_video(["part1.mp4", "part2.mp4"])``)
+        * Multiple videos can be read as one continuous stream with :class:`VideoStreamConcat <scenedetect.backends.concat.VideoStreamConcat>` (for example, ``open_video(["part1.mp4", "part2.mp4"])``)
 
-    * :doc:`api/common`: common functionality such as :class:`FrameTimecode <scenedetect.common.FrameTimecode>` for timecode handling
+    * :doc:`api/common`: common types such as :class:`FrameTimecode <scenedetect.common.FrameTimecode>` for timecode handling
 
-    * :doc:`api/scene_manager`: the :class:`SceneManager <scenedetect.scene_manager.SceneManager>` coordinates performing scene detection on a video with one or more detectors
+    * :doc:`api/scene_manager`: :class:`SceneManager <scenedetect.scene_manager.SceneManager>` runs scene detection on a video with one or more detectors
 
-    * :doc:`api/detector`: the interface (:class:`SceneDetector <scenedetect.detector.SceneDetector>`) that detectors must implement to be compatible with PySceneDetect
+    * :doc:`api/detector`: the :class:`SceneDetector <scenedetect.detector.SceneDetector>` base class for custom detectors
 
-    * :doc:`api/video_stream`: the interface (:class:`VideoStream <scenedetect.video_stream.VideoStream>`) that video backends must implement to be compatible with PySceneDetect
+    * :doc:`api/video_stream`: the :class:`VideoStream <scenedetect.video_stream.VideoStream>` base class for custom video backends
 
-    * :doc:`api/stats_manager`: the :class:`StatsManager <scenedetect.stats_manager.StatsManager>` allows you to store detection metrics for each frame and save them to CSV for further analysis
+    * :doc:`api/stats_manager`: :class:`StatsManager <scenedetect.stats_manager.StatsManager>` stores per-frame detection metrics and writes them to a CSV stats file
 
     * :doc:`api/platform`: logging and utility functions
 
 
-Most types/functions are also available directly from the `scenedetect` package to make imports simpler.
+Most common types and functions can be imported directly from the top-level ``scenedetect`` package.
 
 .. warning::
 
-    The PySceneDetect API is still under development. It is recommended that you pin the `scenedetect` version in your requirements to below the next major release:
+    The PySceneDetect API may change before v1.0. Pin ``scenedetect`` to a minor release in your dependencies:
 
     .. code:: python
 
-        scenedetect~=0.7
+        scenedetect~=0.7.0
 
 
 .. _scenedetect-usage:
@@ -68,7 +68,7 @@ Most types/functions are also available directly from the `scenedetect` package 
 Usage
 -----
 
-PySceneDetect makes it very easy to find scene transitions in a video with the :func:`scenedetect.detect` function:
+Find scene cuts in a video with :func:`scenedetect.detect`:
 
 .. code:: python
 
@@ -78,9 +78,9 @@ PySceneDetect makes it very easy to find scene transitions in a video with the :
     for (scene_start, scene_end) in scenes:
         print(f"{scene_start}-{scene_end}")
 
-``scenes`` now contains a list of :class:`FrameTimecode <scenedetect.common.FrameTimecode>` pairs representing the start/end of each scene. Note that you can set ``show_progress=True`` when calling :func:`detect <scenedetect.detect>` to display a progress bar with estimated time remaining.
+``scenes`` is a list of :class:`FrameTimecode <scenedetect.common.FrameTimecode>` pairs giving the start and end of each scene. Pass ``show_progress=True`` to :func:`detect <scenedetect.detect>` to show a progress bar with estimated time remaining.
 
-Here, we use :mod:`ContentDetector <scenedetect.detectors.content_detector>` to detect fast cuts. There are :ref:`many detector types <scenedetect-detectors>` which can be used to find fast cuts and fades in/out.  PySceneDetect can also export scene data in various formats, and can  :ref:`split the input video <scenedetect-output>` automatically if `ffmpeg` is available:
+This example uses :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>` to find fast cuts. You can choose from several :ref:`detectors <scenedetect-detectors>` for fast cuts and fades. PySceneDetect can also export scene lists in several formats and :ref:`split the input video <scenedetect-output>` when ``ffmpeg`` is installed:
 
 .. code:: python
 
@@ -88,7 +88,7 @@ Here, we use :mod:`ContentDetector <scenedetect.detectors.content_detector>` to 
     scene_list = detect("my_video.mp4", ContentDetector())
     split_video_ffmpeg("my_video.mp4", scene_list)
 
-More tasks, each shown as a command and as Python, are on the :doc:`examples` page. For advanced workflows, start with the :ref:`SceneManager <scenedetect-scene_manager>`. Logging is covered under :ref:`Platform & Logging <scenedetect-platform>`.
+See :doc:`examples` for more tasks shown as both CLI commands and Python code. For advanced workflows, start with :ref:`SceneManager <scenedetect-scene_manager>`. Logging is covered under :ref:`Platform & Logging <scenedetect-platform>`.
 
 .. _scenedetect-functions:
 
