@@ -14,7 +14,7 @@ Platform & Logging
 Logging
 -------
 
-PySceneDetect outputs messages to a logger named ``pyscenedetect`` which does not have any default handlers. You can use :func:`scenedetect.init_logger <scenedetect.platform.init_logger>` with ``show_stdout=True`` or specify a log file (verbosity can also be specified) to attach some common handlers, or use ``logging.getLogger("pyscenedetect")`` and attach log handlers manually.
+PySceneDetect writes log messages to the ``pyscenedetect`` logger, which has no default handlers. Call :func:`scenedetect.init_logger <scenedetect.platform.init_logger>` with ``show_stdout=True`` or a log file path to attach standard handlers, or configure ``logging.getLogger("pyscenedetect")`` directly.
 
 .. seealso:: CLI: :option:`-v/--verbosity <scenedetect -v>`, :option:`-l/--logfile <scenedetect -l>`, :option:`-q/--quiet <scenedetect -q>`
 

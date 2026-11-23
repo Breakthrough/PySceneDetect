@@ -20,6 +20,234 @@
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Output" href="output.html" />
     <link rel="prev" title="scenedetect Package" href="../api.html" />
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <!-- Google tag (gtag.js) -->
+  <script>
+    if (
+      location.protocol.startsWith("http") &&
+      location.hostname !== "localhost" &&
+      location.hostname !== "127.0.0.1" &&
+      location.hostname !== "[::1]" &&
+      !navigator.webdriver
+    ) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", "G-EWBNLVRWW0");
+      const ga = document.createElement("script");
+      ga.async = true;
+      ga.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(ga);
+    }
+  </script>
+  <script type="module">
+    if (!Object.hasOwn(HTMLElement.prototype, "popover")) {
+      import("https://unpkg.com/@oddbird/popover-polyfill@0.6.1/dist/popover.min.js").catch(() => {});
+    }
+
+    (() => {
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (meta) {
+        document.addEventListener("click", (e) => {
+          if (!(e.target instanceof Element) || !e.target.closest(".psd-theme-toggle")) return;
+          let stored = null;
+          try {
+            const v = localStorage.getItem("color-scheme");
+            stored = v === "light" || v === "dark" ? v : null;
+          } catch (err) {}
+          const sys = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          const cur = meta.content === "light" || meta.content === "dark" ? meta.content : (stored ?? sys);
+          const next = cur === "dark" ? "light" : "dark";
+          if (next === sys) {
+            try { localStorage.removeItem("color-scheme"); } catch (err) {}
+            meta.content = "light dark";
+          } else {
+            try { localStorage.setItem("color-scheme", next); } catch (err) {}
+            meta.content = next;
+          }
+        });
+        window.addEventListener("storage", (e) => {
+          if (e.key === "color-scheme" || e.key === null) {
+            const v = e.newValue;
+            meta.content = v === "light" || v === "dark" ? v : "light dark";
+          }
+        });
+      }
+
+      const initVersionSwitcher = () => {
+        const switcher = document.querySelector(".psd-version-switcher");
+        const trigger = switcher?.querySelector(".psd-version-btn");
+        const labelEl = switcher?.querySelector(".psd-version-label");
+        const menu = document.getElementById("psd-version-menu");
+        const listEl = menu?.querySelector(".psd-version-list");
+        if (!switcher || !trigger || !menu || !listEl) return;
+
+        const release = switcher.getAttribute("data-release") || "";
+        const pageRel = switcher.getAttribute("data-page-rel") || "";
+        let latestVersion = switcher.getAttribute("data-latest-version") || "";
+        const pathMatch = window.location.pathname.match(/\/docs\/([^/]+)(?:\/|$)/);
+        const activeSlug = pathMatch ? pathMatch[1] : (release.includes("dev") ? "head" : release);
+
+        const isMenuOpen = () => {
+          try {
+            return menu.matches(":popover-open, .\\:popover-open");
+          } catch {
+            return menu.classList.contains(":popover-open");
+          }
+        };
+
+        const syncActiveLink = () => {
+          let matchedLabel = "";
+          const hasExactMatch = Boolean(
+            listEl.querySelector(`a[data-version-slug="${CSS.escape(activeSlug)}"]`)
+          );
+          for (const link of listEl.querySelectorAll("a[data-version-slug]")) {
+            const slug = link.getAttribute("data-version-slug");
+            const isCurrent =
+              slug === activeSlug ||
+              (!hasExactMatch && slug === "latest" && Boolean(latestVersion) && activeSlug === latestVersion);
+            if (isCurrent) {
+              link.setAttribute("aria-current", "true");
+              matchedLabel = link.querySelector(".psd-version-item-label")?.textContent?.trim() || "";
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          }
+          if (pathMatch && matchedLabel && labelEl) {
+            labelEl.textContent = matchedLabel;
+          }
+        };
+        syncActiveLink();
+
+        const supportsAnchorArea =
+          typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("position-area: block-end");
+
+        const positionFallback = () => {
+          if (supportsAnchorArea) return;
+          const rect = trigger.getBoundingClientRect();
+          const menuWidth = menu.offsetWidth || 210;
+          const menuHeight = menu.offsetHeight || 260;
+          const pad = 8;
+          let left = rect.right - menuWidth;
+          left = Math.max(pad, Math.min(left, window.innerWidth - menuWidth - pad));
+          let top = rect.bottom + 6;
+          if (top + menuHeight > window.innerHeight - pad && rect.top - menuHeight - 6 >= pad) {
+            top = rect.top - menuHeight - 6;
+          }
+          menu.style.left = `${Math.round(left)}px`;
+          menu.style.top = `${Math.round(top)}px`;
+        };
+
+        let fetchedVersions = false;
+        const maybeLoadRemoteVersions = async () => {
+          if (fetchedVersions) return;
+          fetchedVersions = true;
+          try {
+            const resp = await fetch("/versions.json", { headers: { Accept: "application/json" } });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (!data || !Array.isArray(data.versions) || data.versions.length === 0) return;
+
+            const frag = document.createDocumentFragment();
+            const seen = new Set();
+            let prevGroup = "";
+            let added = 0;
+
+            for (const entry of data.versions) {
+              if (!entry || typeof entry.slug !== "string" || !entry.slug || seen.has(entry.slug)) {
+                continue;
+              }
+              seen.add(entry.slug);
+              const group = typeof entry.group === "string" ? entry.group : "";
+              if (prevGroup && group && prevGroup !== group) {
+                const divLi = document.createElement("li");
+                divLi.className = "psd-version-divider";
+                divLi.setAttribute("role", "presentation");
+                frag.appendChild(divLi);
+              }
+              if (group) prevGroup = group;
+
+              const li = document.createElement("li");
+              const a = document.createElement("a");
+              const hasPage =
+                Boolean(entry.same_layout) &&
+                !(pageRel === "examples.html" && ["0.7", "0.7.1", "0.7.2"].includes(entry.slug));
+              const suffix = hasPage ? pageRel : "";
+              a.href = `https://www.scenedetect.com/docs/${encodeURIComponent(entry.slug)}/${suffix}`;
+              a.setAttribute("data-version-slug", entry.slug);
+              const span = document.createElement("span");
+              span.className = "psd-version-item-label";
+              span.textContent = typeof entry.label === "string" && entry.label ? entry.label : `v${entry.slug}`;
+              a.appendChild(span);
+              a.insertAdjacentHTML(
+                "beforeend",
+                '<svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+              );
+              li.appendChild(a);
+              frag.appendChild(li);
+              added += 1;
+            }
+
+            if (added === 0) return;
+
+            const tailDivider = document.createElement("li");
+            tailDivider.className = "psd-version-divider";
+            tailDivider.setAttribute("role", "presentation");
+            frag.appendChild(tailDivider);
+
+            const allLi = document.createElement("li");
+            const allLink = document.createElement("a");
+            allLink.className = "psd-version-all";
+            allLink.href = "https://www.scenedetect.com/docs/";
+            allLink.innerHTML = '<span>All versions</span><span aria-hidden="true">&rarr;</span>';
+            allLi.appendChild(allLink);
+            frag.appendChild(allLi);
+
+            listEl.replaceChildren(frag);
+            if (typeof data.latest === "string" && data.latest) {
+              latestVersion = data.latest;
+            }
+            syncActiveLink();
+          } catch (err) {
+            // Local builds without /versions.json safely keep the static build-time version list.
+          }
+        };
+
+        menu.addEventListener("toggle", () => {
+          const isOpen = isMenuOpen();
+          trigger.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) {
+            positionFallback();
+            maybeLoadRemoteVersions();
+          }
+        });
+
+        window.addEventListener("resize", () => {
+          if (isMenuOpen()) {
+            positionFallback();
+          }
+        });
+
+        switcher.addEventListener("focusout", (e) => {
+          if (!(e.relatedTarget instanceof Node) || switcher.contains(e.relatedTarget)) return;
+          if (isMenuOpen()) {
+            menu.hidePopover?.();
+          }
+        });
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initVersionSwitcher, { once: true });
+      } else {
+        initVersionSwitcher();
+      }
+    })();
+  </script>
+  
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -28,6 +256,112 @@
   
 
   </head><body>
+<header class="psd-topbar">
+  <div class="psd-topbar-inner">
+    <nav class="psd-topbar-nav" aria-label="Documentation navigation">
+      <a class="psd-backlink" href="https://www.scenedetect.com/">&larr; scenedetect.com</a>
+      <span class="psd-sep" aria-hidden="true">/</span>
+      <a href="../index.html">Reference Manual</a>
+      <a href="../cli.html">CLI Reference</a>
+      <a href="../api.html" class="current">Python API</a>
+      <a href="../examples.html">Examples</a>
+    </nav>
+    <div class="psd-topbar-meta">
+      <div class="psd-version-switcher" data-release="0.7.3" data-page-rel="api/detectors.html" data-latest-version="0.7.3">
+        <button
+          type="button"
+          class="psd-version-btn"
+          popovertarget="psd-version-menu"
+          aria-controls="psd-version-menu"
+          aria-expanded="false"
+        >
+          <span class="psd-sr-only">Documentation version: </span>
+          <span class="psd-version-label">v0.7.3</span>
+          <svg class="psd-version-chevron" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="psd-version-menu" class="psd-version-menu" popover="auto">
+          <nav aria-label="Documentation versions">
+            <ul class="psd-version-list">
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/latest/api/detectors.html"
+                  data-version-slug="latest" aria-current="true"
+                >
+                  <span class="psd-version-item-label">v0.7.3 (latest)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/head/api/detectors.html"
+                  data-version-slug="head"
+                >
+                  <span class="psd-version-item-label">dev (head)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.2/api/detectors.html"
+                  data-version-slug="0.7.2"
+                >
+                  <span class="psd-version-item-label">v0.7.2</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.1/api/detectors.html"
+                  data-version-slug="0.7.1"
+                >
+                  <span class="psd-version-item-label">v0.7.1</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7/api/detectors.html"
+                  data-version-slug="0.7"
+                >
+                  <span class="psd-version-item-label">v0.7</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.6.7/"
+                  data-version-slug="0.6.7"
+                >
+                  <span class="psd-version-item-label">v0.6.7 (legacy)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a class="psd-version-all" href="https://www.scenedetect.com/docs/">
+                  <span>All versions</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <button type="button" class="psd-theme-toggle">
+        <svg class="psd-icon-sun" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="psd-icon-moon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span class="psd-sr-only psd-label-dark">Switch to dark theme</span>
+        <span class="psd-sr-only psd-label-light">Switch to light theme</span>
+      </button>
+      <a class="psd-gh-link" href="https://github.com/Breakthrough/PySceneDetect">
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
   
 
     <div class="document">
@@ -82,9 +416,9 @@ value differently from Python, that spelling follows in parentheses.</p>
 <p>CLI: <a class="reference internal" href="../cli.html#command-detect-adaptive"><span class="std std-ref">detect-adaptive</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-detect-adaptive"><span class="std std-ref">[detect-adaptive]</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.detectors.adaptive_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> compares the difference in content between adjacent frames similar
-to <cite>ContentDetector</cite> except the threshold isn’t fixed, but is a rolling average of adjacent frame
+to <code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code> except the threshold isn’t fixed, but is a rolling average of adjacent frame
 changes. This can help mitigate false detections in situations such as fast camera motions.</p>
-<p>This detector is available from the command-line as the <cite>detect-adaptive</cite> command.</p>
+<p>This detector is available from the command-line as the <code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code> command.</p>
 <p id="options-detect-adaptive">Options of <a class="reference internal" href="../cli.html#command-detect-adaptive"><span class="std std-ref">detect-adaptive</span></a> and the <a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> parameters they set. Each option can also be set in the <a class="reference internal" href="../cli/config_file.html#config-detect-adaptive"><span class="std std-ref">[detect-adaptive]</span></a> config file section under its long name (<code class="docutils literal notranslate"><span class="pre">--threshold</span></code> is <code class="docutils literal notranslate"><span class="pre">threshold</span></code>):</p>
 <div class="table-scroll docutils container">
 <table class="detector-options docutils align-default">
@@ -151,15 +485,15 @@ str (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;0.6
 <li><p><strong>window_width</strong> (<em>int</em>) – Size of window (number of frames) before and after each frame to
 average together in order to detect deviations from the mean. Must be at least 1.</p></li>
 <li><p><strong>min_content_val</strong> (<em>float</em>) – Minimum threshold (float) that the content_val must exceed in order to
-register as a new scene. This is calculated the same way that <cite>detect-content</cite>
-calculates frame score based on <cite>weights</cite>/<cite>luma_only</cite>/<cite>kernel_size</cite>.</p></li>
+register as a new scene. This is calculated the same way that <code class="docutils literal notranslate"><span class="pre">detect-content</span></code>
+calculates frame score based on <code class="docutils literal notranslate"><span class="pre">weights</span></code>/<code class="docutils literal notranslate"><span class="pre">luma_only</span></code>/<code class="docutils literal notranslate"><span class="pre">kernel_size</span></code>.</p></li>
 <li><p><strong>weights</strong> (<a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><em>Components</em></a>) – Weight to place on each component when calculating frame score
-(<cite>content_val</cite> in a statsfile, the value <cite>threshold</cite> is compared against).
+(<code class="docutils literal notranslate"><span class="pre">content_val</span></code> in a statsfile, the value <code class="docutils literal notranslate"><span class="pre">threshold</span></code> is compared against).
 If omitted, the default ContentDetector weights are used.</p></li>
 <li><p><strong>luma_only</strong> (<em>bool</em>) – If True, only considers changes in the luminance channel of the video.
-Equivalent to specifying <cite>weights</cite> as
+Equivalent to specifying <code class="docutils literal notranslate"><span class="pre">weights</span></code> as
 <a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS" title="scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LUMA_ONLY_WEIGHTS</span></code></a>.
-Overrides <cite>weights</cite> if both are set.</p></li>
+Overrides <code class="docutils literal notranslate"><span class="pre">weights</span></code> if both are set.</p></li>
 <li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of kernel to use for post edge detection filtering. If None,
 automatically set based on video resolution.</p></li>
 </ul>
@@ -183,13 +517,13 @@ the detector when a StatsManager is passed to process_frame.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame">
 <span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector.process_frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
+<dd><p>Process the next frame. <code class="docutils literal notranslate"><span class="pre">frame_num</span></code> is assumed to be sequential.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
 but must remain sequential.</p></li>
-<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
+<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <code class="docutils literal notranslate"><span class="pre">frame_img</span></code>.</p></li>
 <li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
 </ul>
 </dd>
@@ -224,7 +558,7 @@ amount of frames a detector might emit an event in the past.</p>
 </div>
 <span class="target" id="module-scenedetect.detectors.content_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a> compares the difference in content between adjacent frames against a
 set threshold/score, which if exceeded, triggers a scene cut.</p>
-<p>This detector is available from the command-line as the <cite>detect-content</cite> command.</p>
+<p>This detector is available from the command-line as the <code class="docutils literal notranslate"><span class="pre">detect-content</span></code> command.</p>
 <p id="options-detect-content">Options of <a class="reference internal" href="../cli.html#command-detect-content"><span class="std std-ref">detect-content</span></a> and the <a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a> parameters they set. Each option can also be set in the <a class="reference internal" href="../cli/config_file.html#config-detect-content"><span class="std std-ref">[detect-content]</span></a> config file section under its long name (<code class="docutils literal notranslate"><span class="pre">--threshold</span></code> is <code class="docutils literal notranslate"><span class="pre">threshold</span></code>):</p>
 <div class="table-scroll docutils container">
 <table class="detector-options docutils align-default">
@@ -283,14 +617,14 @@ determine when a fast cut has occurred.</p>
 be added to the scene list. Accepts an int (frames), float (seconds), or
 str (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;0.6s&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;00:00:00.600&quot;</span></code>).</p></li>
 <li><p><strong>weights</strong> (<a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.Components" title="scenedetect.detectors.content_detector.ContentDetector.Components"><em>Components</em></a>) – Weight to place on each component when calculating frame score
-(<cite>content_val</cite> in a statsfile, the value <cite>threshold</cite> is compared against).</p></li>
+(<code class="docutils literal notranslate"><span class="pre">content_val</span></code> in a statsfile, the value <code class="docutils literal notranslate"><span class="pre">threshold</span></code> is compared against).</p></li>
 <li><p><strong>luma_only</strong> (<em>bool</em>) – If True, only considers changes in the luminance channel of the video.
-Equivalent to specifying <cite>weights</cite> as
+Equivalent to specifying <code class="docutils literal notranslate"><span class="pre">weights</span></code> as
 <a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS" title="scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LUMA_ONLY_WEIGHTS</span></code></a>.
-Overrides <cite>weights</cite> if both are set.</p></li>
+Overrides <code class="docutils literal notranslate"><span class="pre">weights</span></code> if both are set.</p></li>
 <li><p><strong>kernel_size</strong> (<em>int</em><em> | </em><em>None</em>) – Size of kernel for expanding detected edges. Must be odd integer
 greater than or equal to 3. If None, automatically set using video resolution.</p></li>
-<li><p><strong>filter_mode</strong> (<a class="reference internal" href="detector.html#scenedetect.detector.FlashFilter.Mode" title="scenedetect.detector.FlashFilter.Mode"><em>Mode</em></a>) – Mode to use when filtering cuts to meet <cite>min_scene_len</cite>.</p></li>
+<li><p><strong>filter_mode</strong> (<a class="reference internal" href="detector.html#scenedetect.detector.FlashFilter.Mode" title="scenedetect.detector.FlashFilter.Mode"><em>Mode</em></a>) – Mode to use when filtering cuts to meet <code class="docutils literal notranslate"><span class="pre">min_scene_len</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -352,13 +686,13 @@ the detector when a StatsManager is passed to process_frame.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.process_frame">
 <span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.process_frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process the next frame. <cite>frame_num</cite> is assumed to be sequential.</p>
+<dd><p>Process the next frame. <code class="docutils literal notranslate"><span class="pre">frame_num</span></code> is assumed to be sequential.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>frame_num</strong> (<em>int</em>) – Frame number of frame that is being passed. Can start from any value
 but must remain sequential.</p></li>
-<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>frame_img</cite>.</p></li>
+<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <code class="docutils literal notranslate"><span class="pre">frame_img</span></code>.</p></li>
 <li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – </p></li>
 </ul>
 </dd>
@@ -391,7 +725,7 @@ to allow adding new components without breaking existing usage.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS">
 <span class="sig-name descname"><span class="pre">LUMA_ONLY_WEIGHTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Components(delta_hue=0.0,</span> <span class="pre">delta_sat=0.0,</span> <span class="pre">delta_lum=1.0,</span> <span class="pre">delta_edges=0.0)</span></em><a class="headerlink" href="#scenedetect.detectors.content_detector.ContentDetector.LUMA_ONLY_WEIGHTS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Component weights to use if <cite>luma_only</cite> is set.</p>
+<dd><p>Component weights to use if <code class="docutils literal notranslate"><span class="pre">luma_only</span></code> is set.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -419,7 +753,7 @@ amount of frames a detector might emit an event in the past.</p>
 <span class="target" id="module-scenedetect.detectors.hash_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.hash_detector.HashDetector" title="scenedetect.detectors.hash_detector.HashDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashDetector</span></code></a> calculates a hash for each frame of a video using a perceptual
 hashing algorithm. The differences (distance) in hash value between frames is calculated.
 If this difference exceeds a set threshold, a scene cut is triggered.</p>
-<p>This detector is available from the command-line interface by using the <cite>detect-hash</cite> command.</p>
+<p>This detector is available from the command-line interface by using the <code class="docutils literal notranslate"><span class="pre">detect-hash</span></code> command.</p>
 <p id="options-detect-hash">Options of <a class="reference internal" href="../cli.html#command-detect-hash"><span class="std std-ref">detect-hash</span></a> and the <a class="reference internal" href="#scenedetect.detectors.hash_detector.HashDetector" title="scenedetect.detectors.hash_detector.HashDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashDetector</span></code></a> parameters they set. Each option can also be set in the <a class="reference internal" href="../cli/config_file.html#config-detect-hash"><span class="std std-ref">[detect-hash]</span></a> config file section under its long name (<code class="docutils literal notranslate"><span class="pre">--threshold</span></code> is <code class="docutils literal notranslate"><span class="pre">threshold</span></code>):</p>
 <div class="table-scroll docutils container">
 <table class="detector-options docutils align-default">
@@ -469,8 +803,8 @@ and lowpass filter, followed by binary thresholding on the median. See reference
 <li><p><strong>threshold</strong> (<em>float</em>) – Value from 0.0 and 1.0 representing the relative hamming distance between
 the perceptual hashes of adjacent frames. A distance of 0 means the image is the same,
 and 1 means no correlation. Smaller threshold values thus require more correlation,
-making the detector more sensitive. The hamming distance is divided by <cite>size</cite> x <cite>size</cite>
-before comparing to <cite>threshold</cite> for normalization.</p></li>
+making the detector more sensitive. The hamming distance is divided by <code class="docutils literal notranslate"><span class="pre">size</span></code> x <code class="docutils literal notranslate"><span class="pre">size</span></code>
+before comparing to <code class="docutils literal notranslate"><span class="pre">threshold</span></code> for normalization.</p></li>
 <li><p><strong>size</strong> (<em>int</em>) – Size of square of low frequency data to use for the DCT</p></li>
 <li><p><strong>lowpass</strong> (<em>int</em>) – How much high frequency information to filter from the DCT. A value of 2 means
 keep lower 1/2 of the frequency data, 4 means only keep 1/4, etc…</p></li>
@@ -534,7 +868,7 @@ frame to frame.</p>
 </div>
 <span class="target" id="module-scenedetect.detectors.histogram_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a> compares the difference in the YUV histograms of subsequent
 frames. If the difference exceeds a given threshold, a cut is detected.</p>
-<p>This detector is available from the command-line as the <cite>detect-hist</cite> command.</p>
+<p>This detector is available from the command-line as the <code class="docutils literal notranslate"><span class="pre">detect-hist</span></code> command.</p>
 <p id="options-detect-hist">Options of <a class="reference internal" href="../cli.html#command-detect-hist"><span class="std std-ref">detect-hist</span></a> and the <a class="reference internal" href="#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a> parameters they set. Each option can also be set in the <a class="reference internal" href="../cli/config_file.html#config-detect-hist"><span class="std std-ref">[detect-hist]</span></a> config file section under its long name (<code class="docutils literal notranslate"><span class="pre">--threshold</span></code> is <code class="docutils literal notranslate"><span class="pre">threshold</span></code>):</p>
 <div class="table-scroll docutils container">
 <table class="detector-options docutils align-default">
@@ -602,7 +936,7 @@ normalized such that the sum of all histogram bins equals 1.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A 1D numpy array of length equal to <cite>bins</cite>, representing the histogram of the
+<dd class="field-even"><p>A 1D numpy array of length equal to <code class="docutils literal notranslate"><span class="pre">bins</span></code>, representing the histogram of the
 luma channel. Each element in the array represents the count (or frequency) of
 a particular luma value in the image. If normalized, these values represent the
 relative frequency.</p>
@@ -651,7 +985,7 @@ detection on.</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of timecodes where scene cuts have been detected. There may be 0
-or more timecodes in the list, and not necessarily the same as <cite>timecode</cite>.</p>
+or more timecodes in the list, and not necessarily the same as <code class="docutils literal notranslate"><span class="pre">timecode</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><em>list</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
@@ -670,7 +1004,7 @@ or more timecodes in the list, and not necessarily the same as <cite>timecode</c
 </div>
 <span class="target" id="module-scenedetect.detectors.threshold_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a> uses a set intensity as a threshold to detect cuts, which are
 triggered when the average pixel intensity exceeds or falls below this threshold.</p>
-<p>This detector is available from the command-line as the <cite>detect-threshold</cite> command.</p>
+<p>This detector is available from the command-line as the <code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code> command.</p>
 <p id="options-detect-threshold">Options of <a class="reference internal" href="../cli.html#command-detect-threshold"><span class="std std-ref">detect-threshold</span></a> and the <a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a> parameters they set. Each option can also be set in the <a class="reference internal" href="../cli/config_file.html#config-detect-threshold"><span class="std std-ref">[detect-threshold]</span></a> config file section under its long name (<code class="docutils literal notranslate"><span class="pre">--threshold</span></code> is <code class="docutils literal notranslate"><span class="pre">threshold</span></code>):</p>
 <div class="table-scroll docutils container">
 <table class="detector-options docutils align-default">
@@ -740,7 +1074,7 @@ fade-to-black, 0.0 in the middle, and +1.0 causing the cut to be
 right at the position where the threshold is passed).</p></li>
 <li><p><strong>add_final_scene</strong> (<em>bool</em>) – Boolean indicating if the video ends on a fade-out to
 generate an additional scene at this timecode.</p></li>
-<li><p><strong>method</strong> (<a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.Method" title="scenedetect.detectors.threshold_detector.ThresholdDetector.Method"><em>Method</em></a>) – How to treat <cite>threshold</cite> when detecting fade events.</p></li>
+<li><p><strong>method</strong> (<a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector.Method" title="scenedetect.detectors.threshold_detector.ThresholdDetector.Method"><em>Method</em></a>) – How to treat <code class="docutils literal notranslate"><span class="pre">threshold</span></code> when detecting fade events.</p></li>
 <li><p><strong>block_size</strong> – [DEPRECATED] DO NOT USE. For backwards compatibility.</p></li>
 <li><p><strong>min_out_length</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Minimum time in the faded out state before a new cut will be added.
 Accepts the same formats as min_scene_len. Fades shorter than this duration will
@@ -749,7 +1083,7 @@ seconds are rounded to the nearest frame.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – <cite>min_out_length</cite> is a negative number.</p>
+<dd class="field-even"><p><strong>ValueError</strong> – <code class="docutils literal notranslate"><span class="pre">min_out_length</span></code> is a negative number.</p>
 </dd>
 </dl>
 <dl class="py class">
@@ -812,7 +1146,7 @@ must also meet min_out_length, including the last processed frame.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – FrameTimecode of the current frame position.</p></li>
-<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <cite>timecode</cite>.</p></li>
+<li><p><strong>frame_img</strong> (<em>numpy.ndarray</em><em> or </em><em>None</em>) – Video frame corresponding to <code class="docutils literal notranslate"><span class="pre">timecode</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -850,48 +1184,19 @@ must also meet min_out_length, including the last processed frame.</p>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<p class="logo">
+        <div class="sphinxsidebarwrapper"><p class="logo">
   <a href="../index.html">
-    <img class="logo" src="../_static/pyscenedetect_logo.png" alt="Logo" />
-    
+    <img class="logo psd-logo-light" src="../_static/pyscenedetect_logo_small.png" alt="PySceneDetect" width="300" height="141" />
+    <img class="logo psd-logo-dark" src="../_static/pyscenedetect_logo_small_darkmode.png" alt="PySceneDetect" width="462" height="217" />
   </a>
 </p>
-
-
-
-<p class="blurb">Version: [0.7.3]</p>
-
-
-
-
-<p>
-<iframe src="https://ghbtns.com/github-btn.html?user=Breakthrough&repo=PySceneDetect&type=star&count=true&size=large&v=2"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-
-
-
-
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-<nav class="section-switch" aria-label="Documentation section">
-  <a href="../cli.html">CLI</a><span class="sep" aria-hidden="true">|</span>
-  <a href="../api.html" class="current" aria-current="location">Python API</a>
-  <span class="section-links">
-  <a href="../examples.html">Examples</a>
-  </span>
-</nav>
+<p class="psd-sidebar-subtitle">Reference Manual &middot; 0.7.3</p>
+<search class="psd-searchbox">
+  <form class="search" action="../search.html" method="get">
+    <input type="search" name="q" aria-label="Search documentation" placeholder="Search docs..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+  </form>
+</search>
+<nav class="psd-sidebar-toc" aria-label="Section navigation">
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#usage">Usage</a></li>
@@ -968,25 +1273,26 @@ must also meet min_out_length, including the last processed frame.</p>
 <li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
 </ul>
 
+</nav>
 
         </div>
       </div>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2014, Brandon Castellano.
-      
-      |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
-      
-      |
-      <a href="../_sources/api/detectors.rst.txt"
-          rel="nofollow">Page source</a>
+      <div class="psd-footer-inner">
+        <span class="psd-footer-meta">&#169;2014, Brandon Castellano. | 
+          Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+          &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a> | 
+          <a href="../_sources/api/detectors.rst.txt" rel="nofollow">Page source</a>
+        </span>
+        <ul class="psd-footer-links" role="list">
+          <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+          <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+          <li><a href="https://www.scenedetect.com/changelog/">Changelog</a></li>
+          <li><a href="https://www.scenedetect.com/copyright/">License</a></li>
+        </ul>
+      </div>
     </div>
-
-    
-
-    
   </body>
 </html>

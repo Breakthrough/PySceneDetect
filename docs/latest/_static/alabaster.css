@@ -3,7 +3,7 @@
 /* -- page layout ----------------------------------------------------------- */
 
 body {
-    font-family: Georgia, serif;
+    font-family: "Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
     font-size: 17px;
     background-color: #fff;
     color: #000;
@@ -13,7 +13,7 @@ body {
 
 
 div.document {
-    width: 940px;
+    width: 1080px;
     margin: 30px auto 0 auto;
 }
 
@@ -23,11 +23,11 @@ div.documentwrapper {
 }
 
 div.bodywrapper {
-    margin: 0 0 0 235px;
+    margin: 0 0 0 255px;
 }
 
 div.sphinxsidebar {
-    width: 235px;
+    width: 255px;
     font-size: 14px;
     line-height: 1.5;
 }
@@ -47,7 +47,7 @@ div.body > .section {
 }
 
 div.footer {
-    width: 940px;
+    width: 1080px;
     margin: 20px auto 30px auto;
     font-size: 14px;
     color: #888;
@@ -112,7 +112,7 @@ div.sphinxsidebarwrapper p.blurb {
 
 div.sphinxsidebar h3,
 div.sphinxsidebar h4 {
-    font-family: Georgia, serif;
+    font-family: "Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
     color: #444;
     font-size: 24px;
     font-weight: normal;
@@ -156,7 +156,7 @@ div.sphinxsidebar ul li.toctree-l2 > a {
 
 div.sphinxsidebar input {
     border: 1px solid #CCC;
-    font-family: Georgia, serif;
+    font-family: "Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
     font-size: 1em;
 }
 
@@ -210,7 +210,7 @@ div.body h3,
 div.body h4,
 div.body h5,
 div.body h6 {
-    font-family: Georgia, serif;
+    font-family: "Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
     font-weight: normal;
     margin: 30px 0px 10px 0px;
     padding: 0;
@@ -251,7 +251,7 @@ div.admonition tt.xref, div.admonition code.xref, div.admonition a tt {
 }
 
 div.admonition p.admonition-title {
-    font-family: Georgia, serif;
+    font-family: "Noto Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
     font-weight: normal;
     font-size: 24px;
     margin: 0 0 10px 0;
@@ -272,8 +272,8 @@ dt:target, .highlight {
 }
 
 div.warning {
-    background-color: #f5ebd0;
-    border: 1px solid #f2caa2;
+    background-color: #FCC;
+    border: 1px solid #FAA;
 }
 
 div.danger {
@@ -298,8 +298,8 @@ div.caution {
 }
 
 div.attention {
-    background-color: #f5dcdc;
-    border: 1px solid #ffaaaa;
+    background-color: #FCC;
+    border: 1px solid #FAA;
 }
 
 div.important {
@@ -313,13 +313,13 @@ div.note {
 }
 
 div.tip {
-    background-color: #f0f6fa;
-    border: 1px solid #c2dcf2;
+    background-color: #EEE;
+    border: 1px solid #CCC;
 }
 
 div.hint {
-    background-color: #f0faf0;
-    border: 1px solid #d3ebdc;
+    background-color: #EEE;
+    border: 1px solid #CCC;
 }
 
 div.seealso {
@@ -340,7 +340,7 @@ p.admonition-title:after {
 }
 
 pre, tt, code {
-    font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace;
+    font-family: "JetBrains Mono", "Cascadia Code", "Cascadia Mono", "Consolas", ui-monospace, monospace;
     font-size: 0.9em;
 }
 
