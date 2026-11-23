@@ -18,6 +18,7 @@ import html
 import html.parser
 import http.server
 import json
+import math
 import posixpath
 import re
 import shutil
@@ -266,6 +267,7 @@ HERO_SNIPPETS: list[tuple[str, str, str, str, str]] = [
 ]
 
 SPHINX_ABS_RE = re.compile(r"^/docs/(?:latest|head|\d+\.\d+(?:\.\d+)?)(?:/.*)?$")
+SPHINX_LIVE_RE = re.compile(r"^/docs/(?:latest|head)(/.*)?$")
 IMG_PATH_RE = re.compile(r"^(?:\./|\.\./|/)*img/(.+)$")
 ATTR_RE = re.compile(
     r"""([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?"""
@@ -333,7 +335,7 @@ def normalize_base_path(raw: str) -> str:
 
 
 def rewrite_internal_href(href: str, base_path: str = "") -> str:
-    """Normalize Markdown and relative internal links to site-root paths."""
+    """Normalize Markdown, image, and internal links (leaving /docs/<ver>/ untouched)."""
     raw = href.strip()
     if not raw or raw.startswith(("#", *EXTERNAL_SCHEMES)):
         return href
@@ -399,6 +401,17 @@ def _format_attrs(attrs: list[tuple[str, str | None]]) -> str:
     return (" " + " ".join(parts)) if parts else ""
 
 
+def _parse_positive_px(raw: str | None) -> float | None:
+    """Parse a positive finite numeric HTML dimension attribute, or return None."""
+    if not raw:
+        return None
+    try:
+        val = float(raw.strip())
+    except ValueError:
+        return None
+    return val if math.isfinite(val) and val > 0 else None
+
+
 def postprocess_html(
     rendered_html: str,
     img_dims: dict[str, tuple[int, int]],
@@ -450,10 +463,19 @@ def postprocess_html(
 
         if local_img_name and local_img_name in img_dims:
             w, h = img_dims[local_img_name]
-            if "width" not in filled:
+            has_w = "width" in filled
+            has_h = "height" in filled
+            if not has_w and not has_h:
                 rebuilt.append(("width", str(w)))
-            if "height" not in filled:
                 rebuilt.append(("height", str(h)))
+            elif has_w and not has_h:
+                explicit_w = _parse_positive_px(attr_map.get("width"))
+                if explicit_w is not None and w > 0:
+                    rebuilt.append(("height", str(max(1, round(explicit_w * h / w)))))
+            elif has_h and not has_w:
+                explicit_h = _parse_positive_px(attr_map.get("height"))
+                if explicit_h is not None and h > 0:
+                    rebuilt.append(("width", str(max(1, round(explicit_h * w / h)))))
 
         if "loading" not in filled and attr_map.get("fetchpriority") != "high":
             rebuilt.append(("loading", "lazy"))
@@ -809,12 +831,26 @@ def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
     (out_dir / "sitemap.xml").write_text("\n".join(sitemap_lines) + "\n", encoding="utf-8")
 
 
-class _PageInspector(html.parser.HTMLParser):
-    """Collect element IDs, headings, links, and asset references from built HTML."""
+class _IdCollector(html.parser.HTMLParser):
+    """Collect element IDs from an HTML document (used for built Sphinx pages)."""
 
     def __init__(self) -> None:
         super().__init__()
         self.ids: set[str] = set()
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        for key, val in attrs:
+            if key == "id" and val:
+                self.ids.add(val)
+
+
+class _PageInspector(html.parser.HTMLParser):
+    """Collect element IDs, duplicate IDs, headings, links, and asset references."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.ids: set[str] = set()
+        self.duplicate_ids: list[str] = []
         self.h1_count = 0
         self.links: list[str] = []
         self.assets: list[tuple[str, str]] = []
@@ -825,7 +861,10 @@ class _PageInspector(html.parser.HTMLParser):
         attr_dict = dict(attrs)
         elem_id = attr_dict.get("id")
         if elem_id:
-            self.ids.add(elem_id)
+            if elem_id in self.ids:
+                self.duplicate_ids.append(elem_id)
+            else:
+                self.ids.add(elem_id)
         if tag == "h1":
             self.h1_count += 1
         if tag == "a":
@@ -867,8 +906,37 @@ def _strip_base_path(site_path: str, base_path: str) -> str | None:
     return None
 
 
-def verify_build(base_path: str = "", build_dir: Path = BUILD_DIR) -> list[str]:
-    """Strictly validate routes, internal links, #fragment anchors, and asset paths."""
+def _resolve_sphinx_target(sphinx_dir: Path, sub_path: str) -> Path | None:
+    """Map a normalized /docs/{latest,head}/ sub-path to a file inside sphinx_dir."""
+    candidate = _map_site_path_to_file(sub_path, sphinx_dir)
+    if candidate is None:
+        return None
+    resolved = candidate.resolve()
+    root = sphinx_dir.resolve()
+    if resolved != root and root not in resolved.parents:
+        return None
+    return resolved
+
+
+def _get_sphinx_ids(target_file: Path, cache: dict[Path, set[str]]) -> set[str]:
+    """Return all HTML element IDs in a built Sphinx page (cached per file)."""
+    if target_file not in cache:
+        if target_file.suffix.lower() not in {".html", ".htm"}:
+            cache[target_file] = set()
+        else:
+            collector = _IdCollector()
+            collector.feed(target_file.read_text(encoding="utf-8"))
+            cache[target_file] = collector.ids
+    return cache[target_file]
+
+
+def verify_build(
+    base_path: str = "",
+    build_dir: Path = BUILD_DIR,
+    sphinx_dir: Path | None = None,
+    repo_dir: Path = REPO_DIR,
+) -> list[str]:
+    """Strictly validate routes, duplicate IDs, internal links, anchors, assets, and Sphinx docs."""
     base_path = normalize_base_path(base_path)
     errors: list[str] = []
     required_files = [
@@ -886,6 +954,15 @@ def verify_build(base_path: str = "", build_dir: Path = BUILD_DIR) -> list[str]:
         if not req.is_file():
             errors.append(f"Missing expected output file: {req}")
 
+    resolved_sphinx: Path | None = None
+    if sphinx_dir is not None:
+        candidate_sphinx = sphinx_dir.resolve()
+        if not candidate_sphinx.is_dir():
+            errors.append(f"Sphinx build directory does not exist: {candidate_sphinx}")
+        else:
+            resolved_sphinx = candidate_sphinx
+    sphinx_id_cache: dict[Path, set[str]] = {}
+
     html_files = sorted(build_dir.rglob("*.html"))
     inspectors: dict[Path, _PageInspector] = {}
     for html_file in html_files:
@@ -895,10 +972,32 @@ def verify_build(base_path: str = "", build_dir: Path = BUILD_DIR) -> list[str]:
         rel_label = html_file.relative_to(build_dir).as_posix()
         if parser.h1_count != 1:
             errors.append(f"{rel_label}: expected exactly 1 <h1>, found {parser.h1_count}")
+        for dup_id in sorted(set(parser.duplicate_ids)):
+            errors.append(f"{rel_label}: duplicate HTML id '{dup_id}'")
         for bad_img in parser.imgs_missing_alt:
             errors.append(f"{rel_label}: <img> missing alt attribute ({bad_img})")
         for bad_dim in parser.imgs_missing_dims:
             errors.append(f"{rel_label}: local <img> missing width/height ({bad_dim})")
+
+    latest_file = repo_dir / "docs" / "LATEST_VERSION"
+    if not latest_file.is_file():
+        errors.append(f"Missing latest version file: {latest_file}")
+    else:
+        latest_ver = latest_file.read_text(encoding="utf-8").strip().lstrip("v")
+        if not latest_ver:
+            errors.append("docs/LATEST_VERSION is empty")
+        else:
+            try:
+                load_doc_versions(repo_dir)
+            except ValueError as exc:
+                errors.append(str(exc))
+            docs_page = build_dir / "docs" / "index.html"
+            expected_href = f"/docs/{latest_ver}/"
+            if docs_page in inspectors and expected_href not in inspectors[docs_page].links:
+                errors.append(
+                    f"docs/index.html: docs/LATEST_VERSION ('{latest_ver}') is not linked "
+                    f"(expected '{expected_href}' from website/pages/docs.md)"
+                )
 
     for html_file, parser in inspectors.items():
         rel_file = html_file.relative_to(build_dir)
@@ -920,6 +1019,23 @@ def verify_build(base_path: str = "", build_dir: Path = BUILD_DIR) -> list[str]:
             site_path = _resolve_site_path(base_url_dir, path_part)
 
             if SPHINX_ABS_RE.match(site_path):
+                live_match = SPHINX_LIVE_RE.match(site_path)
+                if resolved_sphinx is not None and live_match:
+                    sphinx_sub = live_match.group(1) or "/"
+                    sphinx_target = _resolve_sphinx_target(resolved_sphinx, sphinx_sub)
+                    if sphinx_target is None or not sphinx_target.is_file():
+                        errors.append(
+                            f"{rel_label}: broken Sphinx link '{href}' "
+                            f"(resolved to '{site_path}', missing in {resolved_sphinx})"
+                        )
+                    elif sep and frag:
+                        decoded_frag = urllib.parse.unquote(frag)
+                        if decoded_frag not in _get_sphinx_ids(sphinx_target, sphinx_id_cache):
+                            target_rel = sphinx_target.relative_to(resolved_sphinx).as_posix()
+                            errors.append(
+                                f"{rel_label}: broken Sphinx fragment '{href}' "
+                                f"(id '{decoded_frag}' not found in {target_rel})"
+                            )
                 continue
 
             local_site_path = _strip_base_path(site_path, base_path)
@@ -1063,7 +1179,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Verify all expected routes, internal links, #fragment anchors, and assets.",
+        help=(
+            "Verify routes, duplicate IDs, internal links, #fragment anchors, assets, "
+            "LATEST_VERSION coverage, and (with --sphinx-dir) /docs/latest/ and /docs/head/ links."
+        ),
+    )
+    parser.add_argument(
+        "--sphinx-dir",
+        type=Path,
+        default=None,
+        help=(
+            "Optional built Sphinx HTML directory; when used with --strict, validates "
+            "/docs/latest/ and /docs/head/ links and #fragments against it."
+        ),
     )
     parser.add_argument(
         "--serve",
@@ -1076,19 +1204,34 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     base_path = normalize_base_path(args.base_path)
     out_dir = args.out_dir.resolve()
+    sphinx_dir = args.sphinx_dir.resolve() if args.sphinx_dir else None
 
-    build_site(base_path=base_path, out_dir=out_dir)
+    try:
+        build_site(base_path=base_path, out_dir=out_dir)
+    except ValueError as exc:
+        print(f"[BUILD ERROR] {exc}", file=sys.stderr)
+        return 1
     prefix_note = f" (base_path={base_path})" if base_path else ""
     print(f"Built {len(PAGES)} pages + 404 + search index into {out_dir}{prefix_note}")
 
     if args.strict:
-        errors = verify_build(base_path=base_path, build_dir=out_dir)
+        errors = verify_build(base_path=base_path, build_dir=out_dir, sphinx_dir=sphinx_dir)
         if errors:
             for err in errors:
                 print(f"[STRICT ERROR] {err}", file=sys.stderr)
             print(f"Strict check failed with {len(errors)} error(s).", file=sys.stderr)
             return 1
-        print("Strict verification passed (all routes, anchors, and assets verified).")
+        if sphinx_dir is not None:
+            print(
+                "Strict verification passed (routes, IDs, internal links, anchors, assets, "
+                "and /docs/latest/ + /docs/head/ Sphinx links verified)."
+            )
+        else:
+            print(
+                "Strict verification passed (routes, IDs, internal links, anchors, and assets "
+                "verified; /docs/<ver>/ Sphinx links skipped - pass --sphinx-dir to check "
+                "/docs/latest/ and /docs/head/)."
+            )
 
     if args.serve is not None:
         serve_site(args.serve, base_path=base_path, build_dir=out_dir)

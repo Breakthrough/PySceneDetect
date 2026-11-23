@@ -298,8 +298,11 @@ class SimpleWS:
         self.sock.sendall(bytes(header) + masked)
 
     def recv_frame(self) -> str:
+        fragments = bytearray()
+        message_opcode: int | None = None
         while True:
             b1, b2 = self._recv_exact(2)
+            fin = bool(b1 & 0x80)
             opcode = b1 & 0x0F
             masked = bool(b2 & 0x80)
             length = b2 & 0x7F
@@ -320,8 +323,31 @@ class SimpleWS:
                 pong.extend(bytes(b ^ m[i & 3] for i, b in enumerate(data)))
                 self.sock.sendall(bytes(pong))
                 continue
+            if opcode == 0xA:
+                continue
             if opcode == 0x1:
-                return data.decode("utf-8")
+                if message_opcode is not None:
+                    raise RuntimeError("Unexpected WebSocket text frame before previous FIN")
+                if fin:
+                    return data.decode("utf-8")
+                message_opcode = 0x1
+                fragments.extend(data)
+            elif opcode == 0x0:
+                if message_opcode is None:
+                    raise RuntimeError("Unexpected WebSocket continuation frame")
+                fragments.extend(data)
+                if fin:
+                    payload = bytes(fragments)
+                    fragments.clear()
+                    if message_opcode == 0x1:
+                        return payload.decode("utf-8")
+                    message_opcode = None
+            elif opcode == 0x2:
+                if message_opcode is not None:
+                    raise RuntimeError("Unexpected WebSocket binary frame before previous FIN")
+                if not fin:
+                    message_opcode = 0x2
+                    fragments.extend(data)
 
     def call(self, method: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         msg_id = self._next_id

@@ -28,10 +28,6 @@
   </script>
 {%- endif %}
   <script type="module">
-    if (!Object.hasOwn(HTMLElement.prototype, "popover")) {
-      import("https://unpkg.com/@oddbird/popover-polyfill@0.6.1/dist/popover.min.js").catch(() => {});
-    }
-
     (() => {
       const meta = document.querySelector('meta[name="color-scheme"]');
       if (meta) {
