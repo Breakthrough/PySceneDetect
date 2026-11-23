@@ -802,45 +802,73 @@ def run_checks(
     set_viewport(cdp, 390, 844, True, "light")
     navigate(cdp, f"{base_url}/")
 
-    tabs_ok = eval_js(
+    platform_tabs_ok = eval_js(
         cdp,
         """(() => {
-          const cli = document.getElementById('hero-tab-cli');
-          const docker = document.getElementById('hero-tab-docker');
-          const py = document.getElementById('hero-tab-python');
-          if (!cli || !docker || !py) return false;
-          cli.click();
-          const cOk = !document.getElementById('hero-panel-cli').hidden;
-          docker.click();
-          const dOk = !document.getElementById('hero-panel-docker').hidden;
+          const hitOk = (el) => {
+            if (!el) return false;
+            el.scrollIntoView({ block: 'center', inline: 'nearest' });
+            const r = el.getBoundingClientRect();
+            const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            return Boolean(top && (top === el || el.contains(top)));
+          };
+          const py = document.getElementById('platform-tab-python');
+          const win = document.getElementById('platform-tab-windows');
+          const doc = document.getElementById('platform-tab-docker');
+          const card = document.querySelector('.platform-card');
+          if (!py || !win || !doc || !card) return false;
+          const hPy = Math.round(card.getBoundingClientRect().height);
+          const pyHit = hitOk(document.getElementById('install-tab-uv'))
+            && hitOk(document.getElementById('hero-tab-cli'))
+            && hitOk(document.querySelector('#install-panel-pip .copy-inline-btn'));
+          win.click();
+          const hWin = Math.round(card.getBoundingClientRect().height);
+          const wOk = !document.getElementById('platform-panel-windows').hidden
+            && Boolean(document.getElementById('platform-panel-python').hidden)
+            && hitOk(document.querySelector('#platform-panel-windows .install-dl-btn'));
+          doc.click();
+          const hDoc = Math.round(card.getBoundingClientRect().height);
+          const dOk = !document.getElementById('platform-panel-docker').hidden
+            && Boolean(document.getElementById('platform-panel-windows').hidden)
+            && hitOk(document.querySelector('#platform-panel-docker .copy-inline-btn'));
           py.click();
+          const copyBtns = document.querySelectorAll('.platform-card .copy-code-btn').length;
+          const sameHeight = Math.abs(hPy - hWin) <= 1 && Math.abs(hPy - hDoc) <= 1;
           const noOverflow = document.documentElement.scrollWidth <= window.innerWidth + 1;
-          return cOk && dOk && noOverflow;
+          return pyHit && wOk && dOk && copyBtns === 4 && sameHeight && noOverflow;
         })()""",
     )
-    if not tabs_ok:
-        failures.append("[INTERACTIVE] Hero quickstart tabs failed on /")
+    if not platform_tabs_ok:
+        failures.append("[INTERACTIVE] Hero platform tabs failed on /")
 
-    install_tabs_ok = eval_js(
+    python_subtabs_ok = eval_js(
         cdp,
         """(() => {
           const pip = document.getElementById('install-tab-pip');
           const uv = document.getElementById('install-tab-uv');
           const pipx = document.getElementById('install-tab-pipx');
-          if (!pip || !uv || !pipx) return false;
+          const api = document.getElementById('hero-tab-api');
+          const cli = document.getElementById('hero-tab-cli');
+          if (!pip || !uv || !pipx || !api || !cli) return false;
           uv.click();
           const uOk = !document.getElementById('install-panel-uv').hidden
-            && Boolean(document.getElementById('install-panel-pip').hidden);
+            && !document.getElementById('hero-panel-cli').hidden;
           pipx.click();
           const pOk = !document.getElementById('install-panel-pipx').hidden
-            && Boolean(document.getElementById('install-panel-uv').hidden);
+            && !document.getElementById('hero-panel-cli').hidden;
           pip.click();
+          const pipOk = !document.getElementById('install-panel-pip').hidden
+            && !document.getElementById('hero-panel-api').hidden;
+          cli.click();
+          const manualCliOk = !document.getElementById('hero-panel-cli').hidden
+            && !document.getElementById('install-panel-pip').hidden;
+          api.click();
           const noOverflow = document.documentElement.scrollWidth <= window.innerWidth + 1;
-          return uOk && pOk && noOverflow;
+          return uOk && pOk && pipOk && manualCliOk && noOverflow;
         })()""",
     )
-    if not install_tabs_ok:
-        failures.append("[INTERACTIVE] Install method tabs failed on /")
+    if not python_subtabs_ok:
+        failures.append("[INTERACTIVE] Hero Python install/example tabs failed on /")
 
     theme_res = eval_js(
         cdp,

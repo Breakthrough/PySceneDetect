@@ -661,6 +661,13 @@ def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
         "repo_url": REPO_URL,
         "pypi_url": PYPI_URL,
         "version": f"v{latest_ver}",
+        "version_num": latest_ver,
+        "win64_msi_url": (
+            f"{REPO_URL}/releases/download/v{latest_ver}/PySceneDetect-{latest_ver}-win64.msi"
+        ),
+        "win64_zip_url": (
+            f"{REPO_URL}/releases/download/v{latest_ver}/PySceneDetect-{latest_ver}-win64.zip"
+        ),
         "release_date_short": f"{rel_dt:%b} {rel_dt.day}, {rel_dt.year}",
     }
 
@@ -690,6 +697,7 @@ def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
     )
 
     hero_tabs = render_hero_tabs()
+    hero_snippets = {tab["id"]: tab for tab in hero_tabs}
     search_index: list[dict[str, str]] = []
 
     for idx, spec in enumerate(PAGES):
@@ -731,6 +739,7 @@ def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
             site=site_ctx,
             page=page_ctx,
             hero_tabs=hero_tabs,
+            hero_snippets=hero_snippets,
             nav_groups=NAV_GROUPS,
             pages=PAGES,
         )
