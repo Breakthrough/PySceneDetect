@@ -162,6 +162,8 @@ function initThemeToggle() {
  * 4. Accessible Tabs (roving tabindex, selection-on-focus, find-in-page sync)
  * -------------------------------------------------------------------------- */
 function initTabGroups() {
+  const tabActivators = new WeakMap();
+
   for (const tablist of document.querySelectorAll('[role="tablist"]')) {
     const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
     if (!tabs.length) {
@@ -173,7 +175,7 @@ function initTabGroups() {
       tab.id ? document.querySelector(`[role="tabpanel"][aria-labelledby="${CSS.escape(tab.id)}"]`) : null
     );
 
-    const selectTab = (nextTab, moveFocus = false) => {
+    const selectTab = (nextTab, { moveFocus = false, scroll = true, sync = false } = {}) => {
       tabs.forEach((tab, idx) => {
         const isSelected = tab === nextTab;
         tab.setAttribute("aria-selected", isSelected ? "true" : "false");
@@ -186,14 +188,24 @@ function initTabGroups() {
       if (hintEl && nextTab.dataset.hint) {
         hintEl.textContent = nextTab.dataset.hint;
       }
-      nextTab.scrollIntoView({ block: "nearest", inline: "nearest" });
+      if (scroll) {
+        nextTab.scrollIntoView({ block: "nearest", inline: "nearest", container: "nearest" });
+      }
       if (moveFocus) {
         nextTab.focus();
+      }
+      if (sync && nextTab.dataset.syncTab) {
+        const syncTarget = document.getElementById(nextTab.dataset.syncTab);
+        const activateTarget = syncTarget ? tabActivators.get(syncTarget) : null;
+        if (activateTarget) {
+          activateTarget();
+        }
       }
     };
 
     tabs.forEach((tab, idx) => {
-      tab.addEventListener("click", () => selectTab(tab, false));
+      tabActivators.set(tab, () => selectTab(tab, { moveFocus: false, scroll: false, sync: false }));
+      tab.addEventListener("click", () => selectTab(tab, { moveFocus: false, scroll: true, sync: true }));
       tab.addEventListener("keydown", (event) => {
         let targetIdx = -1;
         if (event.key === "ArrowRight") {
@@ -207,15 +219,98 @@ function initTabGroups() {
         }
         if (targetIdx !== -1) {
           event.preventDefault();
-          selectTab(tabs[targetIdx], true);
+          selectTab(tabs[targetIdx], { moveFocus: true, scroll: true, sync: true });
         }
       });
 
       const panel = panels[idx];
       if (panel) {
-        panel.addEventListener("beforematch", () => selectTab(tab, false));
+        panel.addEventListener("beforematch", () =>
+          selectTab(tab, { moveFocus: false, scroll: false, sync: false })
+        );
       }
     });
+  }
+}
+
+/* Equalize tab panel heights so switching tabs never shifts content below. */
+function initEqualHeightTabPanels() {
+  for (const panelsWrap of document.querySelectorAll("[data-equalize-panels]")) {
+    const topPanels = Array.from(panelsWrap.querySelectorAll(':scope > [role="tabpanel"]'));
+    if (topPanels.length < 2) {
+      continue;
+    }
+
+    let lastWidth = -1;
+
+    const syncHeights = (force = false) => {
+      const width = Math.round(panelsWrap.clientWidth);
+      if (width <= 0 || (!force && width === lastWidth)) {
+        return;
+      }
+      lastWidth = width;
+
+      panelsWrap.style.minBlockSize = "";
+      const bandGroups = new Map();
+      for (const el of panelsWrap.querySelectorAll("[data-equalize-band]")) {
+        el.style.minBlockSize = "";
+        const key = el.dataset.equalizeBand;
+        if (!bandGroups.has(key)) {
+          bandGroups.set(key, []);
+        }
+        bandGroups.get(key).push(el);
+      }
+
+      const nestedPanels = Array.from(
+        panelsWrap.querySelectorAll(':scope > [role="tabpanel"] [role="tabpanel"]')
+      );
+      const allPanels = [...topPanels, ...nestedPanels];
+      const savedHidden = allPanels.map((panel) => panel.getAttribute("hidden"));
+
+      for (const panel of allPanels) {
+        panel.hidden = false;
+      }
+
+      for (const els of bandGroups.values()) {
+        const heights = els.map((el) => Math.ceil(el.getBoundingClientRect().height));
+        const maxBandH = Math.max(...heights);
+        const minBandH = Math.min(...heights);
+        if (maxBandH > 0 && maxBandH - minBandH <= 32) {
+          for (const el of els) {
+            el.style.minBlockSize = `${maxBandH}px`;
+          }
+        }
+      }
+
+      let maxPanelH = 0;
+      for (const panel of topPanels) {
+        maxPanelH = Math.max(maxPanelH, Math.ceil(panel.getBoundingClientRect().height));
+      }
+
+      allPanels.forEach((panel, idx) => {
+        const prev = savedHidden[idx];
+        if (prev === null) {
+          panel.hidden = false;
+        } else {
+          panel.setAttribute("hidden", prev);
+        }
+      });
+
+      if (maxPanelH > 0) {
+        panelsWrap.style.minBlockSize = `${maxPanelH}px`;
+      }
+    };
+
+    syncHeights(true);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => syncHeights(true)).catch(() => {});
+    }
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(() => syncHeights(false));
+      observer.observe(panelsWrap);
+    }
   }
 }
 
@@ -256,7 +351,7 @@ function initCopyButtons() {
     });
   }
 
-  for (const container of document.querySelectorAll(".prose .codehilite, .code-window .codehilite")) {
+  for (const container of document.querySelectorAll(".prose .codehilite, .platform-card .codehilite")) {
     const codeEl = container.querySelector("code") || container;
     const btn = document.createElement("button");
     btn.type = "button";
@@ -544,6 +639,7 @@ initDialogLightDismissFallback();
 initResponsiveNavbar();
 initThemeToggle();
 initTabGroups();
+initEqualHeightTabPanels();
 initCopyButtons();
 initTocHighlight();
 initSearchDialog();
