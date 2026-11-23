@@ -266,20 +266,125 @@
 <li><a href="https://github.com/zcbacxc/movie-narrator">movie-narrator</a>: detects scenes as part of its movie recap pipeline.</li>
 </ul>
 <h2 id="research-and-literature">Research and Literature</h2>
-<p>The papers below either use PySceneDetect for video analysis or compare new shot-boundary detection methods against it:</p>
-<ul>
-<li><a href="https://arxiv.org/abs/2402.19479">Panda-70M: Captioning 70M Videos with Multiple Cross-Modality Teachers</a> by Tsai-Shien Chen, Aliaksandr Siarohin, Willi Menapace, Ekaterina Deyneka, Hsiang-wei Chao, Byung Eun Jeon, Yuwei Fang, Hsin-Ying Lee, Jian Ren, Ming-Hsuan Yang, and Sergey Tulyakov (2024).</li>
-<li><a href="https://arxiv.org/pdf/2306.06803.pdf">Stable Remaster: Bridging the Gap Between Old Content and New Displays</a> by Nathan Paull, Shuvam Keshari, and Yian Wong (2023).</li>
-<li><a href="https://ieeexplore.ieee.org/abstract/document/9522986">LoL-V2T: Large-Scale Esports Video Description Dataset</a> by Tsunehiko Tanaka and Edgar Simo-Serra (2021).</li>
-<li><a href="https://ieeexplore.ieee.org/document/9099408">Online Detection of Action Start via Soft Computing for Smart City</a> by Tian Wang, Yang Chen, Hongqiang Lv, Jing Teng, Hichem Snoussi, and Fei Tao (2020).</li>
-<li><a href="https://www.linkedin.com/pulse/blind-people-dont-have-good-muhammad-hashim-1f/">Thesis Project: Smart Shades and Cane for The Blind</a> by Muhammad Hashim (2020).</li>
-<li><a href="https://appliednetsci.springeropen.com/articles/10.1007/s41109-019-0226-0">Movienet: a movie multilayer network model using visual and textual semantic cues</a> by Youssef Mourchid, Benjamin Renoust, Olivier Roupin, L&ecirc; V&#259;n, Hocine Cherifi, and Mohammed El Hassouni (2019).</li>
-<li><a href="https://ieeexplore.ieee.org/document/8525880/">NLP-Enriched Automatic Video Segmentation</a> by Mohannad AlMousa, Rachid Benlamri, and Richard Khoury (2018).</li>
-<li><a href="https://arxiv.org/pdf/1802.06822">Online Detection of Action Start in Untrimmed, Streaming Videos</a> by Zheng Shou, Junting Pan, Jonathan Chan, Kazuyuki Miyazawa, Hassan Mansour, Anthony Vetro, Xavi Gir-i-Nieto, and Shih-Fu Chang (2018).</li>
-<li><a href="https://arxiv.org/pdf/1807.11122">Story Understanding in Video Advertisements</a> by Keren Ye, Kyle Buettner, and Adriana Kovashka (2018).</li>
-</ul>
+<p>The papers below either use PySceneDetect in their video pipelines or evaluate shot-boundary detection methods against it:</p>
+<div tabindex="0" role="region" aria-label="Research and Literature" class="table-wrapper"><table>
+<thead>
+<tr>
+<th scope="col">Paper</th>
+<th scope="col">Year</th>
+<th scope="col">Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://arxiv.org/abs/2511.16719">SAM 3: Segment Anything with Concepts</a></td>
+<td>2025</td>
+<td>Shot boundary detection to pick single-shot clips.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2506.09985">V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning</a></td>
+<td>2025</td>
+<td>Splits pretraining videos into clips at scene transitions.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2505.13211">MAGI-1: Autoregressive Video Generation at Scale</a></td>
+<td>2025</td>
+<td>Cuts long videos into single-shot clips.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2501.03575">Cosmos World Foundation Model Platform for Physical AI</a></td>
+<td>2025</td>
+<td>One of the shot boundary detectors evaluated.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2412.20404">Open-Sora: Democratizing Efficient Video Production for All</a></td>
+<td>2024</td>
+<td>Detects scenes and cuts videos into clips.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2412.03603">HunyuanVideo: A Systematic Framework For Large Video Generative Models</a></td>
+<td>2024</td>
+<td>Splits raw videos into single-shot clips.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2410.13720">Movie Gen: A Cast of Media Foundation Models</a></td>
+<td>2024</td>
+<td>Shot boundary detection to filter out videos with jittery camera movement.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2410.02713">LLaVA-Video: Video Instruction Tuning With Synthetic Data</a></td>
+<td>2024</td>
+<td>Counts scenes in a video to select dynamic videos.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2409.18869">Emu3: Next-Token Prediction is All You Need</a></td>
+<td>2024</td>
+<td>Uses <code>ContentDetector</code> and <code>ThresholdDetector</code> to split videos into scenes.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2402.19479">Panda-70M: Captioning 70M Videos with Multiple Cross-Modality Teachers</a></td>
+<td>2024</td>
+<td>Stage-1 shot boundary detection in its semantics-aware video splitting pipeline.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2311.15127">Stable Video Diffusion: Scaling Latent Video Diffusion Models to Large Datasets</a></td>
+<td>2023</td>
+<td>Cut detection on base video clips, run at three frame rates.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2309.15103">LaVie: High-Quality Video Generation with Cascaded Latent Diffusion Models</a></td>
+<td>2023</td>
+<td>Scene detection to segment the dataset's source videos.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2307.06942">InternVid: A Large-scale Video-Text Dataset for Multimodal Understanding and Generation</a></td>
+<td>2023</td>
+<td>Cuts videos at scene changes with threshold 27.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/2306.06803">Stable Remaster: Bridging the Gap Between Old Content and New Displays</a></td>
+<td>2023</td>
+<td>Python API to segment episodes into scene clips for parallel remastering.</td>
+</tr>
+<tr>
+<td><a href="https://ieeexplore.ieee.org/abstract/document/9522986">LoL-V2T: Large-Scale Esports Video Description Dataset</a></td>
+<td>2021</td>
+<td>Splits full-match esports broadcasts into clips before filtering non-gameplay scenes.</td>
+</tr>
+<tr>
+<td><a href="https://ieeexplore.ieee.org/document/9099408">Online Detection of Action Start via Soft Computing for Smart City</a></td>
+<td>2020</td>
+<td>Online action-start detection in smart-city video analysis.</td>
+</tr>
+<tr>
+<td><a href="https://www.linkedin.com/pulse/blind-people-dont-have-good-muhammad-hashim-1f/">Thesis Project: Smart Shades and Cane for The Blind</a></td>
+<td>2020</td>
+<td>Assistive-vision thesis project using scene change analysis.</td>
+</tr>
+<tr>
+<td><a href="https://appliednetsci.springeropen.com/articles/10.1007/s41109-019-0226-0">Movienet: a movie multilayer network model using visual and textual semantic cues</a></td>
+<td>2019</td>
+<td>Extracts movie scenes for a multilayer narrative network model.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/1807.11122">Story Understanding in Video Advertisements</a></td>
+<td>2018</td>
+<td>Shot boundary detection as a climax indicator feature in video ads.</td>
+</tr>
+<tr>
+<td><a href="https://arxiv.org/abs/1802.06822">Online Detection of Action Start in Untrimmed, Streaming Videos</a></td>
+<td>2018</td>
+<td>Shot boundary detection baseline evaluated against online action-start detection.</td>
+</tr>
+<tr>
+<td><a href="https://ieeexplore.ieee.org/document/8525880/">NLP-Enriched Automatic Video Segmentation</a></td>
+<td>2018</td>
+<td>Visual video segmentation for topic-indexed lecture videos.</td>
+</tr>
+</tbody>
+</table></div>
 <p>Publicly accessible links are preferred when suggesting new citations, though not required.</p>
-<h3 id="scene-detection-methodology">Scene detection methodology</h3>
+<h2 id="methodology-of-pyscenedetect">Methodology of PySceneDetect</h2>
 <p>You can inspect the implementation of every built-in detector in <a href="https://github.com/Breakthrough/PySceneDetect/tree/main/scenedetect/detectors"><code>scenedetect/detectors/</code></a>. For background discussion on references and methods, see <a href="https://github.com/Breakthrough/PySceneDetect/issues/62">Issue #62</a>.</p>
 <h2 id="similar-programs">Similar Programs</h2>
 <p>These tools and models also detect scene cuts in video:</p>
@@ -330,9 +435,9 @@
           </li>
           <li>
             <a href="#research-and-literature">Research and Literature</a>
-            <ul class="toc-sublist" role="list">
-              <li><a href="#scene-detection-methodology">Scene detection methodology</a></li>
-            </ul>
+          </li>
+          <li>
+            <a href="#methodology-of-pyscenedetect">Methodology of PySceneDetect</a>
           </li>
           <li>
             <a href="#similar-programs">Similar Programs</a>
