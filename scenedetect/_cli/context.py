@@ -558,6 +558,8 @@ class CliContext:
         backend: str | None,
     ):
         input_hint = "--stdin" if self.use_stdin else "-i/--input"
+        # The backend may come from the config file or its default (opencv), not just -b/--backend.
+        backend = self.config.get_value("global", "backend", backend)
         if input_path is not None and "%" in input_path and backend != "opencv":
             raise click.BadParameter(
                 "The OpenCV backend (`--backend opencv`) must be used to process image sequences.",
@@ -566,7 +568,6 @@ class CliContext:
         if frame_rate is not None and frame_rate < MAX_FPS_DELTA:
             raise click.BadParameter("Invalid frame rate specified!", param_hint="-f/--frame-rate")
         try:
-            backend = self.config.get_value("global", "backend", backend)
             if backend not in AVAILABLE_BACKENDS:
                 raise click.BadParameter(
                     f"Specified backend {backend} is not available on this system!",
