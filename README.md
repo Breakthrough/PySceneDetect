@@ -161,5 +161,5 @@ BSD-3-Clause; see [`LICENSE`](LICENSE) and [`THIRD-PARTY.md`](THIRD-PARTY.md) fo
 
 ----------------------------------------------------------
 
-Copyright (C) 2014 Brandon Castellano.
+Copyright (C) 2014 [Brandon Castellano](https://bcastell.com).
 All rights reserved.
