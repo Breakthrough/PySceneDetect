@@ -6,8 +6,8 @@
 The root document has one named toctree per section. For every page inside a section, the
 sidebar template gets ``section_toctree()``, which renders that section's toctree fully
 expanded (other pages to the section's ``maxdepth``, the current page to ``current_maxdepth``),
-plus ``sidebar_section`` and ``sidebar_sections`` for a switch between sections. The root
-document itself renders every labelled section's tree, each pruned to
+plus ``sidebar_section`` and ``sidebar_sections`` so templates can highlight the active section
+in the top bar. The root document itself renders every top-level section's tree, each pruned to
 ``section_sidebar_root_depth`` (by default the section's ``maxdepth``). Pages in no section
 (genindex, search, py-modindex) and the singlehtml builder fall back to the regular global
 toctree.
@@ -15,13 +15,13 @@ toctree.
 Configure with ``section_sidebar_sections`` in conf.py::
 
     section_sidebar_sections = {
-        "clitoc": ("CLI", "cli", 2, 2),  # toctree name: (label, landing doc, depth, cur depth)
-        "reftoc": (None, None, 2, 2),  # no label: not part of the switch
+        "clitoc": (True, 2, 3),  # toctree name: (show_on_root, depth, current-page depth)
+        "reftoc": (False, 2, 2),  # standalone page: show only current page's headings
     }
     section_sidebar_root_depth = {"apitoc": 1}  # on the root document: page titles only
 
-A section whose label is ``None`` is not part of the switch. Its tree is only drawn on its own
-pages, and then holds just the current page's headings.
+A section with ``show_on_root=False`` is omitted from the root document's sidebar tree. Its tree
+is only drawn on its own pages, and then holds just the current page's headings.
 
 ``section_sidebar_summary`` trims what a page contributes to the tree when it is NOT the
 current page: only entries (at any depth) whose text matches one of the glob patterns are
@@ -120,8 +120,8 @@ def _prune_depth(top: nodes.list_item, maxdepth: int) -> None:
 def _keep_current_headings(tree: nodes.Element) -> None:
     """Replace the section's page list with the headings of the current page, one level up.
 
-    For sections without a switch label: the link row under the switch already lists their
-    pages, so the tree repeats neither the current page's title nor its siblings.
+    For standalone sections (``show_on_root=False``), the top bar already links to the page,
+    so the sidebar lists only the current page's headings under an "On this page" caption.
     """
     for top in list(tree.findall(nodes.list_item)):
         if "toctree-l1" not in top["classes"] or not top.get("iscurrent"):
@@ -170,7 +170,7 @@ def _prune_tree(
 def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doctree) -> None:
     sections = app.config.section_sidebar_sections
     if app.builder.name == "singlehtml":
-        # Everything is one page: the switch would link to itself, so hide it.
+        # Everything is one page: fall back to the global toctree instead of per-section trees.
         sections = {}
     node = _section_toctree_node(app, pagename) if sections else None
     names = node.parent.get("names", []) if node is not None else []
@@ -185,7 +185,7 @@ def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doct
     context["sidebar_sections"] = sections
 
     def render(name: str, toctree_node: addnodes.toctree) -> str:
-        _, _, maxdepth, current_maxdepth = sections[name]
+        show_on_root, maxdepth, current_maxdepth = sections[name]
         current_maxdepth = app.config.section_sidebar_page_depth.get(pagename, current_maxdepth)
         tree = TocTree(app.env).resolve(
             pagename,
@@ -214,7 +214,7 @@ def _add_section_toctree(app: Sphinx, pagename: str, templatename, context, doct
             for docname, patterns in app.config.section_sidebar_summary.items()
         }
         _prune_tree(tree, maxdepth, current_maxdepth, summary)
-        if sections[name][0] is None:
+        if not show_on_root:
             _keep_current_headings(tree)
         return app.builder.render_partial(tree)["fragment"]
 

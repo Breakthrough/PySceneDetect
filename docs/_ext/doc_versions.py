@@ -58,7 +58,8 @@ def load_doc_versions(
         _entry("latest", f"v{latest_ver} (latest)", "channel"),
         _entry("head", "dev (head)", "channel"),
     ]
-    entries += [_entry(slug, f"v{slug}", "release") for slug in stable_slugs]
+    # Avoid duplicating `latest` as a separate row when it is the current stable release.
+    entries += [_entry(slug, f"v{slug}", "release") for slug in stable_slugs if slug != latest_ver]
     if legacy_slugs:
         entries.append(_entry(legacy_slugs[0], f"v{legacy_slugs[0]} (legacy)", "legacy"))
     return latest_ver, entries

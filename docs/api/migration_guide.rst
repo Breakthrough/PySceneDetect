@@ -139,12 +139,12 @@ Access :attr:`~scenedetect.common.FrameTimecode.frame_num`, :attr:`~scenedetect.
     rate * 0.5                      # 14.985... (float, mixed arithmetic)
     f"{float(rate):.3f}"            # '29.970' (explicit cast for format spec)
 
-The legacy ``framerate`` property (one word, returns ``float``) is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release. Migrate to ``frame_rate``; cast with ``float(...)`` at the call site if you specifically need a ``float``.
+The legacy ``framerate`` property (one word, returns ``float``) is retained as a deprecated alias and emits a ``DeprecationWarning`` (scheduled for removal in v0.9). Migrate to ``frame_rate``; cast with ``float(...)`` at the call site if you specifically need a ``float``.
 
 Renamed Method: ``equal_framerate()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:meth:`~scenedetect.common.FrameTimecode.equal_framerate` has been renamed to :meth:`~scenedetect.common.FrameTimecode.equal_frame_rate` for consistency with the :attr:`~scenedetect.common.FrameTimecode.frame_rate` property. The legacy ``equal_framerate()`` method is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release. The new form additionally accepts a ``Fraction`` or another ``FrameTimecode`` (in addition to ``float``).
+:meth:`~scenedetect.common.FrameTimecode.equal_framerate` has been renamed to :meth:`~scenedetect.common.FrameTimecode.equal_frame_rate` for consistency with the :attr:`~scenedetect.common.FrameTimecode.frame_rate` property. The legacy ``equal_framerate()`` method is retained as a deprecated alias and emits a ``DeprecationWarning`` (scheduled for removal in v0.9). The new form additionally accepts a ``Fraction`` or another ``FrameTimecode`` (in addition to ``float``).
 
 Removed Methods
 ^^^^^^^^^^^^^^^
@@ -170,7 +170,7 @@ Rational Frame Rates
 ``frame_rate`` Keyword Argument
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``framerate`` keyword argument has been renamed to ``frame_rate`` on :func:`~scenedetect.open_video` and on every backend constructor (:class:`~scenedetect.backends.opencv.VideoStreamCv2`, :class:`~scenedetect.backends.opencv.VideoCaptureAdapter`, :class:`~scenedetect.backends.pyav.VideoStreamAv`, :class:`~scenedetect.backends.moviepy.VideoStreamMoviePy`). The new form accepts ``float | Fraction | None``. The legacy ``framerate`` keyword is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release; if both are supplied, ``frame_rate`` takes precedence.
+The ``framerate`` keyword argument has been renamed to ``frame_rate`` on :func:`~scenedetect.open_video` and on every backend constructor (:class:`~scenedetect.backends.opencv.VideoStreamCv2`, :class:`~scenedetect.backends.opencv.VideoCaptureAdapter`, :class:`~scenedetect.backends.pyav.VideoStreamAv`, :class:`~scenedetect.backends.moviepy.VideoStreamMoviePy`). The new form accepts ``float | Fraction | None``. The legacy ``framerate`` keyword is retained as a deprecated alias and emits a ``DeprecationWarning`` (scheduled for removal in v0.9); if both are supplied, ``frame_rate`` takes precedence.
 
 .. code:: python
 

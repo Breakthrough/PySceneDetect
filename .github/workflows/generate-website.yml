@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - 'website-*'
+      - 'website/**'
     paths:
       - 'website/**'
       - 'docs/LATEST_VERSION'
@@ -43,13 +43,18 @@ jobs:
           INPUT_TARGET: ${{ inputs.target || 'auto' }}
         run: |
           if [[ "${INPUT_TARGET}" == "auto" ]]; then
-            if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
               target="production"
             else
               target="staging"
             fi
           else
             target="${INPUT_TARGET}"
+          fi
+
+          if [[ "$target" == "production" ]] && [[ "${GITHUB_REF}" != "refs/heads/main" ]] && [[ "${GITHUB_REF}" != refs/heads/releases/* ]]; then
+            echo "Refusing production deployment from non-release ref: ${GITHUB_REF}" >&2
+            exit 1
           fi
 
           if [[ "$target" == "staging" ]]; then
@@ -77,11 +82,12 @@ jobs:
         if: env.deploy_target != 'clear-staging'
         shell: bash
         run: |
-          python website/build.py \
+          python -B website/build.py \
             --strict \
             --base-path "${SITE_BASE_PATH}" \
             --out-dir "${RUNNER_TEMP}/site-build"
         env:
+          PYTHONDONTWRITEBYTECODE: "1"
           SITE_BASE_PATH: ${{ env.site_base_path }}
 
       - name: Update gh-pages Branch
@@ -89,6 +95,7 @@ jobs:
         run: |
           git fetch origin gh-pages
           git checkout gh-pages
+          git clean -ffdx
 
           if [[ "${DEPLOY_TARGET}" == "production" ]]; then
             # Replace root site while preserving .nojekyll, CNAME, versioned Sphinx

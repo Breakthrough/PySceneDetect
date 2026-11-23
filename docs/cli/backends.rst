@@ -2,12 +2,12 @@
 .. _cli-backends:
 
 ***********************************************************************
-Video Backends
+Video Backends (CLI)
 ***********************************************************************
 
 PySceneDetect supports modular video input backends. You can configure backend options in a :ref:`config file <scenedetect_cli-config_file>`. Run ``scenedetect version`` to see which backends are installed.
 
-The ``scenedetect`` command generates outputs after scene detection finishes. Most output commands require an input that can be replayed, and preferably seeked. Some backends support network streams and other input types, but live streams require the Python API.
+The ``scenedetect`` command generates outputs after scene detection finishes. Most output commands require an input that you can replay, and preferably seek. Some backends support network streams and other input types, but live streams require the Python API.
 
 
 .. _cli-backend-opencv:
@@ -23,7 +23,7 @@ The `OpenCV <https://opencv.org/>`_ backend (usually `opencv-python <https://pyp
 
 OpenCV is fast and reliable for most files, though it can occasionally fail on videos with multiple audio tracks or minor frame corruption. You can use ``opencv-python``, ``opencv-python-headless``, or a custom ``cv2`` build.
 
-The OpenCV backend also supports image sequences (for example, ``frame%02d.jpg`` to load ``frame001.jpg``, ``frame002.jpg``, ``frame003.jpg``, and so on). Set the frame rate manually with ``-f`` / ``--frame-rate`` so timecodes are accurate.
+The OpenCV backend also supports image sequences (for example, ``frame%03d.jpg`` to load ``frame001.jpg``, ``frame002.jpg``, ``frame003.jpg``, and so on). Set the frame rate manually with ``-f`` / ``--frame-rate`` so timecodes are accurate.
 
 Variable frame rate (VFR) video is supported. Scene detection uses PTS-derived timestamps from ``CAP_PROP_POS_MSEC`` for accurate timecodes. Seeking compensates for OpenCV's average-fps seek approximation so output timecodes stay accurate across the full video.
 

@@ -1,6 +1,6 @@
 # Benchmarks
 
-PySceneDetect's detectors are tested for accuracy against three public shot-boundary detection datasets. Scoring follows the [TRECVID-SBD convention](https://www-nlpir.nist.gov/projects/tv2007/pastdata/shot_boundary.07.html) (greedy 1-to-1 nearest-neighbor matching with a configurable frame tolerance for hard cuts, and point-in-interval matching for fades), so results can be compared directly with published research. The benchmark code, dataset loaders, and raw results are in [`benchmark/`](https://github.com/Breakthrough/PySceneDetect/tree/main/benchmark) on GitHub.
+PySceneDetect's detectors are tested for accuracy against three public shot-boundary detection datasets. Scoring follows the [TRECVID-SBD convention](https://trecvid.nist.gov/) (greedy 1-to-1 nearest-neighbor matching with a configurable frame tolerance for hard cuts, and point-in-interval matching for fades), so results can be compared directly with published research. The benchmark code, dataset loaders, and result summaries ([`README.md`](https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/README.md), [`SWEEP_REPORT.md`](https://github.com/Breakthrough/PySceneDetect/blob/main/benchmark/SWEEP_REPORT.md)) are in [`benchmark/`](https://github.com/Breakthrough/PySceneDetect/tree/main/benchmark) on GitHub.
 
 The three datasets cover different types of video:
 
@@ -14,7 +14,7 @@ The three datasets cover different types of video:
 
 Hard cuts with exact frame matching (tolerance 0). F1 cells are shaded by score.
 
-These tables were measured with v0.7 defaults. In v0.7.2, `HistogramDetector` and `HashDetector` defaults changed to the tuned values listed under [Parameter Sweeps](#parameter-sweeps); the default tables below will be updated with v0.7.2 measurements.
+The tables below show scores with the v0.7 defaults. Version 0.7.2 changed the `HistogramDetector` and `HashDetector` defaults to the tuned values in [Parameter Sweeps](#parameter-sweeps).
 
 ### BBC Planet Earth
 
@@ -90,7 +90,7 @@ Dots mark the highest score for each dataset in the tested range. Long-form broa
 
 Scored by mean hard-cut F1 at 1-frame tolerance across all three datasets:
 
-<table class="bm-table">
+<table class="bm-table bm-table-sweep">
 <thead>
 <tr><th scope="col">Detector</th><th scope="col">Best mean F1</th><th scope="col">Best parameters</th><th scope="col">v0.7.2 default</th><th scope="col">v0.7 default</th></tr>
 </thead>

@@ -102,11 +102,9 @@ PySceneDetect 0.7.1 adds support for concatenating multiple videos, along with s
 
  - [general] `scenedetect` and `scenedetect-headless` are unchanged: they continue to ship the full program (library + CLI) with `opencv-python` / `opencv-python-headless` respectively. Both packages provide the same `scenedetect` module (install or depend only one)
  - [feature] Official Docker images are now published to the GitHub Container Registry with the full CLI, all backends, and external tools (ffmpeg, mkvmerge) included, thanks [@FNGarvin](https://github.com/FNGarvin) [#537](https://github.com/Breakthrough/PySceneDetect/pull/537)
-     - Example usage (process a video in the current directory):
+    - Example usage (process a video in the current directory):
 
-```bash
-docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect -i /files/video.mp4 detect-adaptive split-video -o /files
-```
+            docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect -i /files/video.mp4 detect-adaptive split-video -o /files
 
  - [general] The Windows distribution now bundles OpenCV 5.0, PyAV 18, and FFmpeg 8.1.2. The Windows and Docker builds also override Pillow to 12.3.0 for upstream security fixes ([moviepy#2553](https://github.com/Zulko/moviepy/issues/2553))
 
@@ -191,7 +189,7 @@ Care was taken to minimize changes for most common API uses, however more advanc
 
 **Removals:**
 
- * Remove deprecated module `scenedetect.video_manager`, use [the `scenedetect.open_video()` function](/docs/head/api.html#scenedetect.open_video) instead
+ * Remove deprecated module `scenedetect.video_manager`, use [the `scenedetect.open_video()` function](/docs/0.7/api.html#scenedetect.open_video) instead
  * Remove deprecated parameters `base_timecode` and `video_manager` from various functions
  * Remove deprecated `SceneManager.get_event_list()` method
  * Remove deprecated `AdaptiveDetector.get_content_val()` method (use `StatsManager` instead)
@@ -296,7 +294,7 @@ This release brings crop support, performance improvements to save-images, lots 
 #### Python Distribution Changes
 
  * *v0.6.5.1* - Fix compatibility issues with PyAV 14+ [#466](https://github.com/Breakthrough/PySceneDetect/issues/466)
- * *v0.6.5.2* - Fix for `AttributeError: module 'cv2' has no attribute 'Mat'` [#468](https://github.com/Breakthrough/PySceneDetect/issues/466)
+ * *v0.6.5.2* - Fix for `AttributeError: module 'cv2' has no attribute 'Mat'` [#468](https://github.com/Breakthrough/PySceneDetect/issues/468)
 
 
 ### 0.6.4 (June 10, 2024)
@@ -403,7 +401,7 @@ Includes new [`load-scenes` command](/docs/0.6.2/cli.html#load-scenes), ability 
 
 #### Project Updates
 
- - Website and documentation is now hosted on Github Pages, documentation can be found at [scenedetect.com/docs](docs.md)
+ - Website and documentation is now hosted on GitHub Pages, documentation can be found at [scenedetect.com/docs](docs.md)
  - Windows and Linux builds are now done on Github Actions, add OSX builds as well
  - Build matrix has been updated to support Python 3.7 through 3.11 for all operating systems for Python distributions
  - Windows portable builds have been moved to Github Actions, signed builds/installer is still done on Appveyor
@@ -429,7 +427,7 @@ Includes [MoviePy support](https://github.com/Zulko/moviepy), edge detection cap
  - [enhancement] Progress bar now displays number of detections while processing, no longer conflicts with log message output
  - [enhancement] When using ffmpeg to split videos, `-map 0` has been added to the default arguments so other audio tracks are also included when present ([#271](https://github.com/Breakthrough/PySceneDetect/issues/271))
  - [enhancement] Add `-a` flag to `version` command to print more information about versions of dependencies/tools being used
- - [enhancement] The resizing method used used for frame downscaling or resizing can now be set using [a config file](/docs/0.6.1/cli/config_file.html), see `[global]` option `downscale-method` and `[save-images]` option `scale-method`
+ - [enhancement] The resizing method used for frame downscaling or resizing can now be set using [a config file](/docs/0.6.1/cli/config_file.html), see `[global]` option `downscale-method` and `[save-images]` option `scale-method`
  - [other] Linear interpolation is now used as the default downscaling method (previously was nearest neighbor) for improved edge detection accuracy
  - [other] Add `-c`/`--min-content-val` argument to `detect-adaptive`, deprecate `-d`/`--min-delta-hsv`
 

@@ -185,14 +185,14 @@ div.body div.admonition.seealso a {
 }
 
 :root {
-    --psd-bg: light-dark(oklch(99.3% 0.002 250), oklch(17% 0.012 255));
-    --psd-surface: light-dark(oklch(97% 0.005 250), oklch(21% 0.015 255));
-    --psd-surface-elevated: light-dark(oklch(100% 0 0), oklch(23.5% 0.016 255));
-    --psd-fg: light-dark(oklch(21% 0.02 255), oklch(90% 0.008 250));
-    --psd-muted: light-dark(oklch(45% 0.018 255), oklch(71% 0.015 250));
-    --psd-border: light-dark(oklch(88.5% 0.01 250), oklch(30% 0.018 255));
-    --psd-brand: light-dark(oklch(42% 0.115 245), oklch(75% 0.115 240));
-    --psd-code-bg: light-dark(oklch(96.4% 0.005 250), oklch(14.2% 0.012 255));
+    --psd-bg: light-dark(oklch(99.2% 0.002 250), oklch(15.5% 0.012 255));
+    --psd-surface: light-dark(oklch(96.8% 0.005 250), oklch(19.5% 0.015 255));
+    --psd-surface-elevated: light-dark(oklch(100% 0 0), oklch(22% 0.016 255));
+    --psd-fg: light-dark(oklch(21% 0.02 255), oklch(94% 0.008 250));
+    --psd-muted: light-dark(oklch(44% 0.02 255), oklch(72% 0.015 250));
+    --psd-border: light-dark(oklch(87.5% 0.01 250), oklch(29.5% 0.018 255));
+    --psd-brand: light-dark(oklch(44% 0.12 248), oklch(75% 0.12 240));
+    --psd-code-bg: light-dark(oklch(96.2% 0.006 250), oklch(13.5% 0.012 255));
 
     --psd-syn-kw: light-dark(oklch(38% 0.14 295), oklch(78% 0.14 295));
     --psd-syn-fn: light-dark(oklch(38% 0.13 240), oklch(79% 0.12 235));
@@ -482,29 +482,29 @@ header.psd-topbar {
     background: color-mix(in oklab, var(--psd-fg) 8%, var(--psd-surface));
     color: var(--psd-brand);
 }
-.psd-theme-toggle .psd-icon-sun {
+.psd-theme-toggle .psd-icon-moon {
     display: block;
 }
-.psd-theme-toggle .psd-icon-moon,
+.psd-theme-toggle .psd-icon-sun,
 .psd-theme-toggle .psd-label-light {
     display: none;
 }
-:root:has(> head > meta[name="color-scheme"][content="dark"]) .psd-theme-toggle .psd-icon-sun,
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .psd-theme-toggle .psd-icon-moon,
 :root:has(> head > meta[name="color-scheme"][content="dark"]) .psd-theme-toggle .psd-label-dark {
     display: none;
 }
-:root:has(> head > meta[name="color-scheme"][content="dark"]) .psd-theme-toggle .psd-icon-moon {
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .psd-theme-toggle .psd-icon-sun {
     display: block;
 }
 :root:has(> head > meta[name="color-scheme"][content="dark"]) .psd-theme-toggle .psd-label-light {
     display: inline;
 }
 @media (prefers-color-scheme: dark) {
-    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .psd-theme-toggle .psd-icon-sun,
+    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .psd-theme-toggle .psd-icon-moon,
     :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .psd-theme-toggle .psd-label-dark {
         display: none;
     }
-    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .psd-theme-toggle .psd-icon-moon {
+    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .psd-theme-toggle .psd-icon-sun {
         display: block;
     }
     :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .psd-theme-toggle .psd-label-light {
@@ -599,7 +599,8 @@ div.sphinxsidebar hr {
 }
 
 /* Body links & clickable monospace hover feedback */
-div.body a {
+div.body a,
+div.body a:visited {
     color: var(--psd-brand);
     border-bottom: none;
     text-decoration: underline;
@@ -905,6 +906,21 @@ div.body pre code {
 dt:target, div.viewcode-block:target {
     background: color-mix(in oklab, var(--psd-brand) 16%, var(--psd-surface));
 }
+span.highlighted {
+    background-color: color-mix(in oklab, var(--psd-warn) 32%, var(--psd-surface));
+    color: var(--psd-fg);
+    border-radius: 0.2rem;
+    padding: 0 0.15em;
+}
+table.indextable tr.cap {
+    background-color: var(--psd-surface);
+    color: var(--psd-fg);
+}
+div.genindex-jumpbox,
+div.modindex-jumpbox {
+    border-top: 1px solid var(--psd-border);
+    border-bottom: 1px solid var(--psd-border);
+}
 dl.py > dt.sig {
     background: var(--psd-surface);
     border-inline-start: 3px solid var(--psd-brand);
@@ -956,8 +972,25 @@ div.body p.admonition-title {
     font-weight: 600;
     line-height: 1.4;
 }
+.related {
+    color: var(--psd-muted);
+}
 .related.top, .related.bottom {
     border-color: var(--psd-border);
+}
+.related a,
+.related a:visited {
+    color: var(--psd-brand);
+    border-bottom: none;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, var(--psd-brand) 42%, transparent);
+    text-underline-offset: 0.2em;
+}
+.related a:hover {
+    color: var(--psd-brand);
+    border-bottom: none;
+    text-decoration-color: var(--psd-brand);
+    text-decoration-thickness: 1.5px;
 }
 div.footer {
     width: 1080px;
@@ -966,11 +999,31 @@ div.footer {
     padding-top: 1rem;
     margin-top: 2.5rem;
 }
-div.footer a {
+.psd-footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.25rem;
+}
+.psd-footer-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 1rem;
+}
+div.footer a,
+div.footer a:visited {
     color: var(--psd-muted);
+    border-bottom: none;
+    text-decoration: none;
 }
 div.footer a:hover {
     color: var(--psd-brand);
+    text-decoration: underline;
 }
 
 /* Responsive fluid layout below 1120px and mobile <= 875px */
@@ -1086,5 +1139,9 @@ div.footer a:hover {
     .psd-version-list a[aria-current="true"] {
         outline: 2px solid Highlight;
         outline-offset: -2px;
+    }
+    span.highlighted {
+        background-color: Mark;
+        color: MarkText;
     }
 }

@@ -1130,7 +1130,7 @@
   }
 
   .code-body {
-    padding: 1.05rem 1.15rem;
+    padding: 1.05rem 2.75rem 1.05rem 1.15rem;
     background: var(--code-bg);
     font-size: 0.85rem;
     line-height: 1.65;
@@ -1782,6 +1782,11 @@
   .bm-table :where(th, td):not(:first-child) {
     text-align: end;
     font-variant-numeric: tabular-nums;
+  }
+
+  .bm-table-sweep :where(th, td):nth-child(n + 3) {
+    text-align: start;
+    font-variant-numeric: normal;
   }
 
   .bm-t1 {

@@ -6,15 +6,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+{%- if builder != 'singlehtml' %}
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-EWBNLVRWW0');
+    if (
+      location.protocol.startsWith("http") &&
+      location.hostname !== "localhost" &&
+      location.hostname !== "127.0.0.1" &&
+      location.hostname !== "[::1]" &&
+      !navigator.webdriver
+    ) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", "G-EWBNLVRWW0");
+      const ga = document.createElement("script");
+      ga.async = true;
+      ga.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(ga);
+    }
   </script>
+{%- endif %}
   <script type="module">
     if (!Object.hasOwn(HTMLElement.prototype, "popover")) {
       import("https://unpkg.com/@oddbird/popover-polyfill@0.6.1/dist/popover.min.js").catch(() => {});
@@ -59,14 +71,29 @@
 
         const release = switcher.getAttribute("data-release") || "";
         const pageRel = switcher.getAttribute("data-page-rel") || "";
+        let latestVersion = switcher.getAttribute("data-latest-version") || "";
         const pathMatch = window.location.pathname.match(/\/docs\/([^/]+)(?:\/|$)/);
         const activeSlug = pathMatch ? pathMatch[1] : (release.includes("dev") ? "head" : release);
 
+        const isMenuOpen = () => {
+          try {
+            return menu.matches(":popover-open, .\\:popover-open");
+          } catch {
+            return menu.classList.contains(":popover-open");
+          }
+        };
+
         const syncActiveLink = () => {
           let matchedLabel = "";
+          const hasExactMatch = Boolean(
+            listEl.querySelector(`a[data-version-slug="${CSS.escape(activeSlug)}"]`)
+          );
           for (const link of listEl.querySelectorAll("a[data-version-slug]")) {
             const slug = link.getAttribute("data-version-slug");
-            if (slug === activeSlug) {
+            const isCurrent =
+              slug === activeSlug ||
+              (!hasExactMatch && slug === "latest" && Boolean(latestVersion) && activeSlug === latestVersion);
+            if (isCurrent) {
               link.setAttribute("aria-current", "true");
               matchedLabel = link.querySelector(".psd-version-item-label")?.textContent?.trim() || "";
             } else {
@@ -106,33 +133,66 @@
             const resp = await fetch("/versions.json", { headers: { Accept: "application/json" } });
             if (!resp.ok) return;
             const data = await resp.json();
-            if (!data || !Array.isArray(data.versions)) return;
-            const existing = new Set(
-              [...listEl.querySelectorAll("a[data-version-slug]")].map((a) => a.getAttribute("data-version-slug"))
-            );
-            const dividers = listEl.querySelectorAll(".psd-version-divider");
-            const insertBeforeNode = dividers.length > 1 ? dividers[dividers.length - 1] : listEl.lastElementChild;
+            if (!data || !Array.isArray(data.versions) || data.versions.length === 0) return;
+
+            const frag = document.createDocumentFragment();
+            const seen = new Set();
+            let prevGroup = "";
+            let added = 0;
+
             for (const entry of data.versions) {
-              if (!entry || typeof entry.slug !== "string" || existing.has(entry.slug)) continue;
-              existing.add(entry.slug);
+              if (!entry || typeof entry.slug !== "string" || !entry.slug || seen.has(entry.slug)) {
+                continue;
+              }
+              seen.add(entry.slug);
+              const group = typeof entry.group === "string" ? entry.group : "";
+              if (prevGroup && group && prevGroup !== group) {
+                const divLi = document.createElement("li");
+                divLi.className = "psd-version-divider";
+                divLi.setAttribute("role", "presentation");
+                frag.appendChild(divLi);
+              }
+              if (group) prevGroup = group;
+
               const li = document.createElement("li");
               const a = document.createElement("a");
               const hasPage =
-                entry.same_layout &&
+                Boolean(entry.same_layout) &&
                 !(pageRel === "examples.html" && ["0.7", "0.7.1", "0.7.2"].includes(entry.slug));
               const suffix = hasPage ? pageRel : "";
-              a.href = `https://www.scenedetect.com/docs/${entry.slug}/${suffix}`;
+              a.href = `https://www.scenedetect.com/docs/${encodeURIComponent(entry.slug)}/${suffix}`;
               a.setAttribute("data-version-slug", entry.slug);
               const span = document.createElement("span");
               span.className = "psd-version-item-label";
-              span.textContent = entry.label || `v${entry.slug}`;
+              span.textContent = typeof entry.label === "string" && entry.label ? entry.label : `v${entry.slug}`;
               a.appendChild(span);
               a.insertAdjacentHTML(
                 "beforeend",
                 '<svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
               );
               li.appendChild(a);
-              listEl.insertBefore(li, insertBeforeNode);
+              frag.appendChild(li);
+              added += 1;
+            }
+
+            if (added === 0) return;
+
+            const tailDivider = document.createElement("li");
+            tailDivider.className = "psd-version-divider";
+            tailDivider.setAttribute("role", "presentation");
+            frag.appendChild(tailDivider);
+
+            const allLi = document.createElement("li");
+            const allLink = document.createElement("a");
+            allLink.className = "psd-version-all";
+            allLink.href = "https://www.scenedetect.com/docs/";
+            allLink.innerHTML = '<span>All versions</span><span aria-hidden="true">&rarr;</span>';
+            allLi.appendChild(allLink);
+            frag.appendChild(allLi);
+
+            listEl.replaceChildren(frag);
+            if (typeof data.latest === "string" && data.latest) {
+              latestVersion = data.latest;
             }
             syncActiveLink();
           } catch (err) {
@@ -141,7 +201,7 @@
         };
 
         menu.addEventListener("toggle", () => {
-          const isOpen = menu.matches(":popover-open") || menu.classList.contains(":popover-open");
+          const isOpen = isMenuOpen();
           trigger.setAttribute("aria-expanded", String(isOpen));
           if (isOpen) {
             positionFallback();
@@ -150,14 +210,14 @@
         });
 
         window.addEventListener("resize", () => {
-          if (menu.matches(":popover-open") || menu.classList.contains(":popover-open")) {
+          if (isMenuOpen()) {
             positionFallback();
           }
         });
 
         switcher.addEventListener("focusout", (e) => {
           if (!(e.relatedTarget instanceof Node) || switcher.contains(e.relatedTarget)) return;
-          if (menu.matches(":popover-open") || menu.classList.contains(":popover-open")) {
+          if (isMenuOpen()) {
             menu.hidePopover?.();
           }
         });
@@ -180,13 +240,13 @@
     <nav class="psd-topbar-nav" aria-label="Documentation navigation">
       <a class="psd-backlink" href="https://www.scenedetect.com/">&larr; scenedetect.com</a>
       <span class="psd-sep" aria-hidden="true">/</span>
-      <a href="{{ pathto(root_doc) }}"{% if pagename == root_doc %} class="current" aria-current="page"{% endif %}>Docs Home</a>
-      <a href="{{ pathto('cli') }}"{% if sidebar_section == 'clitoc' %} class="current"{% if pagename == 'cli' %} aria-current="page"{% endif %}{% endif %}>CLI Reference</a>
-      <a href="{{ pathto('api') }}"{% if sidebar_section == 'apitoc' %} class="current"{% if pagename == 'api' %} aria-current="page"{% endif %}{% endif %}>Python API</a>
-      <a href="{{ pathto('examples') }}"{% if pagename == 'examples' %} class="current" aria-current="page"{% endif %}>Examples</a>
+      <a href="{{ '#' if builder == 'singlehtml' else pathto(root_doc) }}"{% if pagename == root_doc %} class="current" aria-current="page"{% endif %}>Reference Manual</a>
+      <a href="{{ '#document-cli' if builder == 'singlehtml' else pathto('cli') }}"{% if sidebar_section == 'clitoc' %} class="current"{% if pagename == 'cli' %} aria-current="page"{% endif %}{% endif %}>CLI Reference</a>
+      <a href="{{ '#document-api' if builder == 'singlehtml' else pathto('api') }}"{% if sidebar_section == 'apitoc' %} class="current"{% if pagename == 'api' %} aria-current="page"{% endif %}{% endif %}>Python API</a>
+      <a href="{{ '#document-examples' if builder == 'singlehtml' else pathto('examples') }}"{% if pagename == 'examples' %} class="current" aria-current="page"{% endif %}>Examples</a>
     </nav>
     <div class="psd-topbar-meta">
-      <div class="psd-version-switcher" data-release="{{ release }}" data-page-rel="{{ psd_page_rel }}">
+      <div class="psd-version-switcher" data-release="{{ release }}" data-page-rel="{{ psd_page_rel }}" data-latest-version="{{ psd_latest_version }}">
         <button
           type="button"
           class="psd-version-btn"
@@ -209,7 +269,7 @@
               {%- set ns.prev_group = v.group %}
               {%- set has_page = v.same_layout and not (psd_page_rel == 'examples.html' and v.slug in ('0.7', '0.7.1', '0.7.2')) %}
               {%- set target_suffix = psd_page_rel if has_page else '' %}
-              {%- set is_default_active = (v.slug == 'head' and 'dev' in release) or (v.slug == release and 'dev' not in release) %}
+              {%- set is_default_active = (v.slug == 'head' and 'dev' in release) or ((v.slug == release or (v.slug == 'latest' and release == psd_latest_version)) and 'dev' not in release) %}
               <li>
                 <a
                   href="https://www.scenedetect.com/docs/{{ v.slug }}/{{ target_suffix }}"
@@ -244,4 +304,29 @@
     </div>
   </div>
 </header>
+{%- endblock %}
+
+{%- block footer %}
+    <div class="footer">
+      <div class="psd-footer-inner">
+        <span class="psd-footer-meta">
+          {%- if show_copyright %}&#169;{{ copyright }}.{% endif %}
+          {%- if show_sphinx %}
+          {%- if show_copyright %} | {% endif %}
+          Powered by <a href="https://www.sphinx-doc.org/">Sphinx {{ sphinx_version }}</a>
+          &amp; <a href="https://alabaster.readthedocs.io">Alabaster {{ alabaster_version }}</a>
+          {%- endif %}
+          {%- if show_source and has_source and sourcename %}
+          {%- if show_copyright or show_sphinx %} | {% endif %}
+          <a href="{{ pathto('_sources/' + sourcename, true)|e }}" rel="nofollow">{{ _('Page source') }}</a>
+          {%- endif %}
+        </span>
+        <ul class="psd-footer-links" role="list">
+          <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+          <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+          <li><a href="https://www.scenedetect.com/changelog/">Changelog</a></li>
+          <li><a href="https://www.scenedetect.com/copyright/">License</a></li>
+        </ul>
+      </div>
+    </div>
 {%- endblock %}

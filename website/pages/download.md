@@ -31,7 +31,7 @@ PySceneDetect is free, open-source software released under the BSD 3-Clause Lice
   </div>
 </div>
 
-The `.msi` installer is recommended for most Windows users. Both Windows builds bundle `ffmpeg` and `mkvmerge`. After installing, see the [Command-Line Guide](cli.md) to get started.
+The `.msi` installer is recommended for most Windows users. Both Windows builds bundle `ffmpeg`. To use `split-video -m`, install MKVToolNix. After installing, see the [Command-Line Interface](cli.md) guide to get started.
 
 ## Install with pip, uv, or pipx
 
@@ -49,7 +49,7 @@ Headless install (for servers and containers without GUI libraries):
 pip install --upgrade scenedetect-headless
 ```
 
-Isolated CLI install with `uv` or `pipx`:
+Install with `uv` or `pipx`:
 
 ```bash
 # uv (isolated CLI tool)
@@ -62,12 +62,12 @@ uv add scenedetect
 pipx install scenedetect
 ```
 
-PySceneDetect is published on PyPI as two packages:
+PySceneDetect is published on PyPI as two packages, both including the CLI and the `scenedetect` Python module:
 
-- [`scenedetect`](https://pypi.org/project/scenedetect/): full package with CLI, depends on `opencv-python`.
-- [`scenedetect-headless`](https://pypi.org/project/scenedetect-headless/): full package with CLI, depends on `opencv-python-headless`.
+- [`scenedetect`](https://pypi.org/project/scenedetect/): depends on `opencv-python`.
+- [`scenedetect-headless`](https://pypi.org/project/scenedetect-headless/): depends on `opencv-python-headless`.
 
-Both packages provide the same `scenedetect` Python module. Install only one of them.
+Install only one of them.
 
 ## Docker Image
 
@@ -97,12 +97,12 @@ If you find a bug or want to suggest a feature, open an issue on [the issue trac
 
 ### Python packages
 
-The `scenedetect` and `scenedetect-headless` packages install these required dependencies automatically:
+The `scenedetect` and `scenedetect-headless` packages install these dependencies automatically:
 
-- [OpenCV](https://opencv.org/): `pip install opencv-python` (any `opencv-python*` variant works)
+- [OpenCV](https://opencv.org/): `pip install opencv-python` (or `opencv-python-headless` with `scenedetect-headless`)
 - [NumPy](https://numpy.org/): `pip install numpy`
 - [Click](https://click.palletsprojects.com): `pip install click` (used by the CLI)
-- [tqdm](https://github.com/tqdm/tqdm): `pip install tqdm` (optional, displays progress bars)
+- [tqdm](https://github.com/tqdm/tqdm): `pip install tqdm` (displays progress bars)
 - [platformdirs](https://github.com/tox-dev/platformdirs): `pip install platformdirs` (used by the CLI)
 
 Optional video backend packages:
@@ -112,12 +112,12 @@ Optional video backend packages:
 
 ### Video splitting tools
 
-To split videos into clips, install at least one of these tools (both are bundled in the Windows builds and Docker image):
+To split videos into clips, install at least one of these tools (`ffmpeg` is bundled in the Windows builds; the Docker image has both):
 
 - [FFmpeg](https://ffmpeg.org/download.html): splits videos with re-encoding (`split-video`) or stream copy (`split-video -c` / `--copy`).
-- [mkvmerge](https://mkvtoolnix.download/) (part of MKVToolNix): splits videos in stream-copy mode (`split-video -m` / `--mkvmerge`).
+- [MKVToolNix](https://mkvtoolnix.download/downloads.html) (`mkvmerge`): splits videos in stream-copy mode (`split-video -m` / `--mkvmerge`).
 
-Place `ffmpeg` or `mkvmerge` in a folder on your system `PATH`, or in the same folder where `scenedetect` is installed (on Windows, typically `C:\PythonXY\Scripts`). See [Video Splitting Requirements](cli.md#video-splitting-requirements) for setup steps.
+See [Video Splitting Requirements](cli.md#video-splitting-requirements) for installation and `PATH` setup steps.
 
 ### Building OpenCV from source
 

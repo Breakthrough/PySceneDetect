@@ -19,6 +19,7 @@
               class="install-tab"
               id="install-tab-pip"
               aria-selected="true"
+              aria-controls="install-panel-pip"
               tabindex="0"
             >pip</button>
             <button
@@ -27,6 +28,7 @@
               class="install-tab"
               id="install-tab-uv"
               aria-selected="false"
+              aria-controls="install-panel-uv"
               tabindex="-1"
             >uv</button>
             <button
@@ -35,6 +37,7 @@
               class="install-tab"
               id="install-tab-pipx"
               aria-selected="false"
+              aria-controls="install-panel-pipx"
               tabindex="-1"
             >pipx</button>
           </div>
@@ -137,6 +140,7 @@
               class="tab"
               id="hero-tab-{{ tab.id }}"
               aria-selected="{{ 'true' if loop.first else 'false' }}"
+              aria-controls="hero-panel-{{ tab.id }}"
               tabindex="{{ '0' if loop.first else '-1' }}"
               data-hint="{{ tab.hint }}"
             >{{ tab.label }}</button>
@@ -169,7 +173,7 @@
 
     <div class="grid-3">
       <article class="feature-card">
-        <h2>Five Detection Methods</h2>
+        <h2>Five Detectors</h2>
         <p>Choose from Adaptive, Content (HSV and edges), Perceptual Hash, Histogram, and Threshold detectors. All five are tested on BBC Planet Earth, AutoShot, and ClipShots.</p>
         <footer class="feature-meta">
           <a href="{{ site.base_path }}/benchmarks/">91.6 F1 on BBC Planet Earth</a>
@@ -209,11 +213,11 @@
       </article>
 
       <div class="quick-nav-section">
-        <h2>Explore the Documentation</h2>
+        <h2>More Resources</h2>
         <div class="quick-nav-grid">
           <a class="quick-nav-card" href="{{ site.base_path }}/docs/">
             <strong>Documentation Versions</strong>
-            <span>Browse stable, development, and legacy API and CLI reference manuals.</span>
+            <span>Browse stable, development, and legacy CLI and Python API reference manuals.</span>
           </a>
           <a class="quick-nav-card" href="{{ site.base_path }}/faq/">
             <strong>Frequently Asked Questions</strong>
@@ -225,7 +229,7 @@
           </a>
           <a class="quick-nav-card" href="{{ site.base_path }}/projects/">
             <strong>Projects &amp; Research</strong>
-            <span>Open-source projects, research papers, and similar scene detection tools.</span>
+            <span>Open-source projects, research papers, and similar tools.</span>
           </a>
         </div>
       </div>

@@ -2,17 +2,17 @@
 
 The complete Python API reference is in the [Reference Manual](/docs/latest/api.html). See [Documentation Versions](docs.md) for older releases.
 
-## Scene Detection Algorithms
+## Detectors
 
 This page describes how each built-in detector works, along with its key CLI options and default values.
 
-### Adaptive Content Detector
+### Adaptive detector
 
 The adaptive detector (`AdaptiveDetector` / `detect-adaptive`, default in the CLI) scores adjacent frames the same way as `ContentDetector`, then compares each frame's score against a rolling average of nearby frames. This reduces false cuts during fast camera movement.
 
 Default settings: `--threshold 3.0`, `--frame-window 2`, `--min-content-val 15.0`. See [`detect-adaptive`](/docs/latest/cli.html#detect-adaptive) and [`AdaptiveDetector`](/docs/latest/api/detectors.html#adaptivedetector) for details.
 
-### Content-Aware Detector
+### Content detector
 
 The content detector (`ContentDetector` / `detect-content`) finds fast cuts between scenes. It converts each frame from [RGB](https://en.wikipedia.org/wiki/RGB_color_space) to [HSV](https://en.wikipedia.org/wiki/HSL_and_HSV), computes the average difference across hue, saturation, and value (brightness) between adjacent frames, and records a cut when that score exceeds `--threshold` (default: `27.0`).
 
@@ -20,21 +20,7 @@ You can also enable edge detection by passing four weights (`delta_hue`, `delta_
 
 See [`detect-content`](/docs/latest/cli.html#detect-content) and [`ContentDetector`](/docs/latest/api/detectors.html#contentdetector) for details.
 
-### Threshold Detector
-
-The threshold detector (`ThresholdDetector` / `detect-threshold`) finds fades to and from black, similar to the `ffmpeg blackframe` filter. It averages the R, G, and B values of every pixel in each frame to get a brightness score from `0.0` to `255.0`, and records fade events when that score crosses `--threshold` (default: `12.0`).
-
-See [`detect-threshold`](/docs/latest/cli.html#detect-threshold) and [`ThresholdDetector`](/docs/latest/api/detectors.html#thresholddetector) for details.
-
-### Histogram Detector
-
-The histogram detector (`HistogramDetector` / `detect-hist`) finds fast cuts using brightness histograms. It converts each frame to the YUV color space, extracts the Y (luminance) channel, and builds a normalized histogram with `--bins` bins (default: `128`).
-
-Adjacent frame histograms are compared using correlation (`cv2.HISTCMP_CORREL`). When the difference exceeds `--threshold` (default: `0.20`), the detector records a cut. Focusing on luminance makes this detector less sensitive to pure color shifts.
-
-See [`detect-hist`](/docs/latest/cli.html#detect-hist) and [`HistogramDetector`](/docs/latest/api/detectors.html#histogramdetector) for details.
-
-### Perceptual Hash Detector
+### Perceptual hash detector
 
 The perceptual hash detector (`HashDetector` / `detect-hash`) computes a perceptual hash (`phash`, based on [imagehash](https://github.com/JohannesBuchner/imagehash)) for each frame and compares adjacent hashes using normalized Hamming distance. When the distance exceeds `--threshold` (default: `0.35`, with `--size 8` and `--lowpass 2`), it records a cut.
 
@@ -42,9 +28,23 @@ Because `phash` converts frames to grayscale first, `HashDetector` ignores color
 
 See [`detect-hash`](/docs/latest/cli.html#detect-hash) and [`HashDetector`](/docs/latest/api/detectors.html#hashdetector) for details.
 
-## Creating New Detection Algorithms
+### Histogram detector
 
-Custom detectors must inherit from [`SceneDetector`](/docs/latest/api/detector.html). Because the `SceneDetector` interface may change before v1.0, pin your dependency to a minor version (for example, `scenedetect~=0.7`).
+The histogram detector (`HistogramDetector` / `detect-hist`) finds fast cuts using brightness histograms. It converts each frame to the YUV color space, extracts the Y (luminance) channel, and builds a normalized histogram with `--bins` bins (default: `128`).
+
+Adjacent frame histograms are compared using correlation (`cv2.HISTCMP_CORREL`). When the difference exceeds `--threshold` (default: `0.20`), the detector records a cut. Focusing on luminance makes this detector less sensitive to pure color shifts.
+
+See [`detect-hist`](/docs/latest/cli.html#detect-hist) and [`HistogramDetector`](/docs/latest/api/detectors.html#histogramdetector) for details.
+
+### Threshold detector
+
+The threshold detector (`ThresholdDetector` / `detect-threshold`) finds fades to and from black, similar to the `ffmpeg blackframe` filter. It averages the R, G, and B values of every pixel in each frame to get a brightness score from `0.0` to `255.0`, and records fade events when that score crosses `--threshold` (default: `12.0`).
+
+See [`detect-threshold`](/docs/latest/cli.html#detect-threshold) and [`ThresholdDetector`](/docs/latest/api/detectors.html#thresholddetector) for details.
+
+## Creating Custom Detectors
+
+Custom detectors must inherit from [`SceneDetector`](/docs/latest/api/detector.html). Because the `SceneDetector` interface may change before v1.0, pin your dependency to a minor version (for example, `scenedetect~=0.7.0`).
 
 To create a detector, implement `process_frame` and, if needed, `post_process`:
 

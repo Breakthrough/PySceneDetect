@@ -17,8 +17,8 @@ from doc_versions import load_doc_versions
 from scenedetect import __version__ as scenedetect_version
 
 _REPO_DIR = Path(__file__).resolve().parent.parent
-_, _psd_doc_versions = load_doc_versions(
-    _REPO_DIR, fallback_version=scenedetect_version.split(".dev")[0]
+_psd_latest_version, _psd_doc_versions = load_doc_versions(
+    _REPO_DIR, fallback_version=scenedetect_version.split("-dev")[0]
 )
 
 # -- Project information -----------------------------------------------------
@@ -87,29 +87,22 @@ html_theme_options = {
     "code_font_family": (
         '"JetBrains Mono", "Cascadia Code", "Cascadia Mono", "Consolas", ui-monospace, monospace'
     ),
-    "tip_bg": "#f0f6fa",
-    "tip_border": "#c2dcf2",
-    "hint_bg": "#f0faf0",
-    "hint_border": "#d3ebdc",
-    "warn_bg": "#f5ebd0",
-    "warn_border": "#f2caa2",
-    "attention_bg": "#f5dcdc",
-    "attention_border": "#ffaaaa",
 }
 
 html_context = {
     "psd_doc_versions": _psd_doc_versions,
+    "psd_latest_version": _psd_latest_version,
 }
 
 
-# Options for docs/_ext/section_sidebar.py: toctree `:name:` in index.rst -> (switch label,
-# landing page, depth for other pages in the section, depth for the current page). The
-# Examples page spans both halves, so it is its own one-page section.
+# Options for docs/_ext/section_sidebar.py: toctree `:name:` in index.rst -> (show_on_root,
+# depth for other pages in the section, depth for the current page). The Examples page spans
+# both halves, so it is its own one-page section showing only its on-page headings.
 section_sidebar_sections = {
-    "clitoc": ("CLI", "cli", 2, 3),
-    "apitoc": ("Python API", "api", 2, 4),
-    # No label: the sidebar shows only the headings of the current page.
-    "reftoc": (None, None, 2, 2),
+    "clitoc": (True, 2, 3),
+    "apitoc": (True, 2, 4),
+    # Standalone page: omitted from the root sidebar, shows only the current page's headings.
+    "reftoc": (False, 2, 2),
 }
 # The index page shows every labelled section; keep the API tree to page titles there (the
 # CLI tree keeps its default depth of 2, which is only 12 entries).

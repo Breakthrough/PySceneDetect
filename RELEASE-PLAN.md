@@ -17,8 +17,8 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 - [ ] Docstring examples all run correctly, nothing references removed or deprecated symbols.
 - [ ] Changelog has release notes for major/minor release, all features, breaking changes, bug fixes, and known issues are documented.
 - [ ] `website/pages/download.md` updated with the new version / installer link / release date.
-- [ ] `website/pages/changelog.md`: move the release changes from the **Development** section at the bottom to the top.
-- [ ] `website/pages/index.md`: Latest release version and date updated.
+- [ ] `website/pages/changelog.md`: move the release changes from the **Development** section at the bottom to the top (`website/build.py` derives the homepage release date from this heading).
+- [ ] Verify homepage version and date (`docs/LATEST_VERSION` + `website/pages/changelog.md` parsed by `website/build.py`) match `website/pages/download.md`.
 
 ## 3. Tests
 
@@ -55,8 +55,9 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 
 - [ ] Dispatch `release.yml` (Release Orchestrator) with the release tag while the Github release is still a **draft**. It runs the verify-then-publish ladder (MSI install/upgrade test -> TestPyPI -> publish Github release -> PyPI -> Docker), verifying each stage before the next; `verify-only` stops before anything goes public. See the header of `release.yml` for details.
 - [ ] Verify both projects: https://pypi.org/project/scenedetect/ and https://pypi.org/project/scenedetect-headless/.
-- [ ] Deploy website: `generate-website.yml`
+- [ ] Deploy website: dispatch `generate-website.yml` with `target=production` (or push to `main`).
 - [ ] Deploy docs: `generate-docs.yml`
+- [ ] Fast-forward the `latest` branch to the tagged release commit (`git push origin vX.Y[.Z]:refs/heads/latest`) so stable GitHub links (`/blob/latest/scenedetect.cfg`) track the new release.
 - [ ] Merge release branch back into `main`, verify `docs/LATEST_VERSION` is correct
 - [ ] [Manually dispatch `generate-docs.yml`](https://github.com/Breakthrough/PySceneDetect/actions/workflows/generate-docs.yml) against `releases/X.Y` to update www.scenedetect.com/docs/latest
 - [ ] Smoke-test PyPI release: in a fresh venv, `pip install scenedetect==X.Y.Z`; CLI launches and `scenedetect --version` looks correct.
@@ -71,3 +72,17 @@ Optional: version referenced below as `X.Y[.Z]` - replace with the real version 
 - **Branching model**: work spans multiple commits on `releases/X.Y[.Z]`; the final one gets the `vX.Y[.Z]` tag which gates the release-test workflow. A passing release-test is a hard prerequisite for publishing.
 - **Version consistency** is enforced in two places (`__init__.py`, `PySceneDetect.aip`). The `static` job of `release-test.yml` checks `__init__.py` against the tag and verifies the changelog has a matching `## PySceneDetect X.Y` heading; the installer parity is checked by `scripts/pre_release.py --release`.
 - **Changelog convention**: the in-development section lives at the *bottom* of `website/pages/changelog.md` under the "Development" heading - don't move it to the top.
+
+### Special Branch Naming Scheme
+
+| Pattern | Purpose | Automated CI / Triggers |
+| --- | --- | --- |
+| `main` | Active development / integration branch | Full test suite, `docs/head`, production website, Docker `main` |
+| `latest` | Fast-forwarding pointer to the latest stable release commit | Stable GitHub file URLs (`/blob/latest/scenedetect.cfg`); does not trigger release/`v*` workflows or AppVeyor |
+| `releases/<X.Y[.Z]>` | Release stabilization & maintenance branches (e.g. `releases/0.7.3`) | Full test suite, `docs/<X.Y[.Z]>` + `docs/latest`, AppVeyor (on `v*` tags) |
+| `website/<name>` | Website redesign / content branches (e.g. `website/redesign`) | Auto-deploys staging preview to `scenedetect.com/staging/` via `generate-website.yml` (`'website/**'`) |
+| `feature/<name>` | New features / detectors (e.g. `feature/color-detector`) | PR checks only |
+| `issue/<num>-<desc>` | Issue-linked fixes / work (e.g. `issue/512-description`) | PR checks only |
+| `fix/<name>` | Standalone bug fixes without a linked issue number | PR checks only |
+| `docs/<name>` | Reference documentation / style updates (non-staging) | PR checks only |
+| `gh-pages`, `resources` | Infrastructure branches (published site/docs; test video fixtures) | Automated deploy target / test fixture store |

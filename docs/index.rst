@@ -2,7 +2,7 @@
     Copyright (C) 2014 Brandon Castellano.  All rights reserved.
 
 #######################################################################
-PySceneDetect Documentation
+PySceneDetect Reference Manual
 #######################################################################
 
 PySceneDetect finds scene changes in video (fast cuts and fades) and can split the video, save
@@ -74,8 +74,8 @@ and Python functions or classes.
 
           - :class:`~scenedetect.detectors.adaptive_detector.AdaptiveDetector`
           - :class:`~scenedetect.detectors.content_detector.ContentDetector`
-          - :class:`~scenedetect.detectors.histogram_detector.HistogramDetector`
           - :class:`~scenedetect.detectors.hash_detector.HashDetector`
+          - :class:`~scenedetect.detectors.histogram_detector.HistogramDetector`
 
         - **Other**
 

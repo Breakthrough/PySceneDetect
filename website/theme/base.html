@@ -11,7 +11,7 @@
   <meta name="robots" content="noindex">
   {% endif %}
   <link rel="icon" href="{{ site.base_path }}/img/favicon.ico">
-  {% if page.canonical_path %}
+  {% if page.canonical_path and not site.base_path %}
   <link rel="canonical" href="{{ site.url }}{{ page.canonical_path }}">
   {% endif %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,15 +20,25 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&text=PySceneDetect&display=swap">
   <link rel="stylesheet" href="{{ site.base_path }}/assets/site.css">
   <script type="module" src="{{ site.base_path }}/assets/site.js"></script>
+  {% if not site.base_path %}
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-EWBNLVRWW0');
+    (function() {
+      var h = window.location.hostname;
+      if (navigator.webdriver || h === "localhost" || h === "127.0.0.1" || h === "[::1]" || !h) {
+        return;
+      }
+      var s = document.createElement("script");
+      s.async = true;
+      s.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag("js", new Date());
+      gtag("config", "G-EWBNLVRWW0");
+    })();
   </script>
+  {% endif %}
 </head>
 <body>
   <a class="skip-link visually-hidden" href="#main-content">Skip to main content</a>
@@ -131,7 +141,7 @@
   <search>
     <dialog id="search-dialog" class="search-dialog" closedby="any" aria-label="Search PySceneDetect">
       <form method="dialog" class="search-header">
-        <label for="search-input" class="visually-hidden">Search documentation and guides</label>
+        <label for="search-input" class="visually-hidden">Search this site</label>
         <svg class="search-input-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="7"/>
           <path d="m20 20-3.5-3.5"/>
@@ -140,13 +150,14 @@
           type="search"
           id="search-input"
           class="search-input"
-          placeholder="Search guides, CLI, detectors, FAQ..."
+          placeholder="Search this site"
           autocomplete="off"
           autofocus
         >
         <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
+        <span id="search-status" class="visually-hidden" role="status" aria-live="polite"></span>
       </form>
-      <div id="search-results" class="search-results" role="region" aria-label="Search results" aria-live="polite">
+      <div id="search-results" class="search-results" role="region" aria-label="Search results">
         <p class="search-empty">Type a keyword to search guides, CLI options, detectors, and FAQs.</p>
       </div>
     </dialog>

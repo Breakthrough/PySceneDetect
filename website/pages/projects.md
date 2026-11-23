@@ -60,7 +60,7 @@ These tools and models also detect scene cuts in video:
 
 - [Scenecut Extractor](https://github.com/slhck/scenecut-extractor): wraps the `ffmpeg` `select` filter.
 - `ffmpeg` `blackframe` filter ([thanks @tonycpsu](https://github.com/Breakthrough/PySceneDetect/issues/7)): detects fades to black only.
-- [Shotdetect](http://johmathe.name/shotdetect.html): content-based detector for Linux and macOS.
+- [Shotdetect](https://github.com/johmathe/Shotdetect): content-based detector for Linux and macOS.
 - [MATLAB Scene Change Detection](https://www.mathworks.com/help/vision/examples/scene-change-detection.html): uses feature extraction and edge detection (requires MATLAB and Computer Vision Toolbox).
 - [chaptertool](https://github.com/Mtillmann/chaptertool): CLI and web tool that converts PySceneDetect output to other formats.
 - [TransNetV2](https://github.com/soCzech/TransNetV2): neural network for shot boundary detection (2020).

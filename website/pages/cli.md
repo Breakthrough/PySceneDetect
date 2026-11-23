@@ -1,4 +1,4 @@
-# PySceneDetect CLI
+# Command-Line Interface
 
 See the [Reference Manual](/docs/latest/cli.html) for a complete list of `scenedetect` commands and options.
 
@@ -29,7 +29,7 @@ This walkthrough uses a short clip from the James Bond film *GoldenEye* (Copyrig
 - [Watch the clip on YouTube](https://www.youtube.com/watch?v=OMgIPnCnlbQ)
 - [Download `goldeneye.mp4`](https://github.com/Breakthrough/PySceneDetect/raw/refs/heads/resources/tests/resources/goldeneye.mp4) (right-click and save it in your working directory as `goldeneye.mp4`)
 
-To split this clip on each fast cut, use adaptive mode (`detect-adaptive`) or content-aware mode (`detect-content`). If you want to detect fades to and from black instead, use `detect-threshold`. When you do not specify a detector, PySceneDetect uses `detect-adaptive` by default.
+To split this clip on each fast cut, use the adaptive detector (`detect-adaptive`) or the content detector (`detect-content`). To detect fades to and from black instead, use `detect-threshold`. When you do not specify a detector, PySceneDetect uses `detect-adaptive` by default.
 
 Start by saving a CSV scene list and preview images for each scene:
 
@@ -68,7 +68,7 @@ By default, `split-video` re-encodes each clip with `ffmpeg` for frame-accurate 
 
 For faster splitting without re-encoding, pass `-c` / `--copy` (uses `ffmpeg` stream copy) or `-m` / `--mkvmerge` (uses `mkvmerge`). Stream copy splits only on keyframes, so clip boundaries may not be frame-accurate. Run `scenedetect split-video --help` for all options.
 
-## Detection Methods
+## Detectors
 
 PySceneDetect includes five detectors:
 
@@ -82,35 +82,35 @@ Most detector options can also be set in a [config file](/docs/latest/cli/config
 
 Use `detect-adaptive` or `detect-content` for videos with fast cuts between scenes. Use `detect-threshold` for videos separated by fades to black. If the default settings miss cuts or report false cuts, generate a stats file with `-s` / `--stats` to choose a better threshold.
 
-### Adaptive detection
+### Adaptive detector
 
-`detect-adaptive` compares each frame's `content_val` score against the average of nearby frames and records the ratio as `adaptive_ratio` in the stats file. This reduces false cuts during fast camera movement. Adjust the window size with `--frame-window` and the minimum content score with `--min-content-val`.
+`detect-adaptive` compares each frame's `content_val` score against the average of nearby frames and records the ratio in the stats file under `adaptive_ratio (w=2)` (the `w=` suffix matches `--frame-window`). This reduces false cuts during fast camera movement. Adjust the window size with `--frame-window` and the minimum content score with `--min-content-val`.
 
-### Content-aware detection
+### Content detector
 
 `detect-content` measures the difference between each pair of adjacent frames and records a cut when the difference exceeds the threshold (default: `27.0`).
 
 To find the best threshold, generate a stats file with `-s`, open it in a spreadsheet editor, and check the `content_val` column ([example](img/goldeneye-stats.png)). This value stays low within a scene and spikes when the scene changes. Choose a threshold above normal motion scores and below the spikes at real cuts.
 
-### Threshold detection
+### Threshold detector
 
-`detect-threshold` measures the average RGB brightness of each frame (from `0.0` to `255.0`) and records a fade event when brightness crosses the threshold. The default threshold is `12`:
+`detect-threshold` measures the average RGB brightness of each frame (from `0.0` to `255.0`) and records a fade event when brightness crosses the threshold. The default threshold is `12.0`:
 
 ```bash
-scenedetect -i my_video.mp4 -s my_video.stats.csv detect-threshold
+scenedetect -i video.mp4 -s video.stats.csv detect-threshold
 ```
 
 ```bash
-scenedetect -i my_video.mp4 -s my_video.stats.csv detect-threshold -t 20
+scenedetect -i video.mp4 -s video.stats.csv detect-threshold -t 20
 ```
 
-Thresholds below `8` can cause missed detections on videos with low bitrates or limited brightness range.
+Thresholds below `8.0` can cause missed detections on videos with low bitrates or limited brightness range.
 
 To tune the threshold, generate a stats file with `-s` and inspect the `average_rgb` column in a spreadsheet editor. Choose a threshold below the brightness of normal scenes and above the dark fade frames.
 
-## Detection Parameters
+## Detector Options
 
-You can configure detector parameters on the [command line](/docs/latest/cli.html#detectors) or in a [config file](/docs/latest/cli/config_file.html).
+You can configure detector options on the [command line](/docs/latest/cli.html#detectors) or in a [config file](/docs/latest/cli/config_file.html).
 
 If the default threshold does not give the results you want, generate a stats file first:
 
@@ -118,11 +118,11 @@ If the default threshold does not give the results you want, generate a stats fi
 scenedetect --input goldeneye.mp4 --stats goldeneye.stats.csv detect-adaptive
 ```
 
-Then plot the `content_val` (or `adaptive_ratio`) column from `goldeneye.stats.csv`:
+Then plot the `content_val` or `adaptive_ratio (w=2)` column from `goldeneye.stats.csv`:
 
 <img src="img/goldeneye-stats.png" alt="goldeneye.mp4 statistics graph" />
 
-Peaks in the graph match the scene cuts in the video. Raise the threshold to reduce false cuts, or lower it to catch missed cuts.
+Peaks in the graph match the scene cuts in the video. For fast-cut detectors, raise the threshold to reduce false cuts or lower it to catch missed cuts. For `detect-threshold`, do the opposite: raise `-t` to catch more fades or lower it to reduce false detections.
 
 ## Saving Image Previews of Detected Scenes
 
@@ -132,12 +132,12 @@ By default, `save-images` saves three JPEG images per scene (start, middle, and 
 
 ## Improving Processing Speed
 
-These global options go before any subcommand (such as `detect-adaptive` or `list-scenes`). They speed up processing at the cost of some accuracy:
+These global options go before any command (such as `detect-adaptive` or `list-scenes`). They speed up processing at the cost of some accuracy:
 
 - **Downscaling (`-d` / `--downscale`)**: shrinks each frame by an integer factor (`2`, `3`, `4`, and so on) before analysis. By default, PySceneDetect picks a downscale factor automatically based on video resolution. Pass `-d 1` to disable downscaling, or a higher integer to process frames faster.
 - **Frame skipping (`-fs` / `--frame-skip`)**: skips `N` frames after every processed frame. For example, `--frame-skip 1` processes every second frame and roughly doubles speed.
 
-Frame skipping reduces cut accuracy and disables stats file caching. Because skipped frames increase the difference between adjacent processed frames, large values can cause false cuts even inside the same scene. Use `-fs` only on high-frame-rate video (above 60 FPS) with small values such as `1` or `2`.
+Frame skipping reduces cut accuracy. You cannot use it together with a stats file (`-s` / `--stats`). Because skipped frames increase the difference between adjacent processed frames, large values can cause false cuts even inside the same scene. Use `-fs` only on high-frame-rate video (above 60 FPS) with small values such as `1` or `2`.
 
 ## Seeking, Duration, and Start / End Times
 
@@ -152,19 +152,19 @@ Set either `--end` or `--duration`, not both. You can write times in seconds (`1
 For a 30 FPS video, all four commands below analyze the same 90-second segment (2700 frames) between `00:05:00` and `00:06:30`:
 
 ```bash
-scenedetect -i my_video.mp4 time --start 00:05:00 --end 00:06:30
+scenedetect -i video.mp4 time --start 00:05:00 --end 00:06:30
 ```
 
 ```bash
-scenedetect -i my_video.mp4 time --start 300s --end 390s
+scenedetect -i video.mp4 time --start 300s --end 390s
 ```
 
 ```bash
-scenedetect -i my_video.mp4 time --start 300s --duration 90s
+scenedetect -i video.mp4 time --start 300s --duration 90s
 ```
 
 ```bash
-scenedetect -i my_video.mp4 time --start 300s --duration 2700
+scenedetect -i video.mp4 time --start 300s --duration 2700
 ```
 
 ## Config File
@@ -175,11 +175,11 @@ Pass a config file path with `-c` / `--config`. If you do not pass `-c`, PyScene
     - `C:/Users/%USERNAME%/AppData/Local/PySceneDetect/scenedetect.cfg`
 - Linux:
     - `~/.config/PySceneDetect/scenedetect.cfg`
-    - `$XDG_CONFIG_HOME/scenedetect.cfg`
+    - `$XDG_CONFIG_HOME/PySceneDetect/scenedetect.cfg`
 - macOS:
-    - `~/Library/Preferences/PySceneDetect/scenedetect.cfg`
+    - `~/Library/Application Support/PySceneDetect/scenedetect.cfg`
 
-Run `scenedetect --help` to see the exact path on your system under the `-c` / `--config` help text. You can [download the `scenedetect.cfg` template from GitHub](https://github.com/Breakthrough/PySceneDetect/blob/main/scenedetect.cfg) or copy it from the PySceneDetect installation folder. Lines starting with `#` are comments and are ignored.
+Run `scenedetect --help` to see the exact path on your system under the `-c` / `--config` help text. You can [download the `scenedetect.cfg` template from GitHub](https://github.com/Breakthrough/PySceneDetect/blob/latest/scenedetect.cfg), or copy it from the PySceneDetect installation folder when using the Windows builds. Lines starting with `#` are comments and are ignored.
 
 Options passed on the command line override values in the config file, and `-c` / `--config` overrides the default user config file.
 
@@ -215,7 +215,7 @@ quality = 80
 num-images = 3
 ```
 
-See the [Configuration File Reference](/docs/latest/cli/config_file.html) or [the `scenedetect.cfg` template on GitHub](https://github.com/Breakthrough/PySceneDetect/blob/main/scenedetect.cfg) for every available key.
+See the [Configuration File Reference](/docs/latest/cli/config_file.html) or [the `scenedetect.cfg` template on GitHub](https://github.com/Breakthrough/PySceneDetect/blob/latest/scenedetect.cfg) for every available key.
 
 ## Video Splitting Requirements
 
@@ -227,16 +227,16 @@ PySceneDetect uses `ffmpeg` or `mkvmerge` to split videos:
 
 ### FFmpeg
 
-Download `ffmpeg` from [the FFmpeg download page](https://ffmpeg.org/download.html). On Linux, install it with your package manager (for example, `sudo apt-get install ffmpeg`). On Windows, you can use the PySceneDetect installer (which bundles `ffmpeg`) or follow the steps below.
+Download `ffmpeg` from [FFmpeg](https://ffmpeg.org/download.html). On Linux, install it with your package manager (for example, `sudo apt-get install ffmpeg`). On Windows, the PySceneDetect builds bundle `ffmpeg`; otherwise follow the steps below.
 
 ### mkvmerge
 
-Download `mkvmerge` as part of MKVToolNix from [the MKVToolNix download page](https://mkvtoolnix.download/downloads.html). Use the installer on Windows or your system package manager on Linux so PySceneDetect can find `mkvmerge` automatically.
+Download `mkvmerge` as part of [MKVToolNix](https://mkvtoolnix.download/downloads.html). Use the installer on Windows or your system package manager on Linux so PySceneDetect can find `mkvmerge` automatically.
 
 ### Enabling `split-video` support
 
-If PySceneDetect cannot find `ffmpeg` or `mkvmerge`, use one of these options:
+If PySceneDetect cannot find `ffmpeg` or `mkvmerge`, use one of these approaches:
 
-1. Copy `ffmpeg` or `mkvmerge` into the same folder where `scenedetect` is installed (easiest for most users).
-2. Add the folder containing `ffmpeg` or `mkvmerge` to your system `PATH` environment variable so it works from any terminal (recommended for regular use).
-3. Copy the executable into a folder that is already on `PATH` (only if you cannot edit `PATH`).
+1. Add the folder containing `ffmpeg` or `mkvmerge` to your system `PATH` environment variable so it works from any terminal (recommended).
+2. Copy `ffmpeg` or `mkvmerge` into the same folder where `scenedetect` is installed (on Windows with `pip`, typically `C:\PythonXY\Scripts`) if you prefer not to edit `PATH`.
+3. Copy the executable into a folder already on `PATH` if neither of the above is possible.

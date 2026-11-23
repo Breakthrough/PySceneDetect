@@ -88,6 +88,10 @@ function initResponsiveNavbar() {
 
   syncLayout(true);
 
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => syncLayout(true)).catch(() => {});
+  }
+
   if (typeof ResizeObserver !== "undefined") {
     const headerObserver = new ResizeObserver(() => syncLayout(false));
     headerObserver.observe(header);
@@ -218,15 +222,23 @@ function initTabGroups() {
 /* -------------------------------------------------------------------------- *
  * 5. Copy-to-clipboard buttons (hero inline command + prose code blocks)
  * -------------------------------------------------------------------------- */
+const copyTimers = new WeakMap();
+
 function flashCopied(button, defaultLabel) {
+  const prevTimer = copyTimers.get(button);
+  if (prevTimer !== undefined) {
+    window.clearTimeout(prevTimer);
+  }
   button.innerHTML = CHECK_ICON_SVG;
   button.classList.add("is-copied");
   button.setAttribute("aria-label", "Copied to clipboard");
-  window.setTimeout(() => {
+  const timerId = window.setTimeout(() => {
     button.innerHTML = COPY_ICON_SVG;
     button.classList.remove("is-copied");
     button.setAttribute("aria-label", defaultLabel);
+    copyTimers.delete(button);
   }, 1400);
+  copyTimers.set(button, timerId);
 }
 
 function initCopyButtons() {
@@ -237,11 +249,14 @@ function initCopyButtons() {
       if (!text || !navigator.clipboard) {
         return;
       }
-      navigator.clipboard.writeText(text).then(() => flashCopied(inlineBtn, defaultLabel));
+      navigator.clipboard
+        .writeText(text)
+        .then(() => flashCopied(inlineBtn, defaultLabel))
+        .catch(() => {});
     });
   }
 
-  for (const container of document.querySelectorAll(".prose .codehilite")) {
+  for (const container of document.querySelectorAll(".prose .codehilite, .code-window .codehilite")) {
     const codeEl = container.querySelector("code") || container;
     const btn = document.createElement("button");
     btn.type = "button";
@@ -254,7 +269,10 @@ function initCopyButtons() {
       if (!raw || !navigator.clipboard) {
         return;
       }
-      navigator.clipboard.writeText(raw).then(() => flashCopied(btn, defaultLabel));
+      navigator.clipboard
+        .writeText(raw)
+        .then(() => flashCopied(btn, defaultLabel))
+        .catch(() => {});
     });
     container.appendChild(btn);
   }
@@ -315,9 +333,16 @@ function initSearchDialog() {
   const dialog = document.getElementById("search-dialog");
   const input = document.getElementById("search-input");
   const resultsEl = document.getElementById("search-results");
+  const statusEl = document.getElementById("search-status");
   if (!(dialog instanceof HTMLDialogElement) || !(input instanceof HTMLInputElement) || !resultsEl) {
     return;
   }
+
+  const announceStatus = (msg) => {
+    if (statusEl) {
+      statusEl.textContent = msg;
+    }
+  };
 
   let indexPromise = null;
   let searchData = [];
@@ -370,6 +395,7 @@ function initSearchDialog() {
       renderMessage(
         "Type a keyword to search guides, CLI options, detectors, and FAQs."
       );
+      announceStatus("");
       return;
     }
 
@@ -411,6 +437,7 @@ function initSearchDialog() {
 
     if (!topHits.length) {
       renderMessage(`No matching sections found for "${rawQuery.trim()}".`);
+      announceStatus("No matching sections found.");
       return;
     }
 
@@ -441,6 +468,9 @@ function initSearchDialog() {
       resultsEl.appendChild(link);
     });
     activeHitIndex = 0;
+    announceStatus(
+      topHits.length === 1 ? "1 result found." : `${topHits.length} results found.`
+    );
   };
 
   const openSearch = () => {
@@ -477,9 +507,9 @@ function initSearchDialog() {
       event.preventDefault();
       updateActiveHit(activeHitIndex - 1);
     } else if (event.key === "Enter") {
+      event.preventDefault();
       const hits = resultsEl.querySelectorAll(".search-hit");
       if (activeHitIndex >= 0 && hits[activeHitIndex]) {
-        event.preventDefault();
         const href = hits[activeHitIndex].getAttribute("href");
         dialog.close();
         if (href) {

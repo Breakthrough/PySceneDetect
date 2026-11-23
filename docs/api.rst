@@ -7,19 +7,19 @@
 
 The ``scenedetect`` API integrates into Python applications and supports custom detectors and video backends. See `Usage`_ below for common examples. The ``scenedetect`` package is organized into these submodules:
 
-    * :ref:`Functions <scenedetect-functions>`: high-level functions such as :func:`scenedetect.detect() <scenedetect.detect>` to analyze a video with any :ref:`detection method <scenedetect-detectors>` (:ref:`example <scenedetect-usage>`) and return a list of timecode pairs
+    * :ref:`Functions <scenedetect-functions>`: high-level functions such as :func:`scenedetect.detect() <scenedetect.detect>` to analyze a video with any :ref:`detector <scenedetect-detectors>` (:ref:`example <scenedetect-usage>`) and return a list of timecode pairs
 
-    * :doc:`api/detectors`: detection methods:
+    * :doc:`api/detectors`: built-in detectors:
 
         * :class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`: finds fast cuts using a rolling average of HSV content changes
 
         * :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>`: finds fast cuts using a weighted average of HSV color and optional edge changes
 
-        * :class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`: finds fades in and out using average RGB pixel brightness
+        * :class:`HashDetector <scenedetect.detectors.hash_detector.HashDetector>`: finds fast cuts using perceptual image hashing
 
         * :class:`HistogramDetector <scenedetect.detectors.histogram_detector.HistogramDetector>`: finds fast cuts using Y-channel (brightness) histogram changes in YUV
 
-        * :class:`HashDetector <scenedetect.detectors.hash_detector.HashDetector>`: finds fast cuts using perceptual image hashing
+        * :class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`: finds fades in and out using average RGB pixel brightness
 
     * :doc:`api/output`: output helpers:
 
@@ -60,7 +60,7 @@ Most common types and functions can be imported directly from the top-level ``sc
 
     .. code:: python
 
-        scenedetect~=0.7
+        scenedetect~=0.7.0
 
 
 .. _scenedetect-usage:
@@ -80,7 +80,7 @@ Find scene cuts in a video with :func:`scenedetect.detect`:
 
 ``scenes`` is a list of :class:`FrameTimecode <scenedetect.common.FrameTimecode>` pairs giving the start and end of each scene. Pass ``show_progress=True`` to :func:`detect <scenedetect.detect>` to show a progress bar with estimated time remaining.
 
-This example uses :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>` to find fast cuts. You can choose from several :ref:`detection methods <scenedetect-detectors>` for fast cuts and fades. PySceneDetect can also export scene lists in several formats and :ref:`split the input video <scenedetect-output>` when ``ffmpeg`` is installed:
+This example uses :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>` to find fast cuts. You can choose from several :ref:`detectors <scenedetect-detectors>` for fast cuts and fades. PySceneDetect can also export scene lists in several formats and :ref:`split the input video <scenedetect-output>` when ``ffmpeg`` is installed:
 
 .. code:: python
 

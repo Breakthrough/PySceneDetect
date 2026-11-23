@@ -352,7 +352,7 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
 }
 
 CLI_ONLY = "*CLI only*"
-NO_API = "*no Python API equivalent*"
+NO_API = "*none (CLI only)*"
 
 # Group that `check_concordance` adds inferred rows to, and the warning it prints for each.
 INFERRED_GROUP = "No row"
@@ -814,7 +814,7 @@ def create_help(ctx: click.Context, commands: list[str]) -> str:
 
 
 CLI_INDEX_DETECTOR_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("Fast Cuts", ("detect-adaptive", "detect-content", "detect-hist", "detect-hash")),
+    ("Fast Cuts", ("detect-adaptive", "detect-content", "detect-hash", "detect-hist")),
     ("Other", ("detect-threshold",)),
 )
 
@@ -871,7 +871,7 @@ def generate_cli_index(commands: list[str]) -> str:
     return "".join(
         [
             GENERATED_NOTE + "\n",
-            "- :doc:`scenedetect Command </cli>`\n\n",
+            "- :ref:`scenedetect <command-scenedetect>` Command\n\n",
             "  - :ref:`Usage <cli-usage>`\n",
             "  - :ref:`Options <cli-options>`\n",
             "  - :ref:`Detectors <cli-detectors>`\n",
@@ -1152,7 +1152,7 @@ def config_section_pointer(section: str) -> str:
     """One sentence linking a config section to the command or backend it configures."""
     if section == "global":
         return (
-            "Options of the :doc:`scenedetect </cli>` command; detectors and "
+            "Options of the :ref:`scenedetect <command-scenedetect>` command; detectors and "
             "commands inherit ``min-scene-len`` and ``output`` from here."
         )
     entry = counterpart_for(command=section)

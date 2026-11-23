@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## Third-Party Software Licenses
 
-This section lists the license links for third-party libraries used by or distributed with PySceneDetect. Copies of these licenses are also included in the `LICENSE` files in the installation directory.
+This section lists license links for third-party libraries used by or distributed with PySceneDetect. Windows builds include copies of bundled third-party licenses in the `thirdparty/` folder (also available in `scenedetect/_thirdparty/` in the source repository).
 
 -----------------------------------------------------------------------
 
@@ -50,15 +50,25 @@ This section lists the license links for third-party libraries used by or distri
 - Copyright (C) 2017, Armin Ronacher.
 - License: [https://click.palletsprojects.com/en/stable/license/](https://click.palletsprojects.com/en/stable/license/)
 
+### MoviePy
+
+- Copyright (C) 2015, Zulko.
+- License: [https://github.com/Zulko/moviepy/blob/master/LICENCE.txt](https://github.com/Zulko/moviepy/blob/master/LICENCE.txt)
+
 ### NumPy
 
 - Copyright (C) 2005-2016, NumPy Developers.
-- License: [https://www.numpy.org/license.html](https://www.numpy.org/license.html)
+- License: [https://numpy.org/doc/stable/license.html](https://numpy.org/doc/stable/license.html)
 
 ### OpenCV
 
 - Copyright (C) 2017, Itseez.
-- License: [https://opencv.org/license.html](https://opencv.org/license.html)
+- License: [https://opencv.org/license/](https://opencv.org/license/)
+
+### platformdirs
+
+- Copyright (C) The platformdirs developers.
+- License: [https://github.com/tox-dev/platformdirs/blob/main/LICENSE](https://github.com/tox-dev/platformdirs/blob/main/LICENSE)
 
 ### PyAV
 
@@ -79,9 +89,9 @@ This section lists the license links for third-party libraries used by or distri
 
 ### FFmpeg and mkvmerge
 
-PySceneDetect may also invoke `mkvmerge` or `ffmpeg` if they are installed.
+PySceneDetect may also invoke `ffmpeg` or `mkvmerge` if they are installed.
 
 FFmpeg is a trademark of Fabrice Bellard.
-mkvmerge is Copyright (C) 2005-2016, Matroska.
+`mkvmerge` is part of [MKVToolNix](https://mkvtoolnix.download/) by Moritz Bunkus, licensed under the GNU General Public License v2.
 
-Some PySceneDetect distributions bundle `ffmpeg`. See `thirdparty/LICENSE-FFMPEG` or visit [ffmpeg.org](https://ffmpeg.org).
+Windows builds and the Docker image bundle `ffmpeg` (the Docker image also includes `mkvmerge`). In Windows builds, see `thirdparty/LICENSE-FFMPEG` or visit [ffmpeg.org](https://ffmpeg.org).

@@ -1,4 +1,4 @@
-# Documentation
+# Documentation Versions
 
 Select a version below to open the PySceneDetect Reference Manual (CLI and Python API). Most users should start with [latest](/docs/latest/).
 

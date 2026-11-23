@@ -122,7 +122,8 @@ Python:
 Set a Minimum Scene Length
 --------------------------
 
-Cuts closer than this length are merged or ignored. On the command line
+Cuts closer than this length are suppressed or merged into adjacent scenes (depending on the
+detector and ``filter_mode``). On the command line
 :option:`-m/--min-scene-len <scenedetect -m>` applies to every detector and defaults to
 ``0.6s``; in Python each detector takes ``min_scene_len`` and defaults to ``15`` frames.
 

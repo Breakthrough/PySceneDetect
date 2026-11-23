@@ -12,7 +12,9 @@ Before submitting a pull request, check that your changes meet these requirement
 
 - All unit tests pass (`pytest`).
 - Linting and formatting checks pass (`ruff check` and `ruff format`).
-- New public APIs include type hints and NumPy-style docstrings.
+- New public APIs include type hints and docstrings with `Arguments:` / `Returns:` sections.
+
+When working on repository branches, use a descriptive prefix matching the change: `feature/<name>`, `issue/<num>-<desc>`, `fix/<name>`, `docs/<name>`, or `website/<name>` for website updates.
 
 PySceneDetect is released under the BSD 3-Clause License, and all submitted code must comply with this license (see [License & Copyright](copyright.md)).
 
@@ -32,9 +34,9 @@ Bright flashes and fast camera movement can still trigger false cuts in some vid
 
 Detection accuracy on slow dissolves varies with transition length and detector settings. Better dissolve detection with low performance overhead remains an open problem.
 
-### New detection methods
+### New detectors
 
-Research and prototypes for faster or more accurate detection algorithms are always welcome.
+Research and prototypes for faster or more accurate detectors are always welcome.
 
 ### Graphical user interface (GUI)
 
@@ -52,12 +54,12 @@ PySceneDetect is built and distributed with help from the tools, services, and c
 
 - [GitHub](https://github.com/): Git hosting, website hosting, code review, issue tracking, and CI builds.
 - [AppVeyor](https://www.appveyor.com/): Windows portable and MSI builds.
-- [AdvancedInstaller](https://www.advancedinstaller.com/): Windows MSI installer packaging.
+- [Advanced Installer](https://www.advancedinstaller.com/): Windows MSI installer packaging.
 - [SignPath](https://signpath.io/): free code signing for Windows builds.
 
 ### Community contributions
 
-Thank you to everyone who has submitted bug reports, feature requests, documentation fixes, and pull requests. You can view the contributor list on [the GitHub contributors page](https://github.com/Breakthrough/PySceneDetect/graphs/contributors) or on [libraries.io](https://libraries.io/github/Breakthrough/PySceneDetect/contributors).
+Thank you to everyone who has submitted bug reports, feature requests, documentation fixes, and pull requests. You can view the contributor list on [the GitHub contributors page](https://github.com/Breakthrough/PySceneDetect/graphs/contributors).
 
 ### Donations
 

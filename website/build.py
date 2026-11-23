@@ -46,7 +46,7 @@ REPO_DIR = WEBSITE_DIR.parent
 SITE_URL = "https://www.scenedetect.com"
 REPO_URL = "https://github.com/Breakthrough/PySceneDetect"
 PYPI_URL = "https://pypi.org/project/scenedetect/"
-RELEASE_DATE = "November 8, 2026"
+DEFAULT_RELEASE_DATE = "November 8, 2026"
 DEFAULT_DESCRIPTION = (
     "Fast, frame-accurate video scene detection and splitting tool in Python "
     "with a command-line interface and Python API."
@@ -69,6 +69,7 @@ class PageSpec:
     title: str
     nav_label: str = ""
     is_primary: bool = False
+    description: str = DEFAULT_DESCRIPTION
 
     @property
     def label(self) -> str:
@@ -95,28 +96,119 @@ NAV_GROUPS: list[tuple[str, list[PageSpec]]] = [
     (
         "PySceneDetect",
         [
-            PageSpec("", "Home", "Overview", is_primary=True),
-            PageSpec("features", "Features", is_primary=True),
-            PageSpec("download", "Download", is_primary=True),
-            PageSpec("changelog", "Changelog"),
+            PageSpec(
+                "",
+                "Home",
+                is_primary=True,
+                description=DEFAULT_DESCRIPTION,
+            ),
+            PageSpec(
+                "features",
+                "Features",
+                is_primary=True,
+                description=(
+                    "Explore PySceneDetect features: five built-in scene detectors, "
+                    "video splitting, still-frame previews, and timeline export formats."
+                ),
+            ),
+            PageSpec(
+                "download",
+                "Download",
+                is_primary=True,
+                description=(
+                    "Install PySceneDetect via pip, uv, pipx, Windows 64-bit MSI/ZIP builds, "
+                    "or the official Docker container image."
+                ),
+            ),
+            PageSpec(
+                "changelog",
+                "Changelog",
+                description=(
+                    "Release history, new features, bug fixes, and upgrade notes for PySceneDetect."
+                ),
+            ),
         ],
     ),
     (
-        "Reference",
+        "Guides",
         [
-            PageSpec("docs", "Documentation"),
-            PageSpec("cli", "Command-Line", "CLI", is_primary=True),
-            PageSpec("api", "Python API", is_primary=True),
-            PageSpec("benchmarks", "Benchmarks", is_primary=True),
+            PageSpec(
+                "docs",
+                "Documentation Versions",
+                description=(
+                    "Browse stable, development, and legacy PySceneDetect CLI and Python API "
+                    "reference manuals."
+                ),
+            ),
+            PageSpec(
+                "cli",
+                "Command-Line Interface",
+                "CLI",
+                is_primary=True,
+                description=(
+                    "Get started with the scenedetect command-line interface: examples, "
+                    "detectors, video splitting, config files, and threshold tuning."
+                ),
+            ),
+            PageSpec(
+                "api",
+                "Python API",
+                is_primary=True,
+                description=(
+                    "Learn how PySceneDetect's built-in detectors work and how to build "
+                    "custom scene detectors using the Python API."
+                ),
+            ),
+            PageSpec(
+                "benchmarks",
+                "Benchmarks",
+                is_primary=True,
+                description=(
+                    "Accuracy benchmarks and parameter sweeps for PySceneDetect detectors "
+                    "on BBC Planet Earth, AutoShot, and ClipShots datasets."
+                ),
+            ),
         ],
     ),
     (
         "Community",
         [
-            PageSpec("faq", "FAQ", is_primary=True),
-            PageSpec("contributing", "Contributing & Support", "Contributing"),
-            PageSpec("projects", "Projects & Research", "Projects"),
-            PageSpec("copyright", "License & Copyright", "License"),
+            PageSpec(
+                "faq",
+                "Frequently Asked Questions",
+                "FAQ",
+                is_primary=True,
+                description=(
+                    "Answers to common PySceneDetect questions on installation, OpenCV, "
+                    "threshold tuning, variable frame rate video, and video splitting."
+                ),
+            ),
+            PageSpec(
+                "contributing",
+                "Contributing & Support",
+                "Contributing",
+                description=(
+                    "How to report bugs, contribute code, and support PySceneDetect development."
+                ),
+            ),
+            PageSpec(
+                "projects",
+                "Projects & Research",
+                "Projects",
+                description=(
+                    "Open-source projects, academic papers, and similar video shot-boundary "
+                    "detection tools related to PySceneDetect."
+                ),
+            ),
+            PageSpec(
+                "copyright",
+                "License & Copyright",
+                "License",
+                description=(
+                    "PySceneDetect BSD 3-Clause license agreement and third-party software "
+                    "licenses."
+                ),
+            ),
         ],
     ),
 ]
@@ -165,7 +257,7 @@ HERO_SNIPPETS: list[tuple[str, str, str, str, str]] = [
         "ghcr.io",
         "bash",
         (
-            "# CLI, ffmpeg, mkvmerge, and PyAV in one container\n"
+            "# CLI, ffmpeg, mkvmerge, PyAV, and MoviePy in one container\n"
             'docker run --rm -v "$(pwd):/files" \\\n'
             "    ghcr.io/breakthrough/pyscenedetect \\\n"
             "    -i /files/goldeneye.mp4 split-video -o /files\n"
@@ -503,9 +595,43 @@ def render_hero_tabs() -> list[dict[str, str]]:
     return tabs
 
 
+def load_release_date(pages_dir: Path, version: str) -> str:
+    """Parse the release date for `version` from changelog.md, falling back to default."""
+    changelog_path = pages_dir / "changelog.md"
+    if changelog_path.is_file() and version:
+        pattern = re.compile(
+            rf"^###\s+(?:PySceneDetect\s+)?{re.escape(version)}\s*\(([^)]+)\)",
+            re.MULTILINE,
+        )
+        match = pattern.search(changelog_path.read_text(encoding="utf-8"))
+        if match:
+            candidate = match.group(1).strip()
+            try:
+                datetime.strptime(candidate, "%B %d, %Y")
+                return candidate
+            except ValueError:
+                pass
+    return DEFAULT_RELEASE_DATE
+
+
+def _validate_out_dir(out_dir: Path) -> Path:
+    """Resolve `out_dir` and refuse to overwrite protected repository directories."""
+    resolved_out = out_dir.resolve()
+    protected = {
+        REPO_DIR.resolve(),
+        WEBSITE_DIR.resolve(),
+        PAGES_DIR.resolve(),
+        THEME_DIR.resolve(),
+    }
+    if resolved_out in protected or any(resolved_out in p.parents for p in protected):
+        raise ValueError(f"Refusing to overwrite protected directory: {resolved_out}")
+    return resolved_out
+
+
 def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
     """Cleanly generate out_dir from website/pages/ and website/theme/."""
     base_path = normalize_base_path(base_path)
+    out_dir = _validate_out_dir(out_dir)
     if out_dir.exists():
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -526,7 +652,8 @@ def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
                 img_dims[img_file.name] = dims
 
     latest_ver, doc_versions = load_doc_versions(REPO_DIR)
-    rel_dt = datetime.strptime(RELEASE_DATE, "%B %d, %Y")
+    release_date = load_release_date(PAGES_DIR, latest_ver)
+    rel_dt = datetime.strptime(release_date, "%B %d, %Y")
 
     site_ctx = {
         "url": SITE_URL,
@@ -577,11 +704,11 @@ def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
 
         page_ctx = {
             "html_title": (
-                "PySceneDetect - Video Scene Cut Detection & Analysis"
+                "PySceneDetect | Video Scene Cut Detection & Analysis"
                 if spec.is_home
                 else f"{spec.title} | PySceneDetect"
             ),
-            "description": DEFAULT_DESCRIPTION,
+            "description": spec.description,
             "slug": spec.slug,
             "canonical_path": spec.url_path,
             "content": Markup(processed_html),
@@ -627,7 +754,7 @@ def build_site(base_path: str = "", out_dir: Path = BUILD_DIR) -> None:
 
     for old_slug, (target_path, target_label) in LEGACY_REDIRECTS.items():
         href = f"{base_path}{target_path}"
-        canonical = f"{SITE_URL}{target_path}"
+        canonical = f"{SITE_URL}{target_path.split('#', 1)[0]}"
         safe_href = html.escape(href, quote=True)
         safe_canonical = html.escape(canonical, quote=True)
         safe_label = html.escape(target_label)

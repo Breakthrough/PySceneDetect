@@ -25,16 +25,11 @@ pip install scenedetect
 pip install "opencv-contrib-python==$(pip show opencv-python | grep ^Version | cut -d' ' -f2)"
 ```
 
-Mixing different versions of OpenCV packages can break your `cv2` install. First-class support for choosing an OpenCV variant is tracked in [Issue #558](https://github.com/Breakthrough/PySceneDetect/issues/558).
+Mixing different versions of OpenCV packages can break your `cv2` install. See [Issue #558](https://github.com/Breakthrough/PySceneDetect/issues/558) for background.
 
 ### How do I enable video splitting?
 
-PySceneDetect uses `ffmpeg` or `mkvmerge` to split videos:
-
-- Download `ffmpeg` from [the FFmpeg website](https://ffmpeg.org/download.html).
-- Download `mkvmerge` as part of [MKVToolNix](https://mkvtoolnix.download/downloads.html).
-
-Make sure the executable is on your system `PATH` or in the same folder as `scenedetect`. Windows installers and Docker images already include both tools.
+PySceneDetect uses [FFmpeg](https://ffmpeg.org/download.html) or `mkvmerge` from [MKVToolNix](https://mkvtoolnix.download/downloads.html) to split videos. Make sure the executable is on your system `PATH` or in the same folder as `scenedetect`. The Windows builds include `ffmpeg`. The Docker image includes both tools. See [Video Splitting Requirements](cli.md#video-splitting-requirements) for setup steps.
 
 ## Detection and Splitting
 
@@ -46,12 +41,12 @@ Generate a per-frame stats file with `-s` / `--stats`:
 scenedetect -i video.mp4 -s video.stats.csv detect-adaptive
 ```
 
-Open `video.stats.csv` in a spreadsheet tool and inspect the metric column for your detector (`adaptive_ratio` for `detect-adaptive`, `content_val` for `detect-content`, or `average_rgb` for `detect-threshold`).
+Open `video.stats.csv` in a spreadsheet tool and inspect the metric column for your detector (`adaptive_ratio (w=2)` for `detect-adaptive`, where the `w=` suffix matches `--frame-window`; `content_val` for `detect-content`; or `average_rgb` for `detect-threshold`).
 
-- Lower the threshold (`-t`) if PySceneDetect misses real cuts.
-- Raise the threshold (`-t`) if PySceneDetect reports too many false cuts.
+- For fast-cut detectors (`detect-adaptive`, `detect-content`, `detect-hash`, `detect-hist`), lower the threshold (`-t`) if PySceneDetect misses real cuts, or raise `-t` to reduce false cuts.
+- For `detect-threshold`, do the opposite: raise `-t` to find more fades and lower `-t` to reduce false detections.
 
-See [Detection Parameters](cli.md#detection-parameters) for a full walkthrough and [Benchmarks](benchmarks.md) for parameter sweep results across datasets.
+See [Detector Options](cli.md#detector-options) for a walkthrough and [Benchmarks](benchmarks.md) for parameter sweep results across datasets.
 
 ### Does PySceneDetect support variable frame rate (VFR) videos?
 
@@ -76,7 +71,7 @@ To work around this limit, export the scene list with `list-scenes` and split th
 
 The active video backend could not decode the file. Install PyAV (`pip install av`) and run PySceneDetect with `-b pyav` to test another backend.
 
-Videos with multiple audio tracks can also cause decode failures in OpenCV (see [Issue #179](https://github.com/Breakthrough/PySceneDetect/issues/179)). If switching to PyAV does not help, remove the audio tracks into a temporary file before running detection:
+Videos with multiple audio tracks can also cause decode failures in OpenCV (see [Issue #179](https://github.com/Breakthrough/PySceneDetect/issues/179)). If PyAV does not help, make a copy of the video without its audio tracks. Then run detection on the copy:
 
 ```bash
 ffmpeg -i input.mp4 -c copy -an output.mp4
@@ -85,5 +80,5 @@ ffmpeg -i input.mp4 -c copy -an output.mp4
 Or with `mkvmerge`:
 
 ```bash
-mkvmerge -o output.mkv input.mp4
+mkvmerge -o output.mkv --no-audio input.mp4
 ```
