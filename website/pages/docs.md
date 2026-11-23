@@ -1,21 +1,25 @@
+# Documentation Versions
 
-# Documentation
+Select a version below to open the PySceneDetect Reference Manual (CLI and Python API). Most users should start with [latest](/docs/latest/).
 
 ## Stable
 
- * [latest](latest/)
- * [v0.7](0.7/)
+- [latest](/docs/latest/)
+- [v0.7.3](/docs/0.7.3/)
+- [v0.7.2](/docs/0.7.2/)
+- [v0.7.1](/docs/0.7.1/)
+- [v0.7](/docs/0.7/)
 
 ## Development
 
- * [head](head/)
+- [head](/docs/head/)
 
 ## Legacy
 
- * [v0.6.7](0.6.7/)
- * [v0.6.6](0.6.6/)
- * [v0.6.5](0.6.5/)
- * [v0.6.4](0.6.4/)
- * [v0.6.3](0.6.3/)
- * [v0.6.2](0.6.2/)
- * [v0.6.1](0.6.1/)
+- [v0.6.7](/docs/0.6.7/)
+- [v0.6.6](/docs/0.6.6/)
+- [v0.6.5](/docs/0.6.5/)
+- [v0.6.4](/docs/0.6.4/)
+- [v0.6.3](/docs/0.6.3/)
+- [v0.6.2](/docs/0.6.2/)
+- [v0.6.1](/docs/0.6.1/)

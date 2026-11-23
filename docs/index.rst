@@ -2,7 +2,7 @@
     Copyright (C) 2014 Brandon Castellano.  All rights reserved.
 
 #######################################################################
-PySceneDetect Documentation
+PySceneDetect Reference Manual
 #######################################################################
 
 PySceneDetect finds scene changes in video (fast cuts and fades) and can split the video, save
@@ -36,18 +36,17 @@ The same from Python:
     scenes = detect("video.mp4", AdaptiveDetector())
     split_video_ffmpeg("video.mp4", scenes)
 
-``scenes`` is a list of ``(start, end)`` timecode pairs. More :doc:`examples`, each done both
-ways, cover images, CSV output, detector tuning and more; see :ref:`SceneManager
-<scenedetect-scene_manager>` for advanced workflows.
+``scenes`` is a list of ``(start, end)`` timecode pairs. See :doc:`examples` for side-by-side CLI
+and Python examples (saving images, CSV output, tuning detectors, and more), or
+:ref:`SceneManager <scenedetect-scene_manager>` for advanced workflows.
 
 =======================================================================
 Reference
 =======================================================================
 
-Most features exist on both sides. The :doc:`examples` page shows each task done both ways,
-and every page links to its counterpart on the other side: each command to the function or
-class that does the same, and each detector to a table of its options, config file keys and
-constructor parameters.
+Most features work in both the CLI and the Python API. The :doc:`examples` page shows each task
+both ways, and each reference page links to its counterpart across CLI commands, config file keys,
+and Python functions or classes.
 
 .. The toctrees are hidden so that the singlehtml build does not inline every document into
    the two columns; the sidebar extension reads them by their :name:.
@@ -113,9 +112,9 @@ constructor parameters.
 
     examples
 
-Found a problem in the docs? Raise an issue on
+Found a problem in the docs? Open an issue on
 `the PySceneDetect issue tracker <https://github.com/Breakthrough/PySceneDetect/issues>`_.
-Development happens on Github at
+Development happens on GitHub at
 `github.com/Breakthrough/PySceneDetect <https://github.com/Breakthrough/PySceneDetect>`_.
 
 =======================================================================
