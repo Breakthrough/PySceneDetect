@@ -1,198 +1,491 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Brandon Castellano" />
-      <link rel="shortcut icon" href="img/favicon.ico" />
-    <title>Home - PySceneDetect</title>
-    <link rel="stylesheet" href="css/theme.css" />
-    <link rel="stylesheet" href="css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
-        <link href="style.css" rel="stylesheet" />
-    
-      <script>
-        // Current page data
-        var mkdocs_page_name = "Home";
-        var mkdocs_page_input_path = "index.md";
-        var mkdocs_page_url = null;
-      </script>
-    
-    <!--[if lt IE 9]>
-      <script src="js/html5shiv.min.js"></script>
-    <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-      <script>hljs.highlightAll();</script>
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-  ga('create', 'UA-72551323-1', 'auto');
-  ga('send', 'pageview');
-</script>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <title>PySceneDetect | Video Scene Cut Detection &amp; Analysis</title>
+  <meta name="description" content="Fast, frame-accurate video scene detection and splitting tool in Python with a command-line interface and Python API.">
+  <link rel="icon" href="/img/favicon.ico">
+  <link rel="canonical" href="https://www.scenedetect.com/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&text=PySceneDetect&display=swap">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script type="module" src="/assets/site.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      var h = window.location.hostname;
+      if (navigator.webdriver || h === "localhost" || h === "127.0.0.1" || h === "[::1]" || !h) {
+        return;
+      }
+      var s = document.createElement("script");
+      s.async = true;
+      s.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag("js", new Date());
+      gtag("config", "G-EWBNLVRWW0");
+    })();
+  </script>
 </head>
+<body>
+  <a class="skip-link visually-hidden" href="#main-content">Skip to main content</a>
 
-<body class="wy-body-for-nav" role="document">
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand-link" href="/" aria-label="PySceneDetect">
+        <svg
+          class="brand-mark"
+          aria-hidden="true"
+          width="34"
+          height="34"
+          viewBox="132.5 147.6 34.3 33.8"
+          fill="currentColor"
+        >
+          <path d="m 162.79836,148.30595 -26.75195,7.1034 c -1.11468,0.29597 -1.11468,0.84972 -1.11468,1.47987 0,0.63014 -0.0163,-0.0781 0,1.74004 -1.39332,0 -1.67017,1.8036 -1.67199,2.77477 -0.002,1.10991 0.27879,2.77476 1.67199,2.77476 v 15.53868 c 0,0.55495 0,0.55495 0.55734,0.55495 h 30.09596 c 0.55733,0 0.55733,0 0.55733,-0.55495 v -18.31344 c 0,-0.55495 0,-0.55495 -0.55733,-0.55495 h -22.71131 c 0,0 -0.008,0 22.15397,-5.88462 0.24588,-0.0653 0.50023,-0.3963 0.41801,-0.63608 l -1.95067,-5.68826 c -0.0833,-0.2429 -0.44761,-0.4003 -0.69667,-0.33417 z m -26.47328,12.26565 c 0.4617,1.1e-4 0.8359,0.37286 0.83582,0.8326 -7e-5,0.45962 -0.37425,0.83218 -0.83582,0.83227 -0.46172,8e-5 -0.83607,-0.37253 -0.83617,-0.83227 -9e-5,-0.45986 0.37432,-0.83268 0.83617,-0.8326 z m 4.19772,2.49729 h 2.74995 l -2.24706,3.32972 h -2.74996 z m 5.02074,0 h 2.74996 l -2.24706,3.32972 h -2.74998 z m 5.02073,0 h 2.74995 l -2.24707,3.32972 h -2.74996 z m 5.02072,0 h 2.74995 l -2.24703,3.32972 h -2.74997 z m 5.02072,0 h 2.74999 l -2.24706,3.32972 h -2.74998 z m -22.32998,6.10448 h 24.52263 v 7.76934 h -24.52263 z m -0.6491,-12.14838 2.65361,-0.71842 3.01149,2.08035 -2.65363,0.71842 z m 4.84486,-1.31166 2.65362,-0.71842 3.01147,2.08036 -2.65364,0.71842 z m 4.84484,-1.31165 2.65361,-0.71841 3.01147,2.08035 -2.65363,0.71842 z m 4.84484,-1.31165 2.65361,-0.71842 3.0115,2.08036 -2.65364,0.71841 z m 4.84483,-1.31164 2.65364,-0.71843 3.01149,2.08035 -2.65365,0.71843 z"/>
+        </svg>
+        <span class="brand-wordmark">PySceneDetect</span>
+      </a>
 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-    <div class="wy-side-scroll">
-      <div class="wy-side-nav-search">
+      <nav class="site-nav" aria-label="Primary">
+        <button
+          class="menu-button"
+          type="button"
+          popovertarget="site-menu"
+          popovertargetaction="toggle"
+          aria-controls="site-menu"
+        >
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+          <span>Menu</span>
+        </button>
 
-  <a href=".">
-
-<img src="img/pyscenedetect_logo_small.png" class="logo" id="side-nav-logo" alt="Logo"/>
-</a>
-<div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
-  </form>
-</div>
-      </div>
-
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">PySceneDetect</span></p>
-              <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="features/">Features</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="download/">Download</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="changelog/">Changelog</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Reference:</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="docs/">Documentation</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="cli/">Command-Line</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="api/">Python API</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="benchmarks/">Benchmarks</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Support:</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="faq/">FAQ</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="contributing/">Bugs & Contributing</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="supporting/">Development & Support</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Resources</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="gallery/">Project Gallery</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="similar/">Similar Projects</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="literature/">Research & Literature</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="copyright/">License & Copyright</a>
-                  </li>
-              </ul>
-      </div>
-    </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href=".">PySceneDetect</a>
-        
+        <ul id="site-menu" class="site-menu" popover="auto">
+          <li>
+            <a href="/" aria-current="page">Home</a>
+          </li>
+          <li>
+            <a href="/features/">Features</a>
+          </li>
+          <li>
+            <a href="/download/">Download</a>
+          </li>
+          <li>
+            <a href="/cli/">CLI</a>
+          </li>
+          <li>
+            <a href="/api/">Python API</a>
+          </li>
+          <li>
+            <a href="/benchmarks/">Benchmarks</a>
+          </li>
+          <li>
+            <a href="/faq/">FAQ</a>
+          </li>
+          <li>
+            <a href="/docs/latest/">
+              <span>Reference Manual</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/changelog/">Changelog</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/docs/">Documentation Versions</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/contributing/">Contributing</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/projects/">Projects</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="/copyright/">License</a>
+          </li>
+          <li class="mobile-only-nav">
+            <a href="https://github.com/Breakthrough/PySceneDetect">
+              <span>GitHub</span>
+              <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M7 7h10v10"/>
+              </svg>
+            </a>
+          </li>
+        </ul>
       </nav>
-      <div class="wy-nav-content">
-        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
-          <li>PySceneDetect &raquo;</li>
-      <li class="breadcrumb-item active">Home</li>
-    <li class="wy-breadcrumbs-aside">
-          <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/website/pages/index.md">Edit on PySceneDetect on Github</a>
-    </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-            <div class="section" itemprop="articleBody">
-              
-                <p><img alt="PySceneDetect" src="img/pyscenedetect_logo_small.png" /></p>
-<div class="important">
-<h3 class="wy-text-neutral"><span class="fa fa-info-circle wy-text-info"></span>&nbsp; Latest Release: <b>v0.7.3</b> (November 8, 2026)</h3>
-<a href="download/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Download</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="changelog/" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-reorder"></span>&nbsp; <b>Changelog</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="docs/latest/" class="btn btn-warning" style="margin-bottom:8px;" role="button"><span class="fa fa-gear"></span>&nbsp; <b>Documentation</b></a> &nbsp;&nbsp;&nbsp;&nbsp; <a href="cli/" class="btn btn-danger" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
-</div>
 
-<p><strong>PySceneDetect</strong> is a tool for <strong>detecting shot changes in videos</strong> (<a href="cli/">example</a>), and can <strong>automatically split the video into separate clips</strong>.  PySceneDetect is free and open-source software, and has several <a href="features/#detection-methods">detection methods</a> to find fast-cuts and threshold-based fades.</p>
-<h3>Quickstart</h3>
+      <div class="header-actions">
+        <button
+          type="button"
+          class="search-trigger"
+        >
+          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+          <span class="search-trigger-label">Search</span>
+          <kbd class="kbd" aria-hidden="true">Ctrl K</kbd>
+        </button>
 
-<p>Split video on each fast cut using <a href="cli/">command line (more examples)</a>:</p>
-<pre><code class="language-bash">scenedetect -i video.mp4 split-video
-</code></pre>
-<p>Split video on each fast cut using <a href="docs/">Python API (docs)</a>:</p>
-<pre><code class="language-python">from scenedetect import detect, AdaptiveDetector, split_video_ffmpeg
+        <button type="button" class="theme-toggle">
+          <svg class="theme-option-dark" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+          <span class="visually-hidden theme-option-dark">Switch to dark theme</span>
+          <svg class="theme-option-light" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2m-7.07-14.93 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+          <span class="visually-hidden theme-option-light">Switch to light theme</span>
+        </button>
 
-scene_list = detect(&quot;my_video.mp4&quot;, AdaptiveDetector())
-split_video_ffmpeg(&quot;my_video.mp4&quot;, scene_list)
-</code></pre>
-<h3>Examples and Use Cases</h3>
-
-<p>Here are some of the things people are using PySceneDetect for:</p>
-<ul>
-<li>splitting home videos or other source footage into individual scenes</li>
-<li>automated detection and removal of commercials from PVR-saved video sources</li>
-<li>processing and splitting surveillance camera footage</li>
-<li>statistical analysis of videos to find suitable "loops" for looping GIFs/cinemagraphs</li>
-<li>academic analysis of film and video (e.g. finding mean shot length)</li>
-</ul>
-<p>Of course, this is just a small slice of what you can do with PySceneDetect, so why not <a href="download/" alt="Download PySceneDetect">try it out for yourself</a>!  The timecode format used by default (<code>HH:MM:SS.nnnn</code>) is compatible with most popular video tools, so in most cases the output scene list from PySceneDetect can be directly copied and pasted into another tool of your choice (e.g. <code>ffmpeg</code>, <code>avconv</code> or the <code>mkvtoolnix</code> suite).</p>
-              
-            </div>
-          </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="features/" class="btn btn-neutral float-right" title="Features">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a class="icon-link" href="https://github.com/Breakthrough/PySceneDetect">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+          <span class="github-label">GitHub</span>
+        </a>
+      </div>
     </div>
+  </header>
 
-  <hr/>
+  <search>
+    <dialog id="search-dialog" class="search-dialog" closedby="any" aria-label="Search PySceneDetect">
+      <form method="dialog" class="search-header">
+        <label for="search-input" class="visually-hidden">Search this site</label>
+        <svg class="search-input-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m20 20-3.5-3.5"/>
+        </svg>
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="Search this site"
+          autocomplete="off"
+          autofocus
+        >
+        <button type="submit" class="search-close" aria-label="Esc - Close search">Esc</button>
+        <span id="search-status" class="visually-hidden" role="status" aria-live="polite"></span>
+      </form>
+      <div id="search-results" class="search-results" role="region" aria-label="Search results">
+        <p class="search-empty">Type a keyword to search guides, CLI options, detectors, and FAQs.</p>
+      </div>
+    </dialog>
+  </search>
 
-  <div role="contentinfo">
-    <!-- Copyright etc -->
-      <p>Copyright &copy; 2014 Brandon Castellano.  All rights reserved.<br />Licensed under BSD 3-Clause (see the <a href="https://github.com/Breakthrough/PySceneDetect/blob/main/LICENSE" alt="link to latest LICENSE file on Github">LICENSE file</a> for details).</p>
-  </div>
-
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-</footer>
-          
+  <main id="main-content" class="container home-main" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero-copy">
+        <a class="release-pill" href="/download/">
+          <span>Latest release</span>
+          <strong>v0.7.3</strong>
+          <span>&middot; Nov 8, 2026</span>
+        </a>
+        <h1 id="hero-heading">Fast, frame-accurate scene cut detection for video.</h1>
+        <p class="hero-lead">Detect fast cuts and fades from the command line or Python. Split videos with ffmpeg or mkvmerge, export timeline files for video editors, or save per-frame metrics.</p>
+        <div class="install-box">
+          <div class="install-tabs" role="tablist" aria-label="Install method">
+            <button
+              type="button"
+              role="tab"
+              class="install-tab"
+              id="install-tab-pip"
+              aria-selected="true"
+              aria-controls="install-panel-pip"
+              tabindex="0"
+            >pip</button>
+            <button
+              type="button"
+              role="tab"
+              class="install-tab"
+              id="install-tab-uv"
+              aria-selected="false"
+              aria-controls="install-panel-uv"
+              tabindex="-1"
+            >uv</button>
+            <button
+              type="button"
+              role="tab"
+              class="install-tab"
+              id="install-tab-pipx"
+              aria-selected="false"
+              aria-controls="install-panel-pipx"
+              tabindex="-1"
+            >pipx</button>
+          </div>
+          <div class="install-panels">
+            <div
+              role="tabpanel"
+              class="install-panel"
+              id="install-panel-pip"
+              aria-labelledby="install-tab-pip"
+            >
+              <div class="install-strip">
+                <span class="prompt" aria-hidden="true">$</span>
+                <code>pip install --upgrade scenedetect</code>
+                <button
+                  type="button"
+                  class="copy-inline-btn"
+                  data-copy="pip install --upgrade scenedetect"
+                  aria-label="Copy pip install command"
+                >
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div
+              role="tabpanel"
+              class="install-panel"
+              id="install-panel-uv"
+              aria-labelledby="install-tab-uv"
+              hidden="until-found"
+            >
+              <div class="install-strip">
+                <span class="prompt" aria-hidden="true">$</span>
+                <code>uv tool install scenedetect</code>
+                <button
+                  type="button"
+                  class="copy-inline-btn"
+                  data-copy="uv tool install scenedetect"
+                  aria-label="Copy uv install command"
+                >
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div
+              role="tabpanel"
+              class="install-panel"
+              id="install-panel-pipx"
+              aria-labelledby="install-tab-pipx"
+              hidden="until-found"
+            >
+              <div class="install-strip">
+                <span class="prompt" aria-hidden="true">$</span>
+                <code>pipx install scenedetect</code>
+                <button
+                  type="button"
+                  class="copy-inline-btn"
+                  data-copy="pipx install scenedetect"
+                  aria-label="Copy pipx install command"
+                >
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cta-row">
+          <a class="btn-primary" href="/cli/">
+            <span>Get Started</span>
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a class="btn-secondary" href="/download/#windows-build-64-bit-only">
+            <svg class="download-os-icon" aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M2 3.75 10.75 2.5v8.75H2V3.75Zm9.75-1.4L22 1v10.25H11.75V2.35ZM2 12.75h8.75v8.75L2 20.25v-7.5Zm9.75 0H22V23l-10.25-1.35v-8.9Z"/>
+            </svg>
+            <span>Windows 64-bit</span>
+          </a>
+          <a class="btn-secondary" href="/download/#docker-image">Docker</a>
+          <a class="btn-secondary" href="/docs/latest/">Reference Manual</a>
         </div>
       </div>
 
+      <div class="code-window">
+        <div class="code-tabs">
+          <div class="tab-group" role="tablist" aria-label="Quickstart examples" data-hint-target="hero-code-hint">
+            <button
+              type="button"
+              role="tab"
+              class="tab"
+              id="hero-tab-python"
+              aria-selected="true"
+              aria-controls="hero-panel-python"
+              tabindex="0"
+              data-hint="AdaptiveDetector"
+            >Python API</button>
+            <button
+              type="button"
+              role="tab"
+              class="tab"
+              id="hero-tab-cli"
+              aria-selected="false"
+              aria-controls="hero-panel-cli"
+              tabindex="-1"
+              data-hint="scenedetect"
+            >Command Line</button>
+            <button
+              type="button"
+              role="tab"
+              class="tab"
+              id="hero-tab-docker"
+              aria-selected="false"
+              aria-controls="hero-panel-docker"
+              tabindex="-1"
+              data-hint="ghcr.io"
+            >Docker</button>
+          </div>
+          <span class="code-hint" id="hero-code-hint" aria-hidden="true">AdaptiveDetector</span>
+        </div>
+
+        <div class="code-panels">
+          <div
+            role="tabpanel"
+            class="code-panel"
+            id="hero-panel-python"
+            aria-labelledby="hero-tab-python"          >
+            <div class="codehilite">
+              <pre class="code-body" tabindex="0"><code><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">detect</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">,</span> <span class="n">split_video_ffmpeg</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Find scene cuts and split the video with ffmpeg</span>
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"goldeneye.mp4"</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">())</span>
+<span class="n">split_video_ffmpeg</span><span class="p">(</span><span class="s2">"goldeneye.mp4"</span><span class="p">,</span> <span class="n">scenes</span><span class="p">)</span></code></pre>
+            </div>
+          </div>
+          <div
+            role="tabpanel"
+            class="code-panel"
+            id="hero-panel-cli"
+            aria-labelledby="hero-tab-cli" hidden="until-found"          >
+            <div class="codehilite">
+              <pre class="code-body" tabindex="0"><code><span class="c1"># Split a video at each detected cut</span>
+scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>split-video
+
+<span class="c1"># Export a CSV scene list, still frames, and an HTML report</span>
+scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>list-scenes<span class="w"> </span>save-images<span class="w"> </span>save-html</code></pre>
+            </div>
+          </div>
+          <div
+            role="tabpanel"
+            class="code-panel"
+            id="hero-panel-docker"
+            aria-labelledby="hero-tab-docker" hidden="until-found"          >
+            <div class="codehilite">
+              <pre class="code-body" tabindex="0"><code><span class="c1"># CLI, ffmpeg, mkvmerge, PyAV, and MoviePy in one container</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="s2">"</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">:/files"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>ghcr.io/breakthrough/pyscenedetect<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-i<span class="w"> </span>/files/goldeneye.mp4<span class="w"> </span>split-video<span class="w"> </span>-o<span class="w"> </span>/files</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-divider">
+          <span class="code-divider-label">Or run one command in your terminal:</span>
+          <code>scenedetect -i goldeneye.mp4 split-video</code>
+        </div>
+      </div>
     </section>
 
-  </div>
+    <div class="grid-3">
+      <article class="feature-card">
+        <h2>Five Detectors</h2>
+        <p>Choose from Adaptive, Content (HSV and edges), Perceptual Hash, Histogram, and Threshold detectors. All five are tested on BBC Planet Earth, AutoShot, and ClipShots.</p>
+        <footer class="feature-meta">
+          <a href="/benchmarks/">91.6 F1 on BBC Planet Earth</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="/docs/latest/api/detectors.html">Detectors</a>
+        </footer>
+      </article>
+      <article class="feature-card">
+        <h2>Standard Export Formats</h2>
+        <p>Export <code>HH:MM:SS.nnn</code> CSV scene lists, CMX 3600 EDL, Final Cut Pro XML, OpenTimelineIO (OTIO), x264 QP files, HTML reports, and still frames.</p>
+        <footer class="feature-meta">
+          <a href="/docs/latest/cli.html#save-edl">save-edl</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="/docs/latest/cli.html#save-otio">save-otio</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="/docs/latest/cli.html#save-images">save-images</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="/features/#output-formats">More<span class="visually-hidden"> export formats</span></a>
+        </footer>
+      </article>
+      <article class="feature-card">
+        <h2>Modular Video Backends</h2>
+        <p>Decode video with OpenCV by default, or switch to PyAV or MoviePy. Install via pip (standard or headless), the signed Windows installer, or Docker.</p>
+        <footer class="feature-meta">
+          <a href="/download/#install-with-pip-uv-or-pipx">Python 3.10+</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="/download/#windows-build-64-bit-only">Windows 64-bit</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="/download/#docker-image">Docker</a>
+        </footer>
+      </article>
+    </div>
 
-  <div class="rst-versions" role="note" aria-label="Versions">
-  <span class="rst-current-version" data-toggle="rst-current-version">
-    
-    
-    
-      <span><a href="features/" style="color: #fcfcfc">Next &raquo;</a></span>
-    
-  </span>
-</div>
-    <script src="js/jquery-3.6.0.min.js"></script>
-    <script>var base_url = ".";</script>
-    <script src="js/theme_extra.js"></script>
-    <script src="js/theme.js"></script>
-      <script src="js/helper.js"></script>
-      <script src="search/main.js"></script>
-    <script>
-        jQuery(function () {
-            SphinxRtdTheme.Navigation.enable(true);
-        });
-    </script>
+    <div class="home-content">
+      <article class="prose home-prose">
+        <h2 id="common-use-cases">Common Use Cases</h2>
+<p>People use PySceneDetect for many video workflows:</p>
+<ul>
+<li>Splitting home videos or raw footage into separate scene clips.</li>
+<li>Finding and removing commercials from recorded TV broadcasts.</li>
+<li>Reviewing and splitting security camera recordings.</li>
+<li>Finding clean loops in videos for GIFs and cinemagraphs.</li>
+<li>Analyzing film and video datasets, such as measuring average shot length.</li>
+</ul>
+<p><a href="/download/">Download PySceneDetect</a> to try it on your own videos, or review the <a href="/features/">Features</a> page for a full list of detectors and export formats. The default timecode format (<code>HH:MM:SS.nnn</code>) works directly with tools such as <code>ffmpeg</code> and <code>mkvmerge</code>.</p>
+      </article>
 
+      <div class="quick-nav-section">
+        <h2>More Resources</h2>
+        <div class="quick-nav-grid">
+          <a class="quick-nav-card" href="/docs/">
+            <strong>Documentation Versions</strong>
+            <span>Browse stable, development, and legacy CLI and Python API reference manuals.</span>
+          </a>
+          <a class="quick-nav-card" href="/faq/">
+            <strong>Frequently Asked Questions</strong>
+            <span>Install help, threshold tuning, variable frame rates, and video splitting.</span>
+          </a>
+          <a class="quick-nav-card" href="/contributing/">
+            <strong>Contributing &amp; Support</strong>
+            <span>Report bugs, open pull requests, and see the tools that support development.</span>
+          </a>
+          <a class="quick-nav-card" href="/projects/">
+            <strong>Projects &amp; Research</strong>
+            <span>Open-source projects, research papers, and similar tools.</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-copy">
+        Copyright &copy; 2014 Brandon Castellano. Licensed under the
+        <a href="/copyright/">BSD 3-Clause License</a>.
+      </p>
+      <ul class="footer-links" role="list">
+        <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+        <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+        <li><a href="/docs/latest/">Reference Manual</a></li>
+        <li><a href="/changelog/">Changelog</a></li>
+        <li><a href="/copyright/">License</a></li>
+      </ul>
+    </div>
+  </footer>
 </body>
 </html>
