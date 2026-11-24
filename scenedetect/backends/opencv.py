@@ -54,6 +54,35 @@ NON_VIDEO_FILE_INPUT_IDENTIFIERS = (
 )
 
 
+def _is_interrupted_recording(path: str) -> bool:
+    """True if `path` is an MP4/MOV with media data (mdat) but no complete index (moov), which is
+    what a camera leaves when recording is cut off (e.g. the battery dies). OpenCV only logs
+    "moov atom not found" in that case, so the top-level boxes are walked to tell."""
+    try:
+        size = os.path.getsize(path)
+        with open(path, "rb") as file:
+            pos, seen_mdat = 0, False
+            while pos + 8 <= size:
+                file.seek(pos)
+                header = file.read(16)
+                box_size, box_type = int.from_bytes(header[:4], "big"), header[4:8]
+                if pos == 0 and box_type != b"ftyp":
+                    return False
+                if box_size == 1 and len(header) == 16:
+                    box_size = int.from_bytes(header[8:16], "big")
+                elif box_size == 0:
+                    box_size = size - pos
+                if box_size < 8:
+                    return False
+                if box_type == b"moov":
+                    return pos + box_size > size
+                seen_mdat = seen_mdat or box_type == b"mdat"
+                pos += box_size
+            return seen_mdat
+    except OSError:
+        return False
+
+
 def _get_capture_api(path: str) -> int:
     """API preference to use when opening `path` with `cv2.VideoCapture`. This exists as a
     workaround for https://scenedetect.com/issue/575, where certain versions of the opencv-python
@@ -392,6 +421,14 @@ class VideoStreamCv2(VideoStream):
 
         cap = cv2.VideoCapture(self._path_or_device, capture_api)
         if not cap.isOpened():
+            if isinstance(self._path_or_device, str) and _is_interrupted_recording(
+                self._path_or_device
+            ):
+                raise VideoOpenFailure(
+                    "Video file has no index (moov atom): the recording was probably interrupted "
+                    "before it was saved, for example because the camera lost power. The video "
+                    "data may still be in the file.\n"
+                )
             raise VideoOpenFailure(
                 "Ensure file is valid video and system dependencies are up to date.\n"
             )

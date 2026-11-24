@@ -24,6 +24,7 @@ import pytest
 
 from scenedetect import ContentDetector, SceneManager
 from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
+from scenedetect.video_stream import VideoOpenFailure
 
 GROUND_TRUTH_CAPTURE_ADAPTER_TEST = [1, 90, 210]
 GROUND_TRUTH_CAPTURE_ADAPTER_CALLBACK_TEST = [180, 394]
@@ -133,3 +134,15 @@ def test_decode_failures_exposed(corrupt_video_file: str):
         pass
     assert adapter.decode_failures == adapter._decode_failures
     assert adapter.decode_failures >= 0
+
+
+def test_open_interrupted_recording(test_video_file: str, tmp_path):
+    """A recording cut off before its moov atom was written is reported as such."""
+    with open(test_video_file, "rb") as file:
+        data = file.read()
+    interrupted = tmp_path / "interrupted.mp4"
+    interrupted.write_bytes(data[: len(data) // 2])
+    with pytest.raises(VideoOpenFailure, match="moov atom"):
+        VideoStreamCv2(str(interrupted))
+    # A complete file still opens.
+    assert VideoStreamCv2(test_video_file).frame_rate > 0
