@@ -12,12 +12,13 @@
 """Duration filtering for threshold-based fades."""
 
 import csv
+from fractions import Fraction
 
 import cv2
 import numpy as np
 import pytest
 
-from scenedetect import FrameTimecode, SceneManager, open_video
+from scenedetect import FramePosition, SceneManager, Timecode, open_video
 from scenedetect.detectors import ThresholdDetector
 from tests.helpers import invoke_cli
 
@@ -26,10 +27,16 @@ def _detect_levels(levels, **kwargs):
     detector = ThresholdDetector(**kwargs)
     cuts = []
     for index, level in enumerate(levels):
-        timecode = FrameTimecode(index, fps=10.0)
-        cuts.extend(detector.process_frame(timecode, np.full((4, 4, 3), level, np.uint8)))
-    cuts.extend(detector.post_process(timecode))
-    return [cut.frame_num for cut in cuts]
+        position = FramePosition(
+            Timecode(
+                pts=index,
+                time_base=Fraction(1, 10),
+            ),
+            frame_number=index,
+        )
+        cuts.extend(detector.process_frame(position, np.full((4, 4, 3), level, np.uint8)))
+    cuts.extend(detector.post_process(position))
+    return [cut.frame_number for cut in cuts]
 
 
 @pytest.mark.parametrize("method", list(ThresholdDetector.Method))
@@ -49,7 +56,7 @@ def test_short_fade_does_not_affect_next_cut(method, fade_bias, expected):
 
 
 @pytest.mark.parametrize("out_length, expected", [(3, []), (4, [12]), (5, [12])])
-@pytest.mark.parametrize("minimum", [4, 0.4, "0.4s", "00:00:00.400", FrameTimecode(4, 10.0)])
+@pytest.mark.parametrize("minimum", [4, 0.4, "0.4s", "00:00:00.400", Timecode(4, Fraction(1, 10))])
 def test_min_out_length_boundary(out_length, expected, minimum):
     assert (
         _detect_levels(
@@ -126,8 +133,9 @@ def _write_video(path, levels):
     return str(path)
 
 
+# At EOF, four frames span 0.3s between timestamps; five span 0.4s.
 @pytest.mark.parametrize("backend", ["opencv", "pyav"])
-@pytest.mark.parametrize("final_out_length", [3, 4])
+@pytest.mark.parametrize("final_out_length", [4, 5])
 def test_min_out_length_decoded_video(tmp_path, auto_close, backend, final_out_length):
     if backend == "pyav":
         pytest.importorskip("av")
@@ -140,10 +148,10 @@ def test_min_out_length_decoded_video(tmp_path, auto_close, backend, final_out_l
     )
     assert manager.detect_scenes(video) == len(levels) + final_out_length
     scenes = manager.get_scene_list()
-    assert [start.frame_num for start, _ in scenes] == (
-        [0, 25, 38] if final_out_length == 4 else [0, 25]
+    assert [start.frame_number for start, _ in scenes] == (
+        [0, 25, 38] if final_out_length == 5 else [0, 25]
     )
-    assert scenes[-1][1].frame_num == len(levels) + final_out_length
+    assert scenes[-1][1].frame_number == len(levels) + final_out_length
 
 
 @pytest.mark.parametrize("minimum", ["4", "0.4s", "00:00:00.400"])
