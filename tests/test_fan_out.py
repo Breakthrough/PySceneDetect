@@ -20,7 +20,8 @@ import pytest
 
 from scenedetect import ContentDetector, SceneManager, detect, open_video
 from scenedetect._fan_out import FanOutVideoStream
-from scenedetect.video_stream import SeekError
+from scenedetect.common import FramePosition, Timecode
+from scenedetect.video_stream import FrameNumbering, SeekError
 
 
 def _read_all(stream) -> list[np.ndarray]:
@@ -88,18 +89,24 @@ def test_fan_out_per_consumer_position(test_video_file):
     try:
         s0 = fan.stream(0)
         s1 = fan.stream(1)
-        assert s0.frame_number == 0
-        assert s1.frame_number == 0
+        assert s0.frame_number == -1
+        assert s1.frame_number == -1
+        assert s0.position is None
+        assert s1.position is None
         # Read 5 frames on s0 (s1 must also keep up because of back-pressure, but its
         # frame_number is independent of how many we've consumed there).
         for _ in range(5):
             assert isinstance(s0.read(), np.ndarray)
-        assert s0.frame_number == 5
-        assert s1.frame_number == 0  # never read; counter is per-consumer
-        # Now drain s1; it should still see frame 1 first.
+        assert s0.frame_number == 4
+        assert s1.frame_number == -1  # never read; counter is per-consumer
+        assert isinstance(s0.position, FramePosition)
+        assert s1.position is None
+        # Now drain s1; it should still see frame 0 first.
         for _ in range(5):
             assert isinstance(s1.read(), np.ndarray)
-        assert s1.frame_number == 5
+        assert s1.frame_number == 4
+        assert isinstance(s1.position, FramePosition)
+        assert s0.position == s1.position
     finally:
         fan.close()
 
@@ -129,9 +136,13 @@ def test_fan_out_eof_returns_false_on_subsequent_reads(test_video_file):
         # Drain.
         while s.read() is not False:
             pass
+        last_position = s.position
+        assert s.peek_timecode() is None
+        assert s.peek_timecode() is None
         # Subsequent reads must continue to return False, not block.
         assert s.read() is False
         assert s.read() is False
+        assert s.position == last_position
     finally:
         fan.close()
 
@@ -147,6 +158,8 @@ def test_fan_out_metadata_forwarded(test_video_file):
             assert s.frame_rate == source.frame_rate
             assert s.frame_size == source.frame_size
             assert s.duration == source.duration
+            assert s.frame_count == source.frame_count
+            assert s.frame_numbering is source.frame_numbering
             assert s.path == source.path
             assert s.name == source.name
             assert s.is_seekable is False
@@ -161,7 +174,7 @@ def test_fan_out_cut_list_matches_direct_detect(test_video_file):
     affect detector output.
     """
     baseline_scenes = detect(test_video_file, ContentDetector())
-    baseline_cuts = [scene[1].frame_num for scene in baseline_scenes]
+    baseline_cuts = [scene[1].frame_number for scene in baseline_scenes]
 
     source = open_video(test_video_file)
     fan = FanOutVideoStream(source, n=1)
@@ -170,7 +183,7 @@ def test_fan_out_cut_list_matches_direct_detect(test_video_file):
         sm = SceneManager()
         sm.add_detector(ContentDetector())
         sm.detect_scenes(video=fan.stream(0))
-        cuts = [scene[1].frame_num for scene in sm.get_scene_list()]
+        cuts = [scene[1].frame_number for scene in sm.get_scene_list()]
     finally:
         fan.close()
 
@@ -196,7 +209,7 @@ def test_fan_out_parallel_detection_matches_baseline(test_video_file):
         sm = SceneManager()
         sm.add_detector(det)
         sm.detect_scenes(video=fan.stream(i))
-        results[i] = [scene[1].frame_num for scene in sm.get_scene_list()]
+        results[i] = [scene[1].frame_number for scene in sm.get_scene_list()]
 
     detectors = [ContentDetector(), ContentDetector(threshold=15.0)]
     threads = [threading.Thread(target=worker, args=(i, detectors[i])) for i in range(2)]
@@ -208,8 +221,8 @@ def test_fan_out_parallel_detection_matches_baseline(test_video_file):
     finally:
         fan.close()
 
-    assert results[0] == [scene[1].frame_num for scene in baseline_default]
-    assert results[1] == [scene[1].frame_num for scene in baseline_loose]
+    assert results[0] == [scene[1].frame_number for scene in baseline_default]
+    assert results[1] == [scene[1].frame_number for scene in baseline_loose]
 
 
 def test_fan_out_prefetch_zero_rendezvous(test_video_file):
@@ -234,3 +247,36 @@ def test_fan_out_prefetch_zero_rendezvous(test_video_file):
         fan.close()
 
     assert results[0] == results[1] > 0
+
+
+@pytest.mark.parametrize("frame_numbering", list(FrameNumbering))
+def test_fan_out_peek_preserves_consumer_positions(test_video_file, auto_close, frame_numbering):
+    """Each consumer can peek independently while retaining the source's numbering mode."""
+    source = auto_close(open_video(test_video_file, frame_numbering=frame_numbering))
+    source.seek(4)
+    initial_position = source.position
+    expected_timecode = source.peek_timecode()
+    assert isinstance(expected_timecode, Timecode)
+
+    fan = FanOutVideoStream(source, n=2, prefetch=4)
+    fan.start()
+    try:
+        s0 = fan.stream(0)
+        s1 = fan.stream(1)
+
+        for s in (s0, s1):
+            assert s.frame_numbering is frame_numbering
+            assert s.position == initial_position
+
+            assert s.peek_timecode() == expected_timecode
+            assert s.peek_timecode() == expected_timecode
+            assert s.position == initial_position
+
+            assert s.read(decode=False) is True
+            assert isinstance(s.position, FramePosition)
+            assert s.position.timecode == expected_timecode
+            assert s.frame_number == (4 if frame_numbering is FrameNumbering.SOURCE else 0)
+
+        assert s1.position == s0.position
+    finally:
+        fan.close()
