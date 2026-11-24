@@ -313,19 +313,44 @@ function initEqualHeightTabPanels() {
  * 5. Copy-to-clipboard buttons (hero inline command + prose code blocks)
  * -------------------------------------------------------------------------- */
 const copyTimers = new WeakMap();
+let copyLiveRegion = null;
+let lastCopyAnnouncement = "";
 
-function flashCopied(button, defaultLabel) {
+function announceCopyStatus(message) {
+  if (!copyLiveRegion) {
+    copyLiveRegion = document.createElement("span");
+    copyLiveRegion.className = "visually-hidden";
+    copyLiveRegion.setAttribute("role", "status");
+    document.body.appendChild(copyLiveRegion);
+  }
+  const text = message === lastCopyAnnouncement ? `${message}\u00A0` : message;
+  lastCopyAnnouncement = message;
+  copyLiveRegion.textContent = "";
+  requestAnimationFrame(() => {
+    if (copyLiveRegion) {
+      copyLiveRegion.textContent = text;
+    }
+  });
+}
+
+function flashCopied(button, ok) {
   const prevTimer = copyTimers.get(button);
   if (prevTimer !== undefined) {
     window.clearTimeout(prevTimer);
   }
-  button.innerHTML = CHECK_ICON_SVG;
-  button.classList.add("is-copied");
-  button.setAttribute("aria-label", "Copied to clipboard");
+  if (ok) {
+    button.innerHTML = CHECK_ICON_SVG;
+    button.classList.add("is-copied");
+    announceCopyStatus("Copied");
+  } else {
+    announceCopyStatus("Copy failed");
+  }
   const timerId = window.setTimeout(() => {
     button.innerHTML = COPY_ICON_SVG;
     button.classList.remove("is-copied");
-    button.setAttribute("aria-label", defaultLabel);
+    if (copyLiveRegion) {
+      copyLiveRegion.textContent = "";
+    }
     copyTimers.delete(button);
   }, 1400);
   copyTimers.set(button, timerId);
@@ -334,15 +359,15 @@ function flashCopied(button, defaultLabel) {
 function initCopyButtons() {
   for (const inlineBtn of document.querySelectorAll(".copy-inline-btn")) {
     const text = inlineBtn.getAttribute("data-copy") || "";
-    const defaultLabel = inlineBtn.getAttribute("aria-label") || "Copy command";
     inlineBtn.addEventListener("click", () => {
       if (!text || !navigator.clipboard) {
+        flashCopied(inlineBtn, false);
         return;
       }
       navigator.clipboard
         .writeText(text)
-        .then(() => flashCopied(inlineBtn, defaultLabel))
-        .catch(() => {});
+        .then(() => flashCopied(inlineBtn, true))
+        .catch(() => flashCopied(inlineBtn, false));
     });
   }
 
@@ -351,18 +376,19 @@ function initCopyButtons() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "copy-code-btn";
-    const defaultLabel = "Copy code to clipboard";
+    const defaultLabel = container.getAttribute("data-copy-label") || "Copy code to clipboard";
     btn.setAttribute("aria-label", defaultLabel);
     btn.innerHTML = COPY_ICON_SVG;
     btn.addEventListener("click", () => {
       const raw = (codeEl.textContent || "").trim();
       if (!raw || !navigator.clipboard) {
+        flashCopied(btn, false);
         return;
       }
       navigator.clipboard
         .writeText(raw)
-        .then(() => flashCopied(btn, defaultLabel))
-        .catch(() => {});
+        .then(() => flashCopied(btn, true))
+        .catch(() => flashCopied(btn, false));
     });
     container.appendChild(btn);
   }

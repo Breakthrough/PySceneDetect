@@ -846,6 +846,7 @@ def run_checks(
           const hPy = Math.round(card.getBoundingClientRect().height);
           const pyHit = hitOk(document.getElementById('install-tab-uv'))
             && hitOk(document.getElementById('hero-tab-cli'))
+            && hitOk(document.getElementById('hero-tab-api'))
             && hitOk(document.querySelector('#install-panel-pip .copy-inline-btn'));
           win.click();
           const hWin = Math.round(card.getBoundingClientRect().height);
@@ -861,7 +862,7 @@ def run_checks(
           const copyBtns = document.querySelectorAll('.platform-card .copy-code-btn').length;
           const sameHeight = Math.abs(hPy - hWin) <= 1 && Math.abs(hPy - hDoc) <= 1;
           const noOverflow = document.documentElement.scrollWidth <= window.innerWidth + 1;
-          return pyHit && wOk && dOk && copyBtns === 4 && sameHeight && noOverflow;
+          return pyHit && wOk && dOk && copyBtns === 6 && sameHeight && noOverflow;
         })()""",
     )
     if not platform_tabs_ok:
@@ -873,9 +874,14 @@ def run_checks(
           const pip = document.getElementById('install-tab-pip');
           const uv = document.getElementById('install-tab-uv');
           const pipx = document.getElementById('install-tab-pipx');
-          const api = document.getElementById('hero-tab-api');
           const cli = document.getElementById('hero-tab-cli');
+          const api = document.getElementById('hero-tab-api');
           if (!pip || !uv || !pipx || !api || !cli) return false;
+          const defaultCliOk = cli.nextElementSibling === api
+            && cli.getAttribute('aria-selected') === 'true'
+            && !document.getElementById('install-panel-pip').hidden
+            && !document.getElementById('hero-panel-cli').hidden
+            && Boolean(document.getElementById('hero-panel-api').hidden);
           uv.click();
           const uOk = !document.getElementById('install-panel-uv').hidden
             && !document.getElementById('hero-panel-cli').hidden;
@@ -883,14 +889,18 @@ def run_checks(
           const pOk = !document.getElementById('install-panel-pipx').hidden
             && !document.getElementById('hero-panel-cli').hidden;
           pip.click();
-          const pipOk = !document.getElementById('install-panel-pip').hidden
-            && !document.getElementById('hero-panel-api').hidden;
-          cli.click();
-          const manualCliOk = !document.getElementById('hero-panel-cli').hidden
-            && !document.getElementById('install-panel-pip').hidden;
+          const pipStayCliOk = !document.getElementById('install-panel-pip').hidden
+            && !document.getElementById('hero-panel-cli').hidden;
           api.click();
+          const manualApiOk = !document.getElementById('hero-panel-api').hidden
+            && !document.getElementById('install-panel-pip').hidden;
+          uv.click();
+          const uvSyncCliOk = !document.getElementById('install-panel-uv').hidden
+            && !document.getElementById('hero-panel-cli').hidden;
+          pip.click();
           const noOverflow = document.documentElement.scrollWidth <= window.innerWidth + 1;
-          return uOk && pOk && pipOk && manualCliOk && noOverflow;
+          return defaultCliOk && uOk && pOk && pipStayCliOk && manualApiOk
+            && uvSyncCliOk && noOverflow;
         })()""",
     )
     if not python_subtabs_ok:

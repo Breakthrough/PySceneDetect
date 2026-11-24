@@ -79,8 +79,8 @@ div.body div.surfaces div.surface p.rubric {
     font-family: var(--psd-font-heading);
     font-size: 1.12rem;
     font-weight: 700;
-    margin: 0 0 0.65rem 0;
-    padding-bottom: 0.4rem;
+    margin: 0 0 0.7rem 0;
+    padding-bottom: 0.45rem;
     border-bottom: 1px solid var(--psd-border);
     color: var(--psd-fg);
 }
@@ -90,33 +90,51 @@ div.body div.surfaces ul {
     padding: 0;
 }
 div.body div.surfaces div.surface > ul > li + li {
-    margin-block-start: 0.35rem;
+    margin-block-start: 0.42rem;
 }
 div.body div.surfaces div.surface li > ul {
     list-style: none;
-    margin: 0.2rem 0 0.45rem 0.3rem;
+    margin: 0.22rem 0 0.5rem 0.25rem;
     padding-inline-start: 0.8rem;
     border-inline-start: 1px solid var(--psd-border);
 }
+div.body div.surfaces div.surface li:has(> p > strong:only-child) > ul {
+    margin: 0.14rem 0 0.48rem 0;
+    padding-inline-start: 0;
+    border-inline-start: none;
+}
 div.body div.surfaces li + li {
-    margin-block-start: 0.2rem;
+    margin-block-start: 0.16rem;
+}
+div.body div.surfaces li:has(> p > strong:only-child) + li:has(> p > strong:only-child) {
+    margin-block-start: 0.45rem;
 }
 div.body div.surfaces li p {
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.48;
+}
+div.body div.surfaces div.surface a {
+    text-decoration: none;
+}
+div.body div.surfaces div.surface a:hover,
+div.body div.surfaces div.surface a:focus-visible {
+    text-decoration: underline;
+    text-decoration-color: var(--psd-brand);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.2em;
 }
 div.body div.surfaces div.surface > ul > li > p > a {
-    font-weight: 500;
+    font-weight: 600;
 }
 div.body div.surfaces li > p > strong:only-child {
     display: inline-block;
     font-family: var(--psd-font-sans);
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.045em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--psd-muted);
-    margin-block: 0.18rem 0.04rem;
+    margin-block: 0.22rem 0.06rem;
 }
 div.surfaces li li a {
     white-space: nowrap;
@@ -835,6 +853,39 @@ div.body div.admonition code.xref {
     text-decoration: underline;
     text-decoration-thickness: 1.5px;
     text-underline-offset: 0.18em;
+}
+
+/* Reference TOC cards: keep monospace links evenly spaced and clean highlight on hover/focus. */
+div.body div.surfaces div.surface a :is(code, tt, code.xref),
+div.body div.surfaces div.surface a[href*="#command-"] > span.std-ref {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.28rem;
+    padding: 0.05rem 0.34rem;
+    margin-inline-start: -0.34rem;
+    line-height: 1.38;
+}
+div.body div.surfaces div.surface > ul > li > p > a[href*="#command-"] > span.std-ref {
+    font-weight: 600;
+    padding-inline: 0.18rem;
+    margin-inline-start: -0.18rem;
+}
+div.body div.surfaces div.surface a:is(:hover, :focus-visible) {
+    text-decoration: none;
+}
+div.body div.surfaces div.surface a:not(:has(code, tt, code.xref, span.std-ref)):is(:hover, :focus-visible),
+div.body div.surfaces div.surface a[href*="#cli-"]:is(:hover, :focus-visible) {
+    text-decoration: underline;
+    text-decoration-color: var(--psd-brand);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.2em;
+}
+div.body div.surfaces div.surface a:is(:hover, :focus-visible) :is(code, tt, code.xref),
+div.body div.surfaces div.surface a[href*="#command-"]:is(:hover, :focus-visible) > span.std-ref {
+    background: color-mix(in oklab, var(--psd-brand) 12%, var(--psd-bg));
+    border-color: color-mix(in oklab, var(--psd-brand) 28%, var(--psd-border));
+    text-decoration: none;
 }
 div.body pre code {
     background: transparent;

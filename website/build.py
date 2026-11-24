@@ -225,44 +225,60 @@ LEGACY_REDIRECTS: dict[str, tuple[str, str]] = {
     "supporting": ("/contributing/#project-support-and-credits", "Contributing & Support"),
 }
 
-HERO_SNIPPETS: list[tuple[str, str, str, str, str]] = [
-    (
-        "python",
-        "Python API",
-        "AdaptiveDetector",
-        "python",
-        (
-            "from scenedetect import (\n"
-            "    detect, AdaptiveDetector, split_video_ffmpeg,\n"
-            ")\n\n"
-            "# Find scene cuts and split the video with ffmpeg\n"
-            'scenes = detect("goldeneye.mp4", AdaptiveDetector())\n'
-            'split_video_ffmpeg("goldeneye.mp4", scenes)\n'
-        ),
-    ),
+HERO_SNIPPETS: list[tuple[str, str, str, str, list[tuple[str, str, str]]]] = [
     (
         "cli",
         "Command Line",
         "scenedetect",
         "bash",
-        (
-            "# Split a video at each detected cut\n"
-            "scenedetect -i goldeneye.mp4 split-video\n\n"
-            "# Export a CSV scene list, still frames, and an HTML report\n"
-            "scenedetect -i goldeneye.mp4 list-scenes save-images save-html\n"
-        ),
+        [
+            (
+                "Split a video at each detected cut",
+                "Copy split-video command",
+                "scenedetect -i goldeneye.mp4 split-video",
+            ),
+            (
+                "Export a CSV scene list, still frames, and an HTML report",
+                "Copy export command",
+                "scenedetect -i goldeneye.mp4 list-scenes save-images save-html",
+            ),
+        ],
+    ),
+    (
+        "python",
+        "Python API",
+        "AdaptiveDetector",
+        "python",
+        [
+            (
+                "Find scene cuts and split the video with ffmpeg",
+                "Copy Python API example",
+                (
+                    "from scenedetect import (\n"
+                    "    detect, AdaptiveDetector, split_video_ffmpeg,\n"
+                    ")\n\n"
+                    'scenes = detect("goldeneye.mp4", AdaptiveDetector())\n'
+                    'split_video_ffmpeg("goldeneye.mp4", scenes)\n'
+                ),
+            ),
+        ],
     ),
     (
         "docker",
         "Docker",
         "ghcr.io",
         "bash",
-        (
-            "# CLI, ffmpeg, mkvmerge, PyAV, and MoviePy in one container\n"
-            'docker run --rm -v "$(pwd):/files" \\\n'
-            "    ghcr.io/breakthrough/pyscenedetect \\\n"
-            "    -i /files/goldeneye.mp4 split-video -o /files\n"
-        ),
+        [
+            (
+                "",
+                "Copy docker run command",
+                (
+                    'docker run --rm -v "$(pwd):/files" \\\n'
+                    "    ghcr.io/breakthrough/pyscenedetect \\\n"
+                    "    -i /files/goldeneye.mp4 split-video -o /files\n"
+                ),
+            ),
+        ],
     ),
 ]
 
@@ -600,18 +616,26 @@ def extract_search_entries(
     return entries
 
 
-def render_hero_tabs() -> list[dict[str, str]]:
-    """Pre-highlight the 3 interactive quickstart code tabs with Pygments."""
+def render_hero_tabs() -> list[dict[str, Any]]:
+    """Pre-highlight the interactive quickstart code examples with Pygments."""
     formatter = HtmlFormatter(nowrap=True)
-    tabs: list[dict[str, str]] = []
-    for tab_id, label, hint, lang, code in HERO_SNIPPETS:
-        highlighted = highlight(code, get_lexer_by_name(lang), formatter).rstrip("\n")
+    tabs: list[dict[str, Any]] = []
+    for tab_id, label, hint, lang, items in HERO_SNIPPETS:
+        lexer = get_lexer_by_name(lang)
+        rendered_items = [
+            {
+                "caption": caption,
+                "copy_label": copy_label,
+                "html": highlight(code, lexer, formatter).rstrip("\n"),
+            }
+            for caption, copy_label, code in items
+        ]
         tabs.append(
             {
                 "id": tab_id,
                 "label": label,
                 "hint": hint,
-                "html": highlighted,
+                "examples": rendered_items,
             }
         )
     return tabs

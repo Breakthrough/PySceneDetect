@@ -236,7 +236,6 @@
     <nav class="psd-topbar-nav" aria-label="Documentation navigation">
       <a class="psd-backlink" href="https://www.scenedetect.com/">&larr; scenedetect.com</a>
       <span class="psd-sep" aria-hidden="true">/</span>
-      <a href="{{ '#' if builder == 'singlehtml' else pathto(root_doc) }}"{% if pagename == root_doc %} class="current" aria-current="page"{% endif %}>Reference Manual</a>
       <a href="{{ '#document-cli' if builder == 'singlehtml' else pathto('cli') }}"{% if sidebar_section == 'clitoc' %} class="current"{% if pagename == 'cli' %} aria-current="page"{% endif %}{% endif %}>CLI Reference</a>
       <a href="{{ '#document-api' if builder == 'singlehtml' else pathto('api') }}"{% if sidebar_section == 'apitoc' %} class="current"{% if pagename == 'api' %} aria-current="page"{% endif %}{% endif %}>Python API</a>
       <a href="{{ '#document-examples' if builder == 'singlehtml' else pathto('examples') }}"{% if pagename == 'examples' %} class="current" aria-current="page"{% endif %}>Examples</a>

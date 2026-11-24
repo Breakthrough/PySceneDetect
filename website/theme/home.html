@@ -82,7 +82,6 @@
                       id="install-tab-pip"
                       aria-selected="true"
                       tabindex="0"
-                      data-sync-tab="hero-tab-api"
                     >pip</button>
                     <button
                       type="button"
@@ -182,40 +181,54 @@
                     type="button"
                     role="tab"
                     class="pill-tab pill-tab-sans"
-                    id="hero-tab-api"
+                    id="hero-tab-cli"
                     aria-selected="true"
                     tabindex="0"
-                  >Python API</button>
+                  >Command Line</button>
                   <button
                     type="button"
                     role="tab"
                     class="pill-tab pill-tab-sans"
-                    id="hero-tab-cli"
+                    id="hero-tab-api"
                     aria-selected="false"
                     tabindex="-1"
-                  >Command Line</button>
+                  >Python API</button>
                 </div>
               </div>
               <div class="code-panels">
                 <div
                   role="tabpanel"
                   class="code-panel"
-                  id="hero-panel-api"
-                  aria-labelledby="hero-tab-api"
+                  id="hero-panel-cli"
+                  aria-labelledby="hero-tab-cli"
                 >
-                  <div class="codehilite">
-                    <pre class="code-body" tabindex="0"><code>{{ hero_snippets.python.html | safe }}</code></pre>
+                  <div class="hero-examples">
+                    {% for item in hero_snippets.cli.examples %}
+                    <div class="hero-example-item">
+                      {% if item.caption %}<p class="hero-example-caption">{{ item.caption }}</p>{% endif %}
+                      <div class="codehilite" data-copy-label="{{ item.copy_label }}">
+                        <pre class="code-body" tabindex="0"><code>{{ item.html | safe }}</code></pre>
+                      </div>
+                    </div>
+                    {% endfor %}
                   </div>
                 </div>
                 <div
                   role="tabpanel"
                   class="code-panel"
-                  id="hero-panel-cli"
-                  aria-labelledby="hero-tab-cli"
+                  id="hero-panel-api"
+                  aria-labelledby="hero-tab-api"
                   hidden="until-found"
                 >
-                  <div class="codehilite">
-                    <pre class="code-body" tabindex="0"><code>{{ hero_snippets.cli.html | safe }}</code></pre>
+                  <div class="hero-examples">
+                    {% for item in hero_snippets.python.examples %}
+                    <div class="hero-example-item">
+                      {% if item.caption %}<p class="hero-example-caption">{{ item.caption }}</p>{% endif %}
+                      <div class="codehilite" data-copy-label="{{ item.copy_label }}">
+                        <pre class="code-body" tabindex="0"><code>{{ item.html | safe }}</code></pre>
+                      </div>
+                    </div>
+                    {% endfor %}
                   </div>
                 </div>
               </div>
@@ -258,8 +271,15 @@
                 <span class="platform-section-label">Command Line Example</span>
                 <span class="code-hint" aria-hidden="true">scenedetect.exe</span>
               </div>
-              <div class="codehilite">
-                <pre class="code-body" tabindex="0"><code>{{ hero_snippets.cli.html | safe }}</code></pre>
+              <div class="hero-examples">
+                {% for item in hero_snippets.cli.examples %}
+                <div class="hero-example-item">
+                  {% if item.caption %}<p class="hero-example-caption">{{ item.caption }}</p>{% endif %}
+                  <div class="codehilite" data-copy-label="{{ item.copy_label }}">
+                    <pre class="code-body" tabindex="0"><code>{{ item.html | safe }}</code></pre>
+                  </div>
+                </div>
+                {% endfor %}
               </div>
               <div class="platform-card-footer" data-equalize-band="footer">
                 <span>Signed via SignPath Foundation.</span>
@@ -301,8 +321,15 @@
                 <span class="platform-section-label">Run Container</span>
                 <span class="code-hint" aria-hidden="true">Docker / Podman</span>
               </div>
-              <div class="codehilite">
-                <pre class="code-body" tabindex="0"><code>{{ hero_snippets.docker.html | safe }}</code></pre>
+              <div class="hero-examples">
+                {% for item in hero_snippets.docker.examples %}
+                <div class="hero-example-item">
+                  {% if item.caption %}<p class="hero-example-caption">{{ item.caption }}</p>{% endif %}
+                  <div class="codehilite" data-copy-label="{{ item.copy_label }}">
+                    <pre class="code-body" tabindex="0"><code>{{ item.html | safe }}</code></pre>
+                  </div>
+                </div>
+                {% endfor %}
               </div>
               <div class="platform-card-footer" data-equalize-band="footer">
                 <span>Includes CLI, <code>ffmpeg</code>, <code>mkvmerge</code>, PyAV &amp; MoviePy.</span>
