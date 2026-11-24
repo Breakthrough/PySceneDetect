@@ -1,25 +1,50 @@
 # Projects & Research
 
-This page lists open-source projects, research papers, and similar tools related to PySceneDetect. To suggest an addition, [open an issue on GitHub](https://github.com/Breakthrough/PySceneDetect/issues/new/choose).
+This page highlights industry and cloud adoption alongside open-source projects, research papers, and similar tools related to PySceneDetect. To suggest an addition, [open an issue on GitHub](https://github.com/Breakthrough/PySceneDetect/issues/new/choose).
 
-## Projects Using PySceneDetect
+## Projects Utilizing PySceneDetect
 
-The open-source projects below use PySceneDetect in their own code. They are listed for reference only: PySceneDetect does not maintain or endorse them, and each project has its own license.
+The projects listed below are publicly known to use PySceneDetect in their code or implementation and are listed for *reference only*. **PySceneDetect neither maintains nor endorses any projects and links listed on this page.**
 
-### Datasets and model training
+### Industry Adoption
+
+| Organization | Project | Description |
+| --- | --- | --- |
+| NVIDIA | [Semantic Split C-RADIO NIM](https://catalog.ngc.nvidia.com/orgs/nim/nvidia/containers/nv-semantic-split-cradio/-) | GPU-accelerated PySceneDetect performs initial scene splitting before C-RADIO semantic stitching and filtering. |
+| NVIDIA (NVlabs) | [ShotBench](https://github.com/NVlabs/ShotBench) | Cosmos shot-detection evaluation suite wrapping `ContentDetector`. |
+| Amazon Web Services | [Bedrock Video Understanding](https://github.com/aws-samples/sample-bedrock-video-understanding) | AWS Lambda layer running `ContentDetector` to segment S3 videos for Amazon Bedrock multimodal analysis ([AWS ML Blog](https://aws.amazon.com/blogs/machine-learning/unlocking-video-insights-at-scale-with-amazon-bedrock-multimodal-models/)). |
+| Google Cloud | [Multimodal Data Curation](https://github.com/GoogleCloudPlatform/generative-ai/tree/main/gemini/use-cases/multimodal-data-curation) | Uses `SceneManager` and `ContentDetector` with Cloud Storage, Dataflow, and Vertex AI Gemini for video dataset curation. |
+| Microsoft | [MMCTAgent](https://github.com/microsoft/MMCTAgent) | Video-reasoning agent framework using `ContentDetector` and `AdaptiveDetector` in its scene chunking pipeline. |
+| Microsoft Research | [Magma](https://github.com/microsoft/Magma) | Video preprocessing pipeline running `ContentDetector` to split training videos into single-scene clips. |
+| Microsoft Azure | [Real-Time Video Generation](https://github.com/Azure/realtimevideogen) | Serving stack using `SceneManager` and `ContentDetector` across its `StreamEdit`, `StreamDub`, and `StreamShort` apps. |
+| Oracle Cloud Infrastructure | [Multimodal Data Processing with NVIDIA Nemotron](https://blogs.oracle.com/ai-and-datascience/multimodal-data-processing-nvidia-nemotron-model) | Scales PySceneDetect via Ray actors with FFmpeg proxies ahead of NVIDIA Nemotron Nano 2 VL inference on H100 GPUs. |
+| Backblaze | [B2 Video Scene Search](https://github.com/backblaze-b2-samples/clip-video-scene-search) | Reference Backblaze B2 sample app using `ContentDetector` to segment videos for semantic scene search. |
+| Elastic & Jina AI | [AI Video Search with Elasticsearch](https://www.elastic.co/search-labs/blog/ai-video-search-jina-embeddings) | Elasticsearch Labs guide using PySceneDetect for scene boundary detection before FFmpeg chunking and Jina multimodal vector indexing. |
+| Hugging Face | [video-dataset-scripts](https://github.com/huggingface/video-dataset-scripts) | Video fine-tuning toolkit providing `scene_split.py` with `ContentDetector` and `split_video_ffmpeg`. |
+| Hugging Face | [FineVideo](https://github.com/huggingface/fineVideo) | Dataset alignment pipeline using `SceneManager` and `ContentDetector` to align scene boundaries and frame rates. |
+| Sony AI | [HumanGif](https://github.com/sony/humangif) | Segments raw training videos into duration-bounded single-scene clips using `AdaptiveDetector`. |
+| Alibaba (ModelScope) | [ClearerVoice-Studio](https://github.com/modelscope/ClearerVoice-Studio) | Splits input videos into shots in `video_process.py` for audio-visual speaker separation. |
+| Alibaba (Tongyi Lab) | [Tongyi DeepResearch](https://github.com/Alibaba-NLP/DeepResearch) | Built-in `video_analysis.py` agent tool using `ContentDetector` for scene-aware keyframe extraction. |
+| ByteDance | [LatentSync](https://github.com/bytedance/LatentSync) | Preprocessing pipeline running the `scenedetect` CLI (`detect-adaptive` and `split-video`) to split training videos into shots. |
+| ByteDance (Seed) | [VeOmni](https://github.com/ByteDance-Seed/VeOmni) | Stage-1 multimodal training preprocessor splitting raw videos into scene clips with PySceneDetect and FFmpeg. |
+| Tencent (Hunyuan) | [OmniCapBench](https://github.com/Tencent-Hunyuan/OmniCapBench) | Audio-visual captioning evaluation pipeline running `ContentDetector` for video segmentation. |
+| Tencent (ARC Lab) | [VerseCrafter](https://github.com/TencentARC/VerseCrafter) | 4D video world-model dataset pipeline running `ContentDetector` in `1_run_scenedetect.py` to export scene lists. |
+| Zhipu AI | [ZCode Plugins (`video-agent-kit`)](https://github.com/zai-org/zcode-plugins/blob/main/plugins/video-agent-kit/mcp/ve_tools/shots.py) | MCP server tool (`ve_tools/shots.py`) running `ContentDetector` to generate `shots.json` shot timeline caches. |
+
+### Video Generation, Datasets & Model Training
 
 - [LTX-2](https://github.com/Lightricks/LTX-2): cuts training videos into scenes with `split_scenes.py`.
 - [Data-Juicer](https://github.com/datajuicer/data-juicer): splits videos at scene changes with its `video_split_by_scene_mapper` operator.
 - [OneTrainer](https://github.com/Nerogar/OneTrainer): finds cuts with `AdaptiveDetector` when extracting training clips.
 - [VideoX-Fun](https://github.com/aigc-apps/VideoX-Fun): detects cuts in its video captioning pipeline.
-
-### Video generation
-
 - [ViMax](https://github.com/HKUDS/ViMax): splits generated transition videos into shots with `split_video_ffmpeg`.
 - [InfiniteTalk](https://github.com/MeiGen-AI/InfiniteTalk): detects shots in input videos by combining the content, adaptive, and threshold detectors.
 
-### Agents, RAG, and data tools
+### Agents, RAG, Datasets, Apps & Tools
 
+- [Moondream](https://github.com/m87-labs/moondream): detects scenes before running its content moderation model.
+- [REAL Video Enhancer](https://github.com/TNTwise/REAL-Video-Enhancer): includes `ContentDetector` to catch scene changes during rendering.
+- [movie-narrator](https://github.com/zcbacxc/movie-narrator): detects scenes as part of its movie recap pipeline.
 - [ECC](https://github.com/affaan-m/ECC): measures the cut cadence of a reference video by sweeping `ContentDetector` thresholds.
 - [RAG-Anything](https://github.com/HKUDS/RAG-Anything): splits videos into scenes before indexing them.
 - [CAMEL](https://github.com/camel-ai/camel): extracts keyframes at scene changes in `VideoAnalysisToolkit`.
@@ -28,11 +53,6 @@ The open-source projects below use PySceneDetect in their own code. They are lis
 - [Pixeltable](https://github.com/pixeltable/pixeltable): provides `scene_detect` video functions with an example notebook.
 - [MassGen](https://github.com/massgen/MassGen): extracts frames from each scene in its video extraction tool.
 
-### Applications and tools
-
-- [Moondream](https://github.com/m87-labs/moondream): detects scenes before running its content moderation model.
-- [REAL Video Enhancer](https://github.com/TNTwise/REAL-Video-Enhancer): includes `ContentDetector` to catch scene changes during rendering.
-- [movie-narrator](https://github.com/zcbacxc/movie-narrator): detects scenes as part of its movie recap pipeline.
 
 ## Research and Literature
 

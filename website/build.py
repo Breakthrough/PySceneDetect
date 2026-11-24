@@ -219,7 +219,7 @@ KNOWN_SLUGS: set[str] = {page.slug for page in PAGES}
 
 # Legacy URLs merged into consolidated pages -> (target path, link label).
 LEGACY_REDIRECTS: dict[str, tuple[str, str]] = {
-    "gallery": ("/projects/#projects-using-pyscenedetect", "Projects & Research"),
+    "gallery": ("/projects/#projects-utilizing-pyscenedetect", "Projects & Research"),
     "literature": ("/projects/#research-and-literature", "Projects & Research"),
     "similar": ("/projects/#similar-programs", "Projects & Research"),
     "supporting": ("/contributing/#project-support-and-credits", "Contributing & Support"),
