@@ -24,8 +24,10 @@ import pytest
 
 from scenedetect import (
     ContentDetector,
-    FrameTimecode,
+    FrameNumbering,
+    FramePosition,
     SceneManager,
+    Timecode,
     VideoStreamCv2,
     open_video,
     save_images,
@@ -56,11 +58,7 @@ def test_split_video_ffmpeg_default(tmp_path, test_movie_clip, caplog):
     caplog.set_level(logging.INFO, logger="pyscenedetect")
     video = open_video(test_movie_clip)
     # Extract three hard-coded scenes for testing, each 30 frames.
-    scenes = [
-        (video.base_timecode + 30, video.base_timecode + 60),
-        (video.base_timecode + 60, video.base_timecode + 90),
-        (video.base_timecode + 90, video.base_timecode + 120),
-    ]
+    scenes = _fake_scenes(video.frame_rate, [(30, 60), (60, 90), (90, 120)])
     assert (
         split_video_ffmpeg(test_movie_clip, scenes, output_dir=tmp_path, arg_override=FFMPEG_ARGS)
         == 0
@@ -77,11 +75,7 @@ def test_split_video_ffmpeg_default(tmp_path, test_movie_clip, caplog):
 def test_split_video_ffmpeg_formatter(tmp_path, test_movie_clip):
     video = open_video(test_movie_clip)
     # Extract three hard-coded scenes for testing, each 30 frames.
-    scenes = [
-        (video.base_timecode + 30, video.base_timecode + 60),
-        (video.base_timecode + 60, video.base_timecode + 90),
-        (video.base_timecode + 90, video.base_timecode + 120),
-    ]
+    scenes = _fake_scenes(video.frame_rate, [(30, 60), (60, 90), (90, 120)])
 
     # Custom filename formatter:
     def name_formatter(video: VideoMetadata, scene: SceneMetadata):
@@ -116,11 +110,7 @@ def test_save_images(test_video_file, tmp_path: Path):
         "scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER.$FRAME_NUMBER.$TIMESTAMP_MS.$TIMECODE"
     )
 
-    video_fps = video.frame_rate
-    scene_list = [
-        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
-        for start, end in [(0, 100), (200, 300), (300, 400)]
-    ]
+    scene_list = _fake_scenes(video.frame_rate, [(0, 100), (200, 300), (300, 400)])
 
     image_filenames = save_images(
         scene_list=scene_list,
@@ -153,11 +143,7 @@ def test_save_images_singlethreaded(test_video_file, tmp_path: Path):
         "scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER.$FRAME_NUMBER.$TIMESTAMP_MS.$TIMECODE"
     )
 
-    video_fps = video.frame_rate
-    scene_list = [
-        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
-        for start, end in [(0, 100), (200, 300), (300, 400)]
-    ]
+    scene_list = _fake_scenes(video.frame_rate, [(0, 100), (200, 300), (300, 400)])
 
     image_filenames = save_images(
         scene_list=scene_list,
@@ -185,11 +171,7 @@ def test_save_images_frame_margin_accepts_time_values(
 ):
     """save_images() should accept frame counts (int), seconds (float), and timecode strings."""
     video = VideoStreamCv2(test_video_file)
-    video_fps = video.frame_rate
-    scene_list = [
-        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
-        for start, end in [(0, 100), (200, 300)]
-    ]
+    scene_list = _fake_scenes(video.frame_rate, [(0, 100), (200, 300)])
     image_filenames = save_images(
         scene_list=scene_list,
         output_dir=tmp_path,
@@ -210,12 +192,8 @@ def test_save_images_frame_margin_stays_in_scene(
 ):
     """Scene end times are exclusive, so `frame_margin` must be applied from the last frame of the
     scene rather than from the first frame of the next one."""
-    video = VideoStreamCv2(test_video_file)
-    video_fps = video.frame_rate
-    scene_list = [
-        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
-        for start, end in [(0, 100), (100, 200)]
-    ]
+    video = VideoStreamCv2(test_video_file, frame_numbering=FrameNumbering.SOURCE)
+    scene_list = _fake_scenes(video.frame_rate, [(0, 100), (100, 200)])
     image_filenames = save_images(
         scene_list=scene_list,
         output_dir=tmp_path,
@@ -230,8 +208,8 @@ def test_save_images_frame_margin_stays_in_scene(
 
 def test_save_images_single_frame_scene_stays_in_scene(test_video_file, tmp_path: Path):
     """The image for a one-frame scene must be that frame, not the first frame of the next scene."""
-    video = VideoStreamCv2(test_video_file)
-    scene_list = [(FrameTimecode(11, video.frame_rate), FrameTimecode(12, video.frame_rate))]
+    video = VideoStreamCv2(test_video_file, frame_numbering=FrameNumbering.SOURCE)
+    scene_list = _fake_scenes(video.frame_rate, [(11, 12)])
     image_filenames = save_images(
         scene_list=scene_list,
         output_dir=tmp_path,
@@ -245,9 +223,15 @@ def test_save_images_single_frame_scene_stays_in_scene(test_video_file, tmp_path
 def test_save_images_sub_frame_scene_stays_in_scene(test_video_file, tmp_path: Path):
     """A scene shorter than one frame (e.g. with VFR timestamps) must not yield an image from
     before the scene starts."""
-    video = VideoStreamCv2(test_video_file)
-    start = FrameTimecode(0.5, video.frame_rate)
-    end = FrameTimecode(0.51, video.frame_rate)
+    video = VideoStreamCv2(test_video_file, frame_numbering=FrameNumbering.SOURCE)
+    start = FramePosition(
+        timecode=Timecode(pts=50, time_base=Fraction(1, 100)),
+        frame_number=15,
+    )
+    end = FramePosition(
+        timecode=Timecode(pts=51, time_base=Fraction(1, 100)),
+        frame_number=16,
+    )
     image_filenames = save_images(
         scene_list=[(start, end)],
         output_dir=tmp_path,
@@ -255,12 +239,12 @@ def test_save_images_sub_frame_scene_stays_in_scene(test_video_file, tmp_path: P
         num_images=1,
         image_name_template="$SCENE_NUMBER.$FRAME_NUMBER",
     )
-    assert image_filenames == {0: [f"001.{start.frame_num}.jpg"]}
+    assert image_filenames == {0: [f"001.{start.frame_number}.jpg"]}
 
 
 def test_save_images_rejects_negative_margin(test_video_file, tmp_path: Path):
     video = VideoStreamCv2(test_video_file)
-    scene_list = [(FrameTimecode(0, video.frame_rate), FrameTimecode(10, video.frame_rate))]
+    scene_list = _fake_scenes(video.frame_rate, [(0, 10)])
     with pytest.raises(ValueError):
         save_images(scene_list=scene_list, output_dir=tmp_path, video=video, frame_margin=-1)
 
@@ -272,11 +256,7 @@ def test_save_images_zero_width_scene(test_video_file, tmp_path: Path):
     image_name_glob = "scenedetect.tempfile.*.jpg"
     image_name_template = "scenedetect.tempfile.$SCENE_NUMBER.$IMAGE_NUMBER"
 
-    video_fps = video.frame_rate
-    scene_list = [
-        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
-        for start, end in [(0, 0), (1, 1), (2, 3)]
-    ]
+    scene_list = _fake_scenes(video.frame_rate, [(0, 0), (1, 1), (2, 3)])
     NUM_IMAGES = 10
     image_filenames = save_images(
         scene_list=scene_list,
@@ -315,11 +295,7 @@ def test_save_images_interval(
 ):
     """With `interval`, the number of images saved for each scene depends on its length."""
     video = VideoStreamCv2(test_video_file)
-    video_fps = video.frame_rate
-    scene_list = [
-        (FrameTimecode(start, video_fps), FrameTimecode(end, video_fps))
-        for start, end in [(0, 100), (200, 210), (300, 360)]
-    ]
+    scene_list = _fake_scenes(video.frame_rate, [(0, 100), (200, 210), (300, 360)])
     image_filenames = save_images(
         scene_list=scene_list,
         output_dir=tmp_path,
@@ -359,7 +335,7 @@ def test_save_images_interval_rejects_invalid_arguments(
     test_video_file, tmp_path: Path, kwargs, error
 ):
     video = VideoStreamCv2(test_video_file)
-    scene_list = [(FrameTimecode(0, video.frame_rate), FrameTimecode(10, video.frame_rate))]
+    scene_list = _fake_scenes(video.frame_rate, [(0, 10)])
     with pytest.raises(ValueError, match=error):
         save_images(scene_list=scene_list, output_dir=tmp_path, video=video, **kwargs)
 
@@ -377,7 +353,13 @@ _FPS_CFR = Fraction(30, 1)
 
 
 def _fake_scenes(fps: Fraction, frames):
-    return [(FrameTimecode(start, fps=fps), FrameTimecode(end, fps=fps)) for start, end in frames]
+    return [
+        (
+            FramePosition(Timecode(pts=start, time_base=1 / fps), frame_number=start),
+            FramePosition(Timecode(pts=end, time_base=1 / fps), frame_number=end),
+        )
+        for start, end in frames
+    ]
 
 
 _OUTPUT_TARGET_KINDS = ("file_handle", "str", "path", "bytes")
@@ -450,7 +432,7 @@ def test_write_scene_list_output_target(tmp_path: Path, target_kind: str):
 
 def test_write_scene_list_rejects_invalid_output_target():
     """The shared output decorator rejects objects that are neither paths nor writable files."""
-    scenes = [(FrameTimecode(0, 24.0), FrameTimecode(24, 24.0))]
+    scenes = _fake_scenes(Fraction(24, 1), [(0, 24)])
     with pytest.raises(TypeError, match="output_csv_file"):
         write_scene_list(ty.cast(ty.Any, object()), scenes)
 
@@ -469,7 +451,7 @@ def test_write_scene_list_edl(tmp_path: Path):
     """EDL output has title header, FCM line, and one event per scene in CMX 3600 format."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
     output_path = tmp_path / "scenes.edl"
-    write_scene_list_edl(output_path, scenes, title="my-clip", reel="AX")
+    write_scene_list_edl(output_path, scenes, title="my-clip", reel="AX", frame_rate=_FPS_CFR)
 
     content = output_path.read_text()
     assert "TITLE: my-clip" in content
@@ -483,7 +465,7 @@ def test_write_scene_list_edl_output_target(tmp_path: Path, target_kind: str):
     """EDL output accepts a file handle, string, Path, or bytes path."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
     output_target, read_output = _make_output_target(tmp_path, target_kind, "scenes.edl")
-    write_scene_list_edl(output_target, scenes, title="Tést")
+    write_scene_list_edl(output_target, scenes, title="Tést", frame_rate=_FPS_CFR)
     text = read_output()
     assert "TITLE: Tést" in text
     assert "\r\n" not in text
@@ -493,7 +475,7 @@ def test_write_scene_list_edl_with_start_timecode_smpte(tmp_path: Path):
     """`start_timecode` shifts every event by the supplied SMPTE offset (source + record)."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
     output_path = tmp_path / "scenes.edl"
-    write_scene_list_edl(output_path, scenes, start_timecode="01:00:00:00")
+    write_scene_list_edl(output_path, scenes, start_timecode="01:00:00:00", frame_rate=_FPS_CFR)
 
     content = output_path.read_text()
     assert "001  AX V     C        01:00:00:00 01:00:01:00 01:00:00:00 01:00:01:00" in content
@@ -505,8 +487,8 @@ def test_write_scene_list_edl_with_start_timecode_digits(tmp_path: Path):
     scenes = _fake_scenes(_FPS_CFR, [(0, 30), (30, 60)])
     smpte_path = tmp_path / "smpte.edl"
     digits_path = tmp_path / "digits.edl"
-    write_scene_list_edl(smpte_path, scenes, start_timecode="01:00:00:00")
-    write_scene_list_edl(digits_path, scenes, start_timecode="01000000")
+    write_scene_list_edl(smpte_path, scenes, start_timecode="01:00:00:00", frame_rate=_FPS_CFR)
+    write_scene_list_edl(digits_path, scenes, start_timecode="01000000", frame_rate=_FPS_CFR)
 
     assert smpte_path.read_text() == digits_path.read_text()
 
@@ -515,7 +497,7 @@ def test_write_scene_list_edl_with_start_timecode_subsecond(tmp_path: Path):
     """A sub-second frame offset (FF component) is added to every event."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
     output_path = tmp_path / "scenes.edl"
-    write_scene_list_edl(output_path, scenes, start_timecode="00:00:00:15")
+    write_scene_list_edl(output_path, scenes, start_timecode="00:00:00:15", frame_rate=_FPS_CFR)
 
     content = output_path.read_text()
     assert "001  AX V     C        00:00:00:15 00:00:01:15 00:00:00:15 00:00:01:15" in content
@@ -527,9 +509,9 @@ def test_write_scene_list_edl_default_no_offset(tmp_path: Path):
     baseline = tmp_path / "baseline.edl"
     explicit_none = tmp_path / "none.edl"
     explicit_empty = tmp_path / "empty.edl"
-    write_scene_list_edl(baseline, scenes)
-    write_scene_list_edl(explicit_none, scenes, start_timecode=None)
-    write_scene_list_edl(explicit_empty, scenes, start_timecode="   ")
+    write_scene_list_edl(baseline, scenes, frame_rate=_FPS_CFR)
+    write_scene_list_edl(explicit_none, scenes, start_timecode=None, frame_rate=_FPS_CFR)
+    write_scene_list_edl(explicit_empty, scenes, start_timecode="   ", frame_rate=_FPS_CFR)
 
     assert baseline.read_text() == explicit_none.read_text() == explicit_empty.read_text()
 
@@ -551,7 +533,7 @@ def test_write_scene_list_edl_with_start_timecode_invalid_format(tmp_path: Path,
     output_path = tmp_path / "scenes.edl"
     output_path.write_text("existing output", encoding="utf-8")
     with pytest.raises(ValueError):
-        write_scene_list_edl(output_path, scenes, start_timecode=bad_value)
+        write_scene_list_edl(output_path, scenes, start_timecode=bad_value, frame_rate=_FPS_CFR)
     assert output_path.read_text(encoding="utf-8") == "existing output"
 
 
@@ -567,7 +549,9 @@ def test_write_scene_list_edl_with_start_timecode_out_of_range(tmp_path: Path, b
     """Out-of-range SMPTE components raise ValueError."""
     scenes = _fake_scenes(_FPS_CFR, [(0, 30)])
     with pytest.raises(ValueError):
-        write_scene_list_edl(tmp_path / "scenes.edl", scenes, start_timecode=bad_value)
+        write_scene_list_edl(
+            tmp_path / "scenes.edl", scenes, start_timecode=bad_value, frame_rate=_FPS_CFR
+        )
 
 
 @pytest.mark.parametrize(
@@ -587,7 +571,7 @@ def test_write_scene_list_edl_counts_frames_at_nominal_rate(
     """Non-drop-frame timecodes count 24/30/60 frames per timecode second at NTSC rates rather
     than following wall-clock seconds, which drifts about 3.6 s/hour (#593)."""
     output_path = tmp_path / "scenes.edl"
-    write_scene_list_edl(output_path, _fake_scenes(fps, frames))
+    write_scene_list_edl(output_path, _fake_scenes(fps, frames), frame_rate=fps)
     events = [line for line in output_path.read_text().splitlines() if " AX V " in line]
     assert [line.split()[5] for line in events] == expected
 
@@ -597,7 +581,9 @@ def test_write_scene_list_edl_start_timecode_ntsc_round_trips(tmp_path: Path):
     back as `01:00:00:00` (previously `00:59:59:29`) (#593)."""
     scenes = _fake_scenes(Fraction(30000, 1001), [(0, 30)])
     output_path = tmp_path / "scenes.edl"
-    write_scene_list_edl(output_path, scenes, start_timecode="01:00:00:00")
+    write_scene_list_edl(
+        output_path, scenes, start_timecode="01:00:00:00", frame_rate=Fraction(30000, 1001)
+    )
     assert "001  AX V     C        01:00:00:00 01:00:01:00 01:00:00:00 01:00:01:00" in (
         output_path.read_text()
     )
@@ -606,16 +592,22 @@ def test_write_scene_list_edl_start_timecode_ntsc_round_trips(tmp_path: Path):
 def test_write_scene_list_edl_start_timecode_ff_bound_uses_nominal_rate():
     """At 29.97 fps the FF field runs 00-29, matching the 30 frames per NDF timecode second."""
     scenes = _fake_scenes(Fraction(30000, 1001), [(0, 30)])
-    write_scene_list_edl(StringIO(), scenes, start_timecode="00:00:00:29")
+    write_scene_list_edl(
+        StringIO(), scenes, start_timecode="00:00:00:29", frame_rate=Fraction(30000, 1001)
+    )
     with pytest.raises(ValueError, match="FF<30"):
-        write_scene_list_edl(StringIO(), scenes, start_timecode="00:00:00:30")
+        write_scene_list_edl(
+            StringIO(), scenes, start_timecode="00:00:00:30", frame_rate=Fraction(30000, 1001)
+        )
 
 
 def test_write_scene_list_edl_non_standard_rate_uses_wall_clock(tmp_path: Path):
     """Rates with no nominal frame count (here 12.5 fps) keep the wall-clock approximation."""
     scenes = _fake_scenes(Fraction(25, 2), [(0, 12), (12, 13), (13, 25)])
     output_path = tmp_path / "scenes.edl"
-    write_scene_list_edl(output_path, scenes, start_timecode="00:00:01:00")
+    write_scene_list_edl(
+        output_path, scenes, start_timecode="00:00:01:00", frame_rate=Fraction(25, 2)
+    )
     content = output_path.read_text()
     # The start timecode of one second is 12.5 frames, rounded to 12, shifting every event.
     assert "001  AX V     C        00:00:00:12 00:00:01:11 00:00:00:12 00:00:01:11" in content
@@ -873,7 +865,7 @@ def test_write_scene_list_fcp7(tmp_path: Path):
         video_path=tmp_path / "source.mp4",
         frame_rate=_FPS_NTSC,
         frame_size=(1920, 1080),
-        source_duration=FrameTimecode(240, fps=_FPS_NTSC),
+        source_duration=240 / _FPS_NTSC,
     )
 
     root = ElementTree.parse(output_path).getroot()
@@ -1051,7 +1043,7 @@ def test_write_scene_list_otio_source_duration(
     tmp_path, frame_rate, source_frame_rate, source_frames, audio
 ):
     """Available media duration uses the full source, not the selected scenes."""
-    source_duration = FrameTimecode(source_frames, fps=source_frame_rate)
+    source_duration = source_frames / source_frame_rate
     ranges = [(24, 72), (120, 180)] if source_frames else [(0, 0)]
     output_path = tmp_path / "scenes.otio"
     write_scene_list_otio(
@@ -1065,7 +1057,7 @@ def test_write_scene_list_otio_source_duration(
 
     doc = json.loads(output_path.read_text())
     fps = float(frame_rate)
-    expected_duration = round(source_duration.seconds * fps, 6)
+    expected_duration = round(source_duration * fps, 6)
     tracks = doc["tracks"]["children"]
     assert len(tracks) == (2 if audio else 1)
     for track in tracks:
