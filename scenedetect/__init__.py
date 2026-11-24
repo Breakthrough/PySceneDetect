@@ -172,6 +172,8 @@ def detect(
     end_time: TimecodeLike | None = None,
     start_in_scene: bool = False,
     backend: str = "opencv",
+    *,
+    frame_numbering: FrameNumbering = FrameNumbering.RELATIVE,
 ) -> SceneList:
     """Perform scene detection on a given video `path` using the specified `detector`.
 
@@ -187,8 +189,8 @@ def detect(
         start_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
             number of seconds ``123.45`` (`float`), a zero-based source frame ordinal ``200``
             (`int`), or a :class:`~scenedetect.common.Timecode`.
-        end_time: Exclusive ending point, in the same formats as `start_time`. With the default
-            relative numbering, integer limits count from zero after the start seek.
+        end_time: Exclusive ending point, in the same formats as `start_time`. Integer limits
+            use `frame_numbering`; timestamps remain on the source timeline.
         start_in_scene: Assume the video begins in a scene. This means that when detecting
             fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
             will contain a single scene spanning the processed range (instead of no scenes).
@@ -198,6 +200,9 @@ def detect(
             :data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the
             current system. Defaults to OpenCV; falls back to OpenCV if the requested backend
             is unavailable or fails to open the video.
+        frame_numbering: Origin for returned frame ordinals and integer end limits. RELATIVE
+            (default) restarts ordinals at 0 after the start seek. SOURCE counts ordinals from
+            the beginning and may require decoding the prefix to reach the requested start.
 
     Returns:
         List of scenes as pairs of (start, end) :class:`~scenedetect.common.FramePosition` objects.
@@ -208,7 +213,7 @@ def detect(
         ValueError: `start_time` or `end_time` are incorrectly formatted.
         TypeError: `start_time` or `end_time` are invalid types.
     """
-    video = open_video(video_path, backend=backend)
+    video = open_video(video_path, backend=backend, frame_numbering=frame_numbering)
     if start_time is not None:
         video.seek(start_time)
     # To reduce memory consumption when not required, we only add a StatsManager if we
