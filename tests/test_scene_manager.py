@@ -15,46 +15,52 @@ This file includes unit tests for the scenedetect.scene_manager.SceneManager cla
 which applies SceneDetector algorithms on VideoStream backends.
 """
 
+from fractions import Fraction
+
 import pytest
 
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.common import FrameTimecode
+from scenedetect.common import FramePosition, Timecode
 from scenedetect.detectors import AdaptiveDetector, ContentDetector
 from scenedetect.scene_manager import SceneManager, expand_scenes_to_bounds
+from scenedetect.video_stream import FrameNumbering
 
 TEST_VIDEO_START_FRAMES_ACTUAL = [150, 180, 394]
 
 
 def test_scene_list(test_video_file):
     """Test SceneManager get_scene_list method with VideoStreamCv2/ContentDetector."""
-    video = VideoStreamCv2(test_video_file)
+    video = VideoStreamCv2(test_video_file, frame_numbering=FrameNumbering.SOURCE)
     sm = SceneManager()
     sm.add_detector(ContentDetector())
 
-    video_fps = video.frame_rate
-    start_time = FrameTimecode("00:00:05", video_fps)
-    end_time = FrameTimecode("00:00:10", video_fps)
+    start_time = 5.0
+    end_time = 10.0
 
-    assert end_time.frame_num > start_time.frame_num
+    assert end_time > start_time
 
     video.seek(start_time)
     sm.auto_downscale = True
 
     num_frames = sm.detect_scenes(video=video, end_time=end_time)
 
-    assert num_frames == (end_time.frame_num - start_time.frame_num)
+    # This CFR fixture contributes source frames 150 through 299.
+    assert num_frames == 150
 
     scene_list = sm.get_scene_list()
     assert scene_list
-    # Each scene is in the format (Start Timecode, End Timecode)
+    # Each scene is in the format (start position, end position).
     assert len(scene_list[0]) == 2
 
-    # First scene should start at start_time and last scene should end at end_time.
-    assert scene_list[0][0] == start_time
-    assert scene_list[-1][1] == end_time
+    # The selected source frame range is [150, 300).
+    assert scene_list[0][0].frame_number == 150
+    assert scene_list[-1][1].frame_number == 300
+    # The final timestamp still belongs to the last processed frame.
+    assert isinstance(video.position, FramePosition)
+    assert scene_list[-1][1].timecode == video.position.timecode
 
     for i, _ in enumerate(scene_list):
-        assert scene_list[i][0].frame_num < scene_list[i][1].frame_num
+        assert scene_list[i][0].frame_number < scene_list[i][1].frame_number
         if i > 0:
             # Ensure frame list is sorted (i.e. end time frame of
             # one scene is equal to the start time of the next).
@@ -63,22 +69,21 @@ def test_scene_list(test_video_file):
 
 def test_get_scene_list_start_in_scene(test_video_file):
     """Test SceneManager `get_scene_list()` method with the `start_in_scene` flag."""
-    video = VideoStreamCv2(test_video_file)
+    video = VideoStreamCv2(test_video_file, frame_numbering=FrameNumbering.SOURCE)
     sm = SceneManager()
     sm.add_detector(ContentDetector())
 
-    video_fps = video.frame_rate
     # End time must be short enough that we won't detect any scenes.
-    end_time = FrameTimecode(25, video_fps)
+    end_time = 25
     sm.auto_downscale = True
     sm.detect_scenes(video=video, end_time=end_time)
     # Should be an empty list.
     assert len(sm.get_scene_list()) == 0
-    # Should be a list with a single element spanning the video duration.
+    # Should be a list with a single element spanning the processed range.
     scene_list = sm.get_scene_list(start_in_scene=True)
     assert len(scene_list) == 1
-    assert scene_list[0][0] == 0
-    assert scene_list[0][1] == end_time
+    assert scene_list[0][0].frame_number == 0
+    assert scene_list[0][1].frame_number == end_time
 
 
 # TODO: This would be more readable if the callbacks were defined within the test case, e.g.
@@ -91,19 +96,19 @@ class FakeCallback:
 
     def get_callback_lambda(self):
         """For testing using a lambda.."""
-        return lambda image, frame_num: self._callback(image, frame_num)
+        return lambda image, position: self._callback(image, position)
 
     def get_callback_func(self):
         """For testing using a callback function."""
 
-        def callback(image, frame_num):
+        def callback(image, position):
             nonlocal self
-            self._callback(image, frame_num)
+            self._callback(image, position)
 
         return callback
 
-    def _callback(self, image, frame_num):
-        self.scene_list.append(frame_num)
+    def _callback(self, image, position: FramePosition):
+        self.scene_list.append(position.frame_number)
 
 
 def test_detect_scenes_callback(test_video_file):
@@ -111,15 +116,14 @@ def test_detect_scenes_callback(test_video_file):
 
     Note that the API signature of the callback will undergo breaking changes in v1.0.
     """
-    video = VideoStreamCv2(test_video_file)
+    video = VideoStreamCv2(test_video_file, frame_numbering=FrameNumbering.SOURCE)
     sm = SceneManager()
     sm.add_detector(ContentDetector())
 
     fake_callback = FakeCallback()
 
-    video_fps = video.frame_rate
-    start_time = FrameTimecode("00:00:05", video_fps)
-    end_time = FrameTimecode("00:00:15", video_fps)
+    start_time = 5.0
+    end_time = 15.0
     video.seek(start_time)
     sm.auto_downscale = True
 
@@ -127,7 +131,7 @@ def test_detect_scenes_callback(test_video_file):
         video=video, end_time=end_time, callback=fake_callback.get_callback_lambda()
     )
     scene_list = sm.get_scene_list()
-    assert [start for start, end in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
+    assert [start.frame_number for start, _ in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
     assert fake_callback.scene_list == TEST_VIDEO_START_FRAMES_ACTUAL[1:]
 
     # Perform same test using callback function instead of lambda.
@@ -138,7 +142,7 @@ def test_detect_scenes_callback(test_video_file):
 
     _ = sm.detect_scenes(video=video, end_time=end_time, callback=fake_callback.get_callback_func())
     scene_list = sm.get_scene_list()
-    assert [start for start, end in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
+    assert [start.frame_number for start, _ in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
     assert fake_callback.scene_list == TEST_VIDEO_START_FRAMES_ACTUAL[1:]
 
 
@@ -148,15 +152,14 @@ def test_detect_scenes_callback_adaptive(test_video_file):
 
     Note that the API signature of the callback will undergo breaking changes in v1.0.
     """
-    video = VideoStreamCv2(test_video_file)
+    video = VideoStreamCv2(test_video_file, frame_numbering=FrameNumbering.SOURCE)
     sm = SceneManager()
     sm.add_detector(AdaptiveDetector())
 
     fake_callback = FakeCallback()
 
-    video_fps = video.frame_rate
-    start_time = FrameTimecode("00:00:05", video_fps)
-    end_time = FrameTimecode("00:00:15", video_fps)
+    start_time = 5.0
+    end_time = 15.0
     video.seek(start_time)
     sm.auto_downscale = True
 
@@ -164,7 +167,7 @@ def test_detect_scenes_callback_adaptive(test_video_file):
         video=video, end_time=end_time, callback=fake_callback.get_callback_lambda()
     )
     scene_list = sm.get_scene_list()
-    assert [start for start, end in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
+    assert [start.frame_number for start, _ in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
     assert fake_callback.scene_list == TEST_VIDEO_START_FRAMES_ACTUAL[1:]
 
     # Perform same test using callback function instead of lambda.
@@ -175,25 +178,24 @@ def test_detect_scenes_callback_adaptive(test_video_file):
 
     _ = sm.detect_scenes(video=video, end_time=end_time, callback=fake_callback.get_callback_func())
     scene_list = sm.get_scene_list()
-    assert [start for start, end in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
+    assert [start.frame_number for start, _ in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
     assert fake_callback.scene_list == TEST_VIDEO_START_FRAMES_ACTUAL[1:]
 
 
 def test_detect_scenes_crop(test_video_file):
-    video = VideoStreamCv2(test_video_file)
+    video = VideoStreamCv2(test_video_file, frame_numbering=FrameNumbering.SOURCE)
     sm = SceneManager()
     sm.crop = (10, 10, 1900, 1000)
     sm.add_detector(ContentDetector())
 
-    video_fps = video.frame_rate
-    start_time = FrameTimecode("00:00:05", video_fps)
-    end_time = FrameTimecode("00:00:15", video_fps)
+    start_time = 5.0
+    end_time = 15.0
     video.seek(start_time)
     sm.auto_downscale = True
 
     _ = sm.detect_scenes(video=video, end_time=end_time)
     scene_list = sm.get_scene_list()
-    assert [start for start, _ in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
+    assert [start.frame_number for start, _ in scene_list] == TEST_VIDEO_START_FRAMES_ACTUAL
 
 
 def test_crop_invalid():
@@ -212,52 +214,55 @@ def test_crop_invalid():
         sm.crop = (1, 1, 1, -1)
 
 
+def _position(frame_number: int) -> FramePosition:
+    return FramePosition(
+        timecode=Timecode(pts=frame_number, time_base=Fraction(1, 10)),
+        frame_number=frame_number,
+    )
+
+
 def test_expand_scenes_to_bounds_two_scenes():
     """Scenes detected inside a sub-window should be extended outward."""
-    fps = 10.0
-    t0 = FrameTimecode(0, fps)
-    t130 = FrameTimecode(130, fps)
-    t150 = FrameTimecode(150, fps)
-    t170 = FrameTimecode(170, fps)
-    t300 = FrameTimecode(300, fps)
+    p0 = _position(0)
+    p130 = _position(130)
+    p150 = _position(150)
+    p170 = _position(170)
+    p300 = _position(300)
 
-    scenes = [(t130, t150), (t150, t170)]
-    expanded = expand_scenes_to_bounds(scenes, start=t0, end=t300)
+    scenes = [(p130, p150), (p150, p170)]
+    expanded = expand_scenes_to_bounds(scenes, start=p0, end=p300)
 
-    assert expanded == [(t0, t150), (t150, t300)]
+    assert expanded == [(p0, p150), (p150, p300)]
 
 
 def test_expand_scenes_to_bounds_empty():
     """Empty scene lists pass through unchanged."""
-    fps = 10.0
-    assert expand_scenes_to_bounds([], FrameTimecode(0, fps), FrameTimecode(100, fps)) == []
+    assert expand_scenes_to_bounds([], _position(0), _position(10)) == []
 
 
 def test_expand_scenes_to_bounds_single_scene():
     """A single scene gets both endpoints extended."""
-    fps = 10.0
-    t0 = FrameTimecode(0, fps)
-    t130 = FrameTimecode(130, fps)
-    t170 = FrameTimecode(170, fps)
-    t300 = FrameTimecode(300, fps)
+    p0 = _position(0)
+    p130 = _position(130)
+    p170 = _position(170)
+    p300 = _position(300)
 
-    scenes = [(t130, t170)]
-    expanded = expand_scenes_to_bounds(scenes, start=t0, end=t300)
+    scenes = [(p130, p170)]
+    expanded = expand_scenes_to_bounds(scenes, start=p0, end=p300)
 
-    assert expanded == [(t0, t300)]
+    assert expanded == [(p0, p300)]
 
 
 def test_expand_scenes_to_bounds_does_not_mutate_input():
     """The input scene list must not be modified in place."""
-    fps = 10.0
-    t0 = FrameTimecode(0, fps)
-    t130 = FrameTimecode(130, fps)
-    t150 = FrameTimecode(150, fps)
-    t170 = FrameTimecode(170, fps)
-    t300 = FrameTimecode(300, fps)
+    p0 = _position(0)
+    p130 = _position(130)
+    p150 = _position(150)
+    p170 = _position(170)
+    p300 = _position(300)
 
-    scenes = [(t130, t150), (t150, t170)]
+    scenes = [(p130, p150), (p150, p170)]
     original = list(scenes)
-    expand_scenes_to_bounds(scenes, start=t0, end=t300)
+    expand_scenes_to_bounds(scenes, start=p0, end=p300)
 
     assert scenes == original
