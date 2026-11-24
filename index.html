@@ -263,7 +263,6 @@
                       id="install-tab-pip"
                       aria-selected="true"
                       tabindex="0"
-                      data-sync-tab="hero-tab-api"
                     >pip</button>
                     <button
                       type="button"
@@ -363,50 +362,58 @@
                     type="button"
                     role="tab"
                     class="pill-tab pill-tab-sans"
-                    id="hero-tab-api"
+                    id="hero-tab-cli"
                     aria-selected="true"
                     tabindex="0"
-                  >Python API</button>
+                  >Command Line</button>
                   <button
                     type="button"
                     role="tab"
                     class="pill-tab pill-tab-sans"
-                    id="hero-tab-cli"
+                    id="hero-tab-api"
                     aria-selected="false"
                     tabindex="-1"
-                  >Command Line</button>
+                  >Python API</button>
                 </div>
               </div>
               <div class="code-panels">
                 <div
                   role="tabpanel"
                   class="code-panel"
-                  id="hero-panel-api"
-                  aria-labelledby="hero-tab-api"
+                  id="hero-panel-cli"
+                  aria-labelledby="hero-tab-cli"
                 >
-                  <div class="codehilite">
-                    <pre class="code-body" tabindex="0"><code><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">detect</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">,</span> <span class="n">split_video_ffmpeg</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="c1"># Find scene cuts and split the video with ffmpeg</span>
-<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"goldeneye.mp4"</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">())</span>
-<span class="n">split_video_ffmpeg</span><span class="p">(</span><span class="s2">"goldeneye.mp4"</span><span class="p">,</span> <span class="n">scenes</span><span class="p">)</span></code></pre>
+                  <div class="hero-examples">
+                    <div class="hero-example-item">
+<p class="hero-example-caption">Split a video at each detected cut</p>                      <div class="codehilite" data-copy-label="Copy split-video command">
+                        <pre class="code-body" tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>split-video</code></pre>
+                      </div>
+                    </div>
+                    <div class="hero-example-item">
+<p class="hero-example-caption">Export a CSV scene list, still frames, and an HTML report</p>                      <div class="codehilite" data-copy-label="Copy export command">
+                        <pre class="code-body" tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>list-scenes<span class="w"> </span>save-images<span class="w"> </span>save-html</code></pre>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div
                   role="tabpanel"
                   class="code-panel"
-                  id="hero-panel-cli"
-                  aria-labelledby="hero-tab-cli"
+                  id="hero-panel-api"
+                  aria-labelledby="hero-tab-api"
                   hidden="until-found"
                 >
-                  <div class="codehilite">
-                    <pre class="code-body" tabindex="0"><code><span class="c1"># Split a video at each detected cut</span>
-scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>split-video
+                  <div class="hero-examples">
+                    <div class="hero-example-item">
+<p class="hero-example-caption">Find scene cuts and split the video with ffmpeg</p>                      <div class="codehilite" data-copy-label="Copy Python API example">
+                        <pre class="code-body" tabindex="0"><code><span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">detect</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">,</span> <span class="n">split_video_ffmpeg</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="c1"># Export a CSV scene list, still frames, and an HTML report</span>
-scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>list-scenes<span class="w"> </span>save-images<span class="w"> </span>save-html</code></pre>
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"goldeneye.mp4"</span><span class="p">,</span> <span class="n">AdaptiveDetector</span><span class="p">())</span>
+<span class="n">split_video_ffmpeg</span><span class="p">(</span><span class="s2">"goldeneye.mp4"</span><span class="p">,</span> <span class="n">scenes</span><span class="p">)</span></code></pre>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -449,12 +456,17 @@ scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span 
                 <span class="platform-section-label">Command Line Example</span>
                 <span class="code-hint" aria-hidden="true">scenedetect.exe</span>
               </div>
-              <div class="codehilite">
-                <pre class="code-body" tabindex="0"><code><span class="c1"># Split a video at each detected cut</span>
-scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>split-video
-
-<span class="c1"># Export a CSV scene list, still frames, and an HTML report</span>
-scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>list-scenes<span class="w"> </span>save-images<span class="w"> </span>save-html</code></pre>
+              <div class="hero-examples">
+                <div class="hero-example-item">
+<p class="hero-example-caption">Split a video at each detected cut</p>                  <div class="codehilite" data-copy-label="Copy split-video command">
+                    <pre class="code-body" tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>split-video</code></pre>
+                  </div>
+                </div>
+                <div class="hero-example-item">
+<p class="hero-example-caption">Export a CSV scene list, still frames, and an HTML report</p>                  <div class="codehilite" data-copy-label="Copy export command">
+                    <pre class="code-body" tabindex="0"><code>scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span class="w"> </span>list-scenes<span class="w"> </span>save-images<span class="w"> </span>save-html</code></pre>
+                  </div>
+                </div>
               </div>
               <div class="platform-card-footer" data-equalize-band="footer">
                 <span>Signed via SignPath Foundation.</span>
@@ -496,11 +508,14 @@ scenedetect<span class="w"> </span>-i<span class="w"> </span>goldeneye.mp4<span 
                 <span class="platform-section-label">Run Container</span>
                 <span class="code-hint" aria-hidden="true">Docker / Podman</span>
               </div>
-              <div class="codehilite">
-                <pre class="code-body" tabindex="0"><code><span class="c1"># CLI, ffmpeg, mkvmerge, PyAV, and MoviePy in one container</span>
-docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="s2">"</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">:/files"</span><span class="w"> </span><span class="se">\</span>
+              <div class="hero-examples">
+                <div class="hero-example-item">
+                  <div class="codehilite" data-copy-label="Copy docker run command">
+                    <pre class="code-body" tabindex="0"><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="s2">"</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">:/files"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>ghcr.io/breakthrough/pyscenedetect<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>-i<span class="w"> </span>/files/goldeneye.mp4<span class="w"> </span>split-video<span class="w"> </span>-o<span class="w"> </span>/files</code></pre>
+                  </div>
+                </div>
               </div>
               <div class="platform-card-footer" data-equalize-band="footer">
                 <span>Includes CLI, <code>ffmpeg</code>, <code>mkvmerge</code>, PyAV &amp; MoviePy.</span>

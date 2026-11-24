@@ -1336,23 +1336,55 @@
     flex-direction: column;
   }
 
-  .platform-card .codehilite {
+  .hero-examples {
     flex: 1 0 auto;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    gap: 0.78rem;
+    padding: 0.85rem 0.95rem;
+    background: var(--surface-elevated);
+  }
+
+  .hero-example-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.32rem;
+    min-inline-size: 0;
+  }
+
+  .hero-example-caption {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+
+  .platform-card .codehilite {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.25rem;
     margin: 0;
-    border: 0;
-    border-radius: 0;
+    border: 1px solid var(--border);
+    border-radius: 0.45rem;
+    background: var(--code-bg);
   }
 
   .platform-card .code-body {
-    flex: 1 0 auto;
-    min-block-size: 11.4rem;
-    padding: 0.9rem 2.75rem 0.9rem 1rem;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    padding: 0.62rem 0.25rem 0.62rem 0.85rem;
     background: var(--code-bg);
-    font-size: 0.83rem;
-    line-height: 1.6;
+    font-size: 0.82rem;
+    line-height: 1.55;
     overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .platform-card .copy-code-btn {
+    position: static;
+    flex: none;
+    margin: 0.34rem 0.36rem 0.34rem 0;
+    opacity: 0.95;
   }
 
   .platform-card-footer {
