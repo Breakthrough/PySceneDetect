@@ -30,6 +30,7 @@ import subprocess
 # TODO: Missing tests for --min-scene-len and --drop-short-scenes.
 import sys
 from csv import DictReader
+from fractions import Fraction
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -41,6 +42,8 @@ import pytest
 import scenedetect
 from scenedetect._cli.config import ConfigLoadFailure, ConfigRegistry
 from scenedetect._cli.context import CliContext
+from scenedetect._cli.controller import _load_scenes
+from scenedetect.common import Timecode
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
 from scenedetect.platform import StrPath
 from tests.helpers import invoke_cli
@@ -180,6 +183,52 @@ def test_cli_downscale(
         assert context.scene_manager is not None
         assert context.scene_manager.auto_downscale is expected_auto
         assert context.scene_manager.downscale == expected_downscale
+    finally:
+        if context.video_stream is not None:
+            close_video_stream(context.video_stream)
+
+
+@pytest.mark.parametrize(
+    ("config", "cli_args", "expected"),
+    [
+        ("", [], scenedetect.FrameNumbering.RELATIVE),
+        ("frame-numbering = source", [], scenedetect.FrameNumbering.SOURCE),
+        (
+            "frame-numbering = relative",
+            ["--frame-numbering", "source"],
+            scenedetect.FrameNumbering.SOURCE,
+        ),
+        (
+            "frame-numbering = source",
+            ["--frame-numbering", "relative"],
+            scenedetect.FrameNumbering.RELATIVE,
+        ),
+    ],
+)
+def test_cli_frame_numbering(
+    tmp_path: Path,
+    config: str,
+    cli_args: list[str],
+    expected: scenedetect.FrameNumbering,
+):
+    """Resolve frame numbering from defaults, config, and CLI overrides."""
+    from click.testing import CliRunner
+
+    from scenedetect._cli import scenedetect as scenedetect_cli
+    from tests.helpers import close_video_stream
+
+    config_path = tmp_path / "scenedetect.cfg"
+    config_path.write_text(f"[global]\n{config}\n")
+    context = CliContext()
+    try:
+        result = CliRunner().invoke(
+            scenedetect_cli,
+            ["-c", str(config_path), "-i", DEFAULT_VIDEO_PATH, *cli_args, "time", "-e", "1"],
+            obj=context,
+        )
+        assert result.exit_code == 0, result.output
+        assert context.video_stream is not None
+        assert context.video_stream.frame_numbering is expected
     finally:
         if context.video_stream is not None:
             close_video_stream(context.video_stream)
@@ -1220,6 +1269,32 @@ def test_cli_backend_unsupported():
     )
 
 
+@pytest.fixture
+def paired_scenes_csv(tmp_path: Path) -> Path:
+    path = tmp_path / "scenes.csv"
+    path.write_text(
+        """sf,st,ef,et
+49,2.250,90,3.750
+91,3.750,210,8.125
+""",
+        encoding="utf-8",
+    )
+    return path
+
+
+@pytest.fixture
+def paired_scenes_context(paired_scenes_csv: Path) -> CliContext:
+    context = CliContext()
+    context.load_scenes_input = str(paired_scenes_csv)
+    context.load_scenes_columns = {
+        "start_frame": "sf",
+        "start_time": "st",
+        "end_frame": "ef",
+        "end_time": "et",
+    }
+    return context
+
+
 def test_cli_load_scenes_options():
     """Ensure we can load scenes both with and without the cut row."""
     assert invoke_scenedetect("-i {VIDEO} time {TIME} {DETECTOR} list-scenes") == 0
@@ -1324,6 +1399,148 @@ def test_cli_load_scenes_round_trip():
             original.pop(column)
             loaded.pop(column)
         assert original == loaded
+
+
+@pytest.mark.parametrize("column_source", ["cli", "config"])
+def test_cli_load_scenes_custom_columns(
+    tmp_path: Path, paired_scenes_csv: Path, column_source: str
+):
+    """Load both coordinates using column names supplied through CLI or config."""
+    from click.testing import CliRunner
+
+    from scenedetect._cli import load_scenes_command
+
+    names = {
+        "start-frame-col-name": "sf",
+        "start-time-col-name": "st",
+        "end-frame-col-name": "ef",
+        "end-time-col-name": "et",
+    }
+    config_path = tmp_path / "scenedetect.cfg"
+    config = "[load-scenes]\n"
+    args = ["-i", str(paired_scenes_csv)]
+    if column_source == "config":
+        config += "".join(f"{key} = {value}\n" for key, value in names.items())
+    else:
+        for key, value in names.items():
+            args.extend([f"--{key}", value])
+    config_path.write_text(config, encoding="utf-8")
+
+    context = CliContext()
+    context.config = ConfigRegistry(str(config_path))
+    context.scene_manager = scenedetect.SceneManager()
+    result = CliRunner().invoke(load_scenes_command, args, obj=context, catch_exceptions=False)
+    assert result.exit_code == 0, result.output
+
+    scenes, cuts = _load_scenes(context)
+    assert [
+        (start.frame_number, start.timecode.seconds, end.frame_number, end.timecode.seconds)
+        for start, end in scenes
+    ] == [
+        (48, Fraction("2.250"), 90, Fraction("3.750")),
+        (90, Fraction("3.750"), 210, Fraction("8.125")),
+    ]
+    assert cuts == [scenes[1][0]]
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "duration", "expected_frames"),
+    [
+        pytest.param(90, 210, None, (90, 210), id="frame-limits"),
+        pytest.param(
+            Timecode(3750, Fraction(1, 1000)),
+            Timecode(8125, Fraction(1, 1000)),
+            None,
+            (90, 210),
+            id="time-limits",
+        ),
+        pytest.param(None, None, 42, (48, 90), id="frame-duration-from-saved-start"),
+        pytest.param(
+            None,
+            None,
+            Timecode(1500, Fraction(1, 1000)),
+            (48, 90),
+            id="time-duration-from-saved-start",
+        ),
+        pytest.param(
+            90,
+            None,
+            Timecode(4375, Fraction(1, 1000)),
+            (90, 210),
+            id="frame-start-time-duration",
+        ),
+        pytest.param(
+            Timecode(3750, Fraction(1, 1000)),
+            None,
+            120,
+            (90, 210),
+            id="time-start-frame-duration",
+        ),
+    ],
+)
+def test_cli_load_scenes_limits(
+    paired_scenes_context: CliContext,
+    start: int | Timecode | None,
+    end: int | Timecode | None,
+    duration: int | Timecode | None,
+    expected_frames: tuple[int, int],
+):
+    """Select complete rows using saved boundaries and unit-aware durations."""
+    context = paired_scenes_context
+    context.start_time = start
+    context.end_time = end
+    context.duration = duration
+
+    scenes, cuts = _load_scenes(context)
+    assert [(start.frame_number, end.frame_number) for start, end in scenes] == [expected_frames]
+    assert cuts == []
+
+
+@pytest.mark.parametrize("limit", ["start_time", "end_time"])
+@pytest.mark.parametrize("value", [60, Timecode(3, Fraction(1))])
+def test_cli_load_scenes_rejects_interior_cutoff(
+    paired_scenes_context: CliContext, limit: str, value: int | Timecode
+):
+    """Reject frame or time cutoffs whose complete position is absent from the CSV."""
+    setattr(paired_scenes_context, limit, value)
+    with pytest.raises(ValueError, match="would split a saved scene"):
+        _load_scenes(paired_scenes_context)
+
+
+def test_cli_load_scenes_requires_paired_columns(
+    paired_scenes_csv: Path, paired_scenes_context: CliContext
+):
+    """Require a timestamp as well as an ordinal for each boundary."""
+    paired_scenes_csv.write_text("sf,st,ef\n49,2.250,90\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="Missing scene columns: et"):
+        _load_scenes(paired_scenes_context)
+
+
+def test_cli_load_scenes_repeated_timestamp(
+    paired_scenes_csv: Path, paired_scenes_context: CliContext
+):
+    """Allow time selection but reject an ambiguous conversion to frame ordinals."""
+    paired_scenes_csv.write_text(
+        """sf,st,ef,et
+49,2.250,90,3.750
+91,3.750,91,3.750
+92,3.750,210,8.125
+""",
+        encoding="utf-8",
+    )
+    context = paired_scenes_context
+    context.start_time = Timecode(3750, Fraction(1, 1000))
+    scenes, cuts = _load_scenes(context)
+    assert [(start.frame_number, end.frame_number) for start, end in scenes] == [
+        (90, 91),
+        (91, 210),
+    ]
+    assert scenes[0][0].timecode.seconds == scenes[0][1].timecode.seconds == Fraction("3.750")
+    assert cuts == [scenes[1][0]]
+
+    context.duration = 120
+    with pytest.raises(ValueError, match="no unique saved position"):
+        _load_scenes(context)
 
 
 def test_cli_save_chapters(tmp_path: Path):
