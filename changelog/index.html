@@ -1070,6 +1070,8 @@
 <hr />
 <h2 id="development">Development</h2>
 <h3 id="pyscenedetect-08-tbd">PySceneDetect 0.8 (TBD)</h3>
+<p>Major breaking release that overhauls how time is managed. Rather than assigning each frame a point in time, we will now represent the presenation time, duration, and ordinal of a given frame. We will also align on a policy for how we deal with non-monotonic frame delivery from backends.</p>
+<h3 id="pyscenedetect-074-tbd">PySceneDetect 0.7.4 (TBD)</h3>
 <ul>
 <li>[general] The root <code>pyproject.toml</code> is now <code>scenedetect</code> again (it had a development-only <code>scenedetect-core</code> name since 0.7.1). <code>pip install -e .</code> now installs the same distribution as PyPI. The <code>[opencv]</code> and <code>[opencv-headless]</code> extras of the development config were removed because <code>opencv-python</code> is now a declared dependency <a href="https://github.com/Breakthrough/PySceneDetect/issues/558">#558</a></li>
 <li>[feature] Add <code>save-chapters</code> command to save scenes as chapters in FFmetadata format, which can be added to a video with ffmpeg without re-encoding. Also available as <code>write_scene_list_ffmetadata()</code> in the <code>scenedetect.output</code> module <a href="https://github.com/Breakthrough/PySceneDetect/issues/323">#323</a></li>
@@ -1082,6 +1084,7 @@
 <li>[bugfix] <code>detect-content</code> / <code>detect-adaptive</code> <code>--weights</code> set to all zeros, or with a negative or non-finite weight (also in a config file), now give an error instead of NaN frame scores and no detected scenes, and <code>ContentDetector</code> / <code>AdaptiveDetector</code> raise a <code>ValueError</code> for them <a href="https://github.com/Breakthrough/PySceneDetect/issues/612">#612</a></li>
 <li>[bugfix] <code>FrameTimecode.get_timecode()</code> with <code>use_rounding=False</code> now truncates instead of sometimes rounding up the last digit. Previously 0.4996 seconds with <code>precision=2</code> gave <code>00:00:00.50</code>, and 1.99997 seconds gave <code>00:00:01.000</code> instead of <code>00:00:01.999</code>. <a href="https://github.com/Breakthrough/PySceneDetect/issues/611">#611</a></li>
 <li>[bugfix] <code>FrameTimecode.get_timecode()</code> now shows a negative time (e.g. from a negative PTS) as zero. Previously a large negative time gave output such as <code>-1:-6:00.000</code>. A negative <code>precision</code> now raises a <code>ValueError</code></li>
+<li>[bugfix] Allow image sequences as inputs when the default backend is already OpenCV <a href="https://github.com/Breakthrough/PySceneDetect/issues/620">#620</a></li>
 </ul>
       </article>
 
@@ -1185,6 +1188,7 @@
             <a href="#development">Development</a>
             <ul class="toc-sublist" role="list">
               <li><a href="#pyscenedetect-08-tbd">PySceneDetect 0.8 (TBD)</a></li>
+              <li><a href="#pyscenedetect-074-tbd">PySceneDetect 0.7.4 (TBD)</a></li>
             </ul>
           </li>
         </ul>
