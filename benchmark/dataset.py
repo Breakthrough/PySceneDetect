@@ -67,8 +67,7 @@ def _read_tab_separated_cuts(scene_file: str) -> list[Frames]:
     """Parse a BBC/AutoShot-style annotation file.
 
     Each line is tab-separated; the second column is the 0-based frame index of a
-    hard cut. Returns 1-based frame indices, matching the convention used by
-    :class:`scenedetect.FrameTimecode`.
+    hard cut. Returns 1-based frame indices for the benchmark evaluator.
     """
     with open(scene_file) as f:
         return [int(line.strip().split("\t")[1]) + 1 for line in f]
@@ -153,7 +152,7 @@ class ClipShotsDataset(Dataset):
     Each annotation entry is ``{"transitions": [[start, end], ...], "frame_num": float}``.
     Hard cuts are single-frame spans (``end == start + 1``); wider spans are gradual
     transitions. Unlike the BBC/AutoShot annotations, ClipShots frame indices already match
-    PySceneDetect's boundary-frame convention (the prediction's ``frame_num`` lines up with
+    PySceneDetect's boundary-frame convention (the prediction's ``frame_number`` lines up with
     ``transition[1]`` directly), so no offset is applied here.
 
     Loading rules:

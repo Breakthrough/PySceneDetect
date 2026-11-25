@@ -225,13 +225,13 @@ class FramePosition:
 
     def __sub__(self, other: "FramePosition") -> "FrameDuration":
         if not isinstance(other, FramePosition):
-            raise TypeError(f"Cannot subtract {type(other)} from FramePosition")
+            return NotImplemented
 
         frames = self.frame_number - other.frame_number
         elapsed = self.timecode.seconds - other.timecode.seconds
 
         if frames < 0 or elapsed < 0:
-            raise ValueError("Cannot subtract FramePosition objects with negative result")
+            raise ArithmeticError("Cannot subtract FramePosition objects with negative result")
 
         return FrameDuration(frames=frames, elapsed=elapsed)
 

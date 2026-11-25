@@ -14,11 +14,16 @@ Common
 Timecodes
 ---------
 
-.. autoclass:: scenedetect.common.FrameTimecode
+.. autoclass:: scenedetect.common.FramePosition
+   :members:
+
+.. autoclass:: scenedetect.common.FrameDuration
    :members:
 
 .. autoclass:: scenedetect.common.Timecode
    :members:
+
+.. autofunction:: scenedetect.common.parse_frame_or_time
 
 .. autofunction:: scenedetect.common.framerate_to_fraction
 
@@ -30,7 +35,7 @@ Type Aliases
 
 .. autodata:: scenedetect.common.CutList
 
-.. autodata:: scenedetect.common.TimecodePair
+.. autodata:: scenedetect.common.PositionPair
 
 .. autodata:: scenedetect.common.TimecodeLike
 

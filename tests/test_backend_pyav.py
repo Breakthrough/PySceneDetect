@@ -21,6 +21,7 @@ import gc
 import itertools
 from fractions import Fraction
 from types import SimpleNamespace
+from typing import cast
 
 import av
 import pytest
@@ -425,7 +426,7 @@ def _positions(stream: VideoStreamAv, frames) -> list[int]:
     for pts, dts in frames:
         frame = SimpleNamespace(pts=pts, dts=dts, time_base=1 / stream.frame_rate)
         stream._frames_decoded += 1
-        stream._update_timecode(frame)
+        stream._update_timecode(cast(av.VideoFrame, frame))
         assert stream._timecode is not None
         positions.append(stream._timecode.pts)
     return positions

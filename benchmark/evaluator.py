@@ -35,8 +35,7 @@ from pathlib import Path
 from statistics import mean
 from typing import TypeAlias
 
-# 1-based frame number, matching the convention used by the BBC/AutoShot text annotations and by
-# PySceneDetect's :class:`FrameTimecode`. Used for cut positions and for tolerance windows.
+# 1-based frame number used by the benchmark evaluator for cut positions and tolerance windows.
 #
 # Ironically, all the work we did in v0.7 to support VFR is meaningless for most existing benchmarks
 # since they are all CFR. In the future we should consider extending the API to support temporal

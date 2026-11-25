@@ -280,6 +280,11 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
             api=(":func:`~scenedetect.open_video` (``frame_rate``)",),
         ),
         Counterpart(
+            "Frame numbering",
+            option="frame_numbering",
+            api=(":attr:`~scenedetect.video_stream.VideoStream.frame_numbering`",),
+        ),
+        Counterpart(
             "Crop",
             option="crop",
             api=(f":attr:`SceneManager.crop <{_SM}.crop>`",),

@@ -10,7 +10,7 @@ counterparts, and each detector to a table of its options.
 
 All examples assume a file called ``video.mp4`` in the working directory. When no ``detect-*`` command is given, the CLI uses :ref:`detect-adaptive <command-detect-adaptive>` (:class:`AdaptiveDetector <scenedetect.detectors.adaptive_detector.AdaptiveDetector>`). Most Python examples
 use :func:`scenedetect.detect`, which returns a list of ``(start, end)``
-:class:`FrameTimecode <scenedetect.common.FrameTimecode>` pairs (empty if no cuts are found);
+:class:`FramePosition <scenedetect.common.FramePosition>` pairs with exclusive ends (empty if no cuts are found);
 see :ref:`SceneManager <scenedetect-scene_manager>` for lower-level control.
 
 Split a Video Into Scenes

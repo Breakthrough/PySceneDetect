@@ -121,8 +121,8 @@ def test_frame_position_subtraction_rejects_negative_results(end_frame, end_pts)
     start = FramePosition(Timecode(1000, Fraction(1, 1000)), 10)
     end = FramePosition(Timecode(end_pts, Fraction(1, 1000)), end_frame)
 
-    with pytest.raises(ValueError, match="negative"):
-        end - start
+    with pytest.raises(ArithmeticError, match="negative"):
+        _ = end - start
 
 
 @pytest.mark.parametrize(
@@ -132,8 +132,9 @@ def test_frame_position_subtraction_rejects_negative_results(end_frame, end_pts)
 def test_frame_position_subtraction_requires_another_position(other):
     position = FramePosition(Timecode(1000, Fraction(1, 1000)), 10)
 
+    assert position.__sub__(other) is NotImplemented
     with pytest.raises(TypeError):
-        position - other
+        _ = position - other
 
 
 @pytest.mark.parametrize(

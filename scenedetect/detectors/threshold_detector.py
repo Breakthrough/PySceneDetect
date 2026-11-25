@@ -19,7 +19,6 @@ import typing as ty
 import warnings
 from bisect import bisect_left
 from enum import Enum
-from fractions import Fraction
 from logging import getLogger
 
 import numpy
@@ -27,7 +26,6 @@ import numpy
 from scenedetect.common import (
     FrameDuration,
     FramePosition,
-    Timecode,
     TimecodeLike,
     parse_frame_or_time,
 )

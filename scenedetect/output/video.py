@@ -163,12 +163,12 @@ def default_formatter(template: str, *, expand: bool = False) -> PathFormatter:
         return Template(template).safe_substitute(
             VIDEO_NAME=video.name,
             SCENE_NUMBER=format_scene_number(video, scene),
-            START_TIME=str(start_time),
-            END_TIME=str(end_time),
-            START_FRAME=str(start_frame),
-            END_FRAME=str(end_frame),
-            START_PTS=str(start_pts),
-            END_PTS=str(end_pts),
+            START_TIME=start_time,
+            END_TIME=end_time,
+            START_FRAME=start_frame,
+            END_FRAME=end_frame,
+            START_PTS=start_pts,
+            END_PTS=end_pts,
         )
 
     return formatter

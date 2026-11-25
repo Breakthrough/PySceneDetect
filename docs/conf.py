@@ -196,7 +196,7 @@ section_sidebar_root_depth = {"apitoc": 1}
 # What each page contributes to the sidebar when it is NOT the current page: glob patterns on
 # the entry text ([] = page title only). The current page is always expanded in full.
 section_sidebar_summary = {
-    "api/common": ["FrameTimecode", "SceneList", "CutList"],
+    "api/common": ["FramePosition", "FrameDuration", "Timecode", "SceneList", "CutList"],
     "api/scene_manager": ["SceneManager", "get_scenes_from_cuts()"],
     "api/detector": ["SceneDetector"],
     "api/video_stream": ["VideoStream"],

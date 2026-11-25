@@ -13,9 +13,15 @@
 
 These tests demonstrate common workflow patterns used when integrating the PySceneDetect API."""
 
+from typing import TypedDict
+
 import pytest
 
 from scenedetect.video_stream import FrameNumbering
+
+
+class _DetectOptions(TypedDict, total=False):
+    frame_numbering: FrameNumbering
 
 
 def test_api_detect(test_video_file: str):
@@ -50,7 +56,7 @@ def test_api_detect_frame_numbering(
     test_video_file: str,
     start_time: int | str,
     end_time: int | str,
-    options: dict[str, FrameNumbering],
+    options: _DetectOptions,
     expected_start: int,
     expected_end: int,
 ):

@@ -268,9 +268,6 @@ class StatsManager:
 
         # If we get here, file is a valid file handle in read-only text mode.
         csv_reader = csv.reader(csv_file, lineterminator="\n")
-        num_cols = None
-        num_metrics = None
-        num_frames = None
         # First Row: Frame Num, Timecode, [metrics...]
         try:
             row = next(csv_reader)

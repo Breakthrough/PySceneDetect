@@ -43,7 +43,7 @@ Creating a new scene detection method can be as simple as implementing the `proc
 ```python
 import typing as ty
 import numpy as np
-from scenedetect import FrameTimecode, SceneDetector
+from scenedetect import FramePosition, SceneDetector
 
 
 class CustomDetector(SceneDetector):
@@ -51,29 +51,27 @@ class CustomDetector(SceneDetector):
 
     def process_frame(
         self,
-        timecode: FrameTimecode,
-        frame_im: np.ndarray,
-    ) -> ty.List[FrameTimecode]:
-        # Return a list of timecodes where we found cuts (either on this frame or previously).
+        position: FramePosition,
+        frame_img: np.ndarray,
+    ) -> ty.List[FramePosition]:
+        # Return positions where we found cuts (either on this frame or previously).
         return []
 
-    def post_process(self, timecode: FrameTimecode) -> ty.List[FrameTimecode]:
+    def post_process(self, position: FramePosition) -> ty.List[FramePosition]:
         # Called after the last frame has been read to handle pending events.
         return []
 ```
 
-`process_frame` is called on every frame in the input video, which will be called after the final frame of the video is passed to `process_frame`. This may be useful for multi-pass algorithms, or detectors which are waiting on some condition but still wish to output an event on the final frame.
+`post_process` is called after frame processing ends. This may be useful for multi-pass algorithms, or detectors which are waiting on some condition but still wish to output an event on the final frame.
 
-For example, a detector may output at most 1 cuts for every call to `process_frame`, it may output the entire scene list in `post_process`, or a combination of both.  Note that the latter will not work in cases where a live video stream or camera input device is being used. See the [API documentation for the `SceneDetector` class](https://www.scenedetect.com/docs/latest/api/detector.html#scenedetect.scene_detector.SceneDetector) for details. Alternatively, you can call `help(SceneDetector)` from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the `scenedetect/detectors/` directory (e.g. `threshold_detector.py`, `content_detector.py`).
+For example, a detector may return cuts from `process_frame`, save pending cuts for `post_process`, or use both. `post_process` runs only after detection stops. See the [API documentation for the `SceneDetector` class](https://www.scenedetect.com/docs/latest/api/detector.html#scenedetect.detector.SceneDetector) for details. Alternatively, you can call `help(SceneDetector)` from a Python REPL. For examples of actual detection algorithm implementations, see the source files in the `scenedetect/detectors/` directory (e.g. `threshold_detector.py`, `content_detector.py`).
 
-Processing is done by calling the `process_frame(...)` function for all frames in the video, followed by `post_process(...)` (optional) after the final frame.  Scene cuts are detected and added to the passed list object in both cases.
+Processing is done by calling the `process_frame(...)` function for each processed frame, followed by `post_process(...)` (optional) after the final frame. Each method returns a list of detected frame positions.
 
 `process_frame(...)` is called for each frame in sequence, passing the following arguments:
 
-- `frame_num`: the number of the current frame being processed
-- `frame_img`: frame returned video file or stream (accessible as NumPy array)
-- `frame_metrics`: dictionary for memoizing results of detection algorithm calculations for quicker subsequent analyses (if possible)
-- `scene_list`: List containing the frame numbers where all scene cuts/breaks occur in the video.
+- `position`: a `FramePosition` containing the current frame's `frame_number` and `timecode`. The `Timecode` stores its presentation timestamp (`pts`) and timestamp unit (`time_base`).
+- `frame_img`: frame returned by the video file or stream (accessible as a NumPy array)
 
 `post_process(...)` is called **after** the final frame has been processed, to allow for any stored scene cuts to be written *if required* (e.g. in the case of the `ThresholdDetector`).
 
