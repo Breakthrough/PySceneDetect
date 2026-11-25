@@ -45,8 +45,8 @@ def invoke_cli(args: list[str], catch_exceptions: bool = False) -> tuple[int, st
         result = runner.invoke(
             _scenedetect_cli, args, obj=context, catch_exceptions=catch_exceptions
         )
-        if result.exit_code == 0:
-            run_scenedetect(context)
+        if result.exit_code == 0 and not run_scenedetect(context):
+            return 1, result.output
         return result.exit_code, result.output
     finally:
         # The CLI opens a VideoStream on `context` and has no teardown path; close it here so
