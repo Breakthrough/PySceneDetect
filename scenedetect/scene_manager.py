@@ -508,7 +508,8 @@ class SceneManager:
             logger.debug(
                 f"Crop set: top left = {self._crop[0:2]}, bottom right = {self._crop[2:4]}"
             )
-            x0, y0, x1, y1 = self._crop
+            # Use the public (inclusive) coordinates, `_crop` is stored one-past-the-end.
+            x0, y0, x1, y1 = self.crop
             min_x, min_y = (min(x0, x1), min(y0, y1))
             max_x, max_y = (max(x0, x1), max(y0, y1))
             frame_width, frame_height = video.frame_size
@@ -517,8 +518,8 @@ class SceneManager:
             if max_x >= frame_width or max_y >= frame_height:
                 logger.warning("Warning: crop ends outside of video boundary.")
             effective_frame_size = (
-                1 + min(max_x, frame_width) - min_x,
-                1 + min(max_y, frame_height) - min_y,
+                1 + min(max_x, frame_width - 1) - min_x,
+                1 + min(max_y, frame_height - 1) - min_y,
             )
         # Calculate downscale factor and log effective resolution.
         if self.auto_downscale:
