@@ -94,6 +94,6 @@ def test_golden_regression(golden_file):
     scene_manager.add_detector(detector_class(**params))
     scene_manager.detect_scenes(video)
     scene_list = scene_manager.get_scene_list()
-    actual_cuts = [scene[0].frame_num for scene in scene_list[1:]]
+    actual_cuts = [scene[0].frame_number for scene in scene_list[1:]]
 
     assert actual_cuts == expected_cuts, f"Cut list mismatch for {golden_file}"
