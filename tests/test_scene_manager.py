@@ -19,6 +19,7 @@ from fractions import Fraction
 
 import pytest
 
+from scenedetect import SceneDetector, open_video
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.common import FramePosition, Timecode
 from scenedetect.detectors import AdaptiveDetector, ContentDetector
@@ -290,3 +291,47 @@ def test_resolve_end_time(start, end, frame_numbering, expected):
 def test_resolve_end_time_rejects_unknown_relative_origin():
     with pytest.raises(ValueError, match="timestamp start"):
         _resolve_end_time("0.3s", 15, FrameNumbering.RELATIVE)
+
+
+@pytest.mark.parametrize("backend", ["opencv", "pyav"])
+@pytest.mark.parametrize("frame_skip", [0, 3])
+def test_time_cutoff_preserves_next_frame(
+    test_vfr_drop3_video: str, auto_close, backend: str, frame_skip: int
+):
+    """Stop before the timestamp cutoff, including during a skipped-frame sequence."""
+    processed: list[int] = []
+
+    class RecordingDetector(SceneDetector):
+        def process_frame(self, position: FramePosition, frame_img) -> list[FramePosition]:
+            processed.append(position.frame_number)
+            return []
+
+    reference = auto_close(open_video(test_vfr_drop3_video, backend=backend))
+    for _ in range(6):
+        assert reference.read(decode=False) is True
+    last_included = reference.position
+    assert isinstance(last_included, FramePosition)
+    assert reference.read(decode=False) is True
+    first_excluded = reference.position
+    assert isinstance(first_excluded, FramePosition)
+
+    video = auto_close(open_video(test_vfr_drop3_video, backend=backend))
+    manager = SceneManager()
+    manager.add_detector(RecordingDetector())
+    num_frames = manager.detect_scenes(
+        video=video,
+        end_time=first_excluded.timecode,
+        frame_skip=frame_skip,
+    )
+
+    assert num_frames == 6
+    assert processed == list(range(0, 6, frame_skip + 1))
+    assert video.position == last_included
+
+    scene_list = manager.get_scene_list(start_in_scene=True)
+    assert len(scene_list) == 1
+    assert scene_list[0][1].frame_number == 6
+
+    assert video.peek_timecode() == first_excluded.timecode
+    assert video.read(decode=False) is True
+    assert video.position == first_excluded
