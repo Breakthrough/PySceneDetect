@@ -408,7 +408,7 @@ value differently from Python, that spelling follows in parentheses.</p>
 <h2>AdaptiveDetector<a class="headerlink" href="#adaptivedetector" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli.html#command-detect-adaptive"><span class="std std-ref">detect-adaptive</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-detect-adaptive"><span class="std std-ref">[detect-adaptive]</span></a></p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli.html#command-detect-adaptive"><span class="std std-ref">detect-adaptive</span></a> | <strong>Config File:</strong> <a class="reference internal" href="../cli/config_file.html#config-detect-adaptive"><span class="std std-ref">[detect-adaptive]</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.detectors.adaptive_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> compares the difference in content between adjacent frames similar
 to <code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code> except the threshold isn’t fixed, but is a rolling average of adjacent frame
@@ -550,7 +550,7 @@ amount of frames a detector might emit an event in the past.</p>
 <h2>ContentDetector<a class="headerlink" href="#contentdetector" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli.html#command-detect-content"><span class="std std-ref">detect-content</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-detect-content"><span class="std std-ref">[detect-content]</span></a></p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli.html#command-detect-content"><span class="std std-ref">detect-content</span></a> | <strong>Config File:</strong> <a class="reference internal" href="../cli/config_file.html#config-detect-content"><span class="std std-ref">[detect-content]</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.detectors.content_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a> compares the difference in content between adjacent frames against a
 set threshold/score, which if exceeded, triggers a scene cut.</p>
@@ -745,7 +745,7 @@ amount of frames a detector might emit an event in the past.</p>
 <h2>HashDetector<a class="headerlink" href="#hashdetector" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli.html#command-detect-hash"><span class="std std-ref">detect-hash</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-detect-hash"><span class="std std-ref">[detect-hash]</span></a></p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli.html#command-detect-hash"><span class="std std-ref">detect-hash</span></a> | <strong>Config File:</strong> <a class="reference internal" href="../cli/config_file.html#config-detect-hash"><span class="std std-ref">[detect-hash]</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.detectors.hash_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.hash_detector.HashDetector" title="scenedetect.detectors.hash_detector.HashDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashDetector</span></code></a> calculates a hash for each frame of a video using a perceptual
 hashing algorithm. The differences (distance) in hash value between frames is calculated.
@@ -861,7 +861,7 @@ frame to frame.</p>
 <h2>HistogramDetector<a class="headerlink" href="#histogramdetector" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli.html#command-detect-hist"><span class="std std-ref">detect-hist</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-detect-hist"><span class="std std-ref">[detect-hist]</span></a></p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli.html#command-detect-hist"><span class="std std-ref">detect-hist</span></a> | <strong>Config File:</strong> <a class="reference internal" href="../cli/config_file.html#config-detect-hist"><span class="std std-ref">[detect-hist]</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.detectors.histogram_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a> compares the difference in the YUV histograms of subsequent
 frames. If the difference exceeds a given threshold, a cut is detected.</p>
@@ -997,7 +997,7 @@ or more timecodes in the list, and not necessarily the same as <code class="docu
 <h2>ThresholdDetector<a class="headerlink" href="#thresholddetector" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli.html#command-detect-threshold"><span class="std std-ref">detect-threshold</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-detect-threshold"><span class="std std-ref">[detect-threshold]</span></a></p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli.html#command-detect-threshold"><span class="std std-ref">detect-threshold</span></a> | <strong>Config File:</strong> <a class="reference internal" href="../cli/config_file.html#config-detect-threshold"><span class="std std-ref">[detect-threshold]</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.detectors.threshold_detector"></span><p><a class="reference internal" href="#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a> uses a set intensity as a threshold to detect cuts, which are
 triggered when the average pixel intensity exceeds or falls below this threshold.</p>

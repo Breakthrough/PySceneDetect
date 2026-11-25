@@ -370,7 +370,7 @@
 <h1><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Command<a class="headerlink" href="#scenedetect-command" title="Permalink to this heading">¶</a></h1>
 <div class="admonition seealso" id="command-scenedetect">
 <p class="admonition-title">See also</p>
-<p>Config file: <a class="reference internal" href="cli/config_file.html#scenedetect-cli-config-file"><span class="std std-ref">Configuration File</span></a> | Python API: <a class="reference internal" href="api.html"><span class="doc">scenedetect Package</span></a></p>
+<p><strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#scenedetect-cli-config-file"><span class="std std-ref">Configuration File</span></a> | <strong>Python API:</strong> <a class="reference internal" href="api.html"><span class="doc">scenedetect Package</span></a></p>
 </div>
 <p>PySceneDetect is a scene cut/transition detection program. PySceneDetect takes an input video, runs detection on it, and uses the resulting scene information to generate output. The syntax for using PySceneDetect is:</p>
 <blockquote>
@@ -587,7 +587,7 @@
 <span id="command-detect-adaptive"></span><h3><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code><a class="headerlink" href="#detect-adaptive" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-adaptive"><span class="std std-ref">option table</span></a>) | Config file: <a class="reference internal" href="cli/config_file.html#config-detect-adaptive"><span class="std std-ref">[detect-adaptive]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-adaptive"><span class="std std-ref">option table</span></a>) | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-detect-adaptive"><span class="std std-ref">[detect-adaptive]</span></a></p>
 </div>
 <p>Find fast cuts using diffs in HSL colorspace (rolling average).</p>
 <p>Two-pass algorithm that first calculates frame scores with <a class="reference internal" href="#command-detect-content"><span class="std std-ref">detect-content</span></a>, and then applies a rolling average when processing the result. This can help mitigate false detections in situations such as camera movement.</p>
@@ -653,7 +653,7 @@
 <span id="command-detect-content"></span><h3><code class="docutils literal notranslate"><span class="pre">detect-content</span></code><a class="headerlink" href="#detect-content" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-content"><span class="std std-ref">option table</span></a>) | Config file: <a class="reference internal" href="cli/config_file.html#config-detect-content"><span class="std std-ref">[detect-content]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/detectors.html#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-content"><span class="std std-ref">option table</span></a>) | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-detect-content"><span class="std std-ref">[detect-content]</span></a></p>
 </div>
 <p>Find fast cuts using differences in HSL (filtered).</p>
 <p>For each frame, a score from 0 to 255.0 is calculated which represents the difference in content between the current and previous frame (higher = more different). A cut is generated when a frame score exceeds <a class="reference internal" href="#cmdoption-scenedetect-detect-content-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--threshold</span></code></a>. Frame scores are saved under the “content_val” column in a statsfile.</p>
@@ -722,7 +722,7 @@
 <span id="command-detect-hash"></span><h3><code class="docutils literal notranslate"><span class="pre">detect-hash</span></code><a class="headerlink" href="#detect-hash" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector" title="scenedetect.detectors.hash_detector.HashDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-hash"><span class="std std-ref">option table</span></a>) | Config file: <a class="reference internal" href="cli/config_file.html#config-detect-hash"><span class="std std-ref">[detect-hash]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/detectors.html#scenedetect.detectors.hash_detector.HashDetector" title="scenedetect.detectors.hash_detector.HashDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-hash"><span class="std std-ref">option table</span></a>) | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-detect-hash"><span class="std std-ref">[detect-hash]</span></a></p>
 </div>
 <p>Find fast cuts using perceptual hashing.</p>
 <p>The perceptual hash is taken of adjacent frames, and used to calculate the hamming distance between them. The distance is then normalized by the squared size of the hash, and compared to the threshold.</p>
@@ -769,7 +769,7 @@
 <span id="command-detect-hist"></span><h3><code class="docutils literal notranslate"><span class="pre">detect-hist</span></code><a class="headerlink" href="#detect-hist" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-hist"><span class="std std-ref">option table</span></a>) | Config file: <a class="reference internal" href="cli/config_file.html#config-detect-hist"><span class="std std-ref">[detect-hist]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-hist"><span class="std std-ref">option table</span></a>) | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-detect-hist"><span class="std std-ref">[detect-hist]</span></a></p>
 </div>
 <p>Find fast cuts by differencing YUV histograms.</p>
 <p>Uses Y channel after converting each frame to YUV to create a histogram of each frame. Histograms between frames are compared to determine a score for how similar they are.</p>
@@ -809,7 +809,7 @@
 <span id="command-detect-threshold"></span><h3><code class="docutils literal notranslate"><span class="pre">detect-threshold</span></code><a class="headerlink" href="#detect-threshold" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-threshold"><span class="std std-ref">option table</span></a>) | Config file: <a class="reference internal" href="cli/config_file.html#config-detect-threshold"><span class="std std-ref">[detect-threshold]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a> (<a class="reference internal" href="api/detectors.html#options-detect-threshold"><span class="std std-ref">option table</span></a>) | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-detect-threshold"><span class="std std-ref">[detect-threshold]</span></a></p>
 </div>
 <p>Find fade in/out using averaging.</p>
 <p>Detects fade-in and fade-out events using average pixel values. Resulting cuts are placed between adjacent fade-out and fade-in events.</p>
@@ -865,7 +865,7 @@
 <span id="command-list-scenes"></span><h3><code class="docutils literal notranslate"><span class="pre">list-scenes</span></code><a class="headerlink" href="#list-scenes" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list" title="scenedetect.output.write_scene_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-list-scenes"><span class="std std-ref">[list-scenes]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list" title="scenedetect.output.write_scene_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-list-scenes"><span class="std std-ref">[list-scenes]</span></a></p>
 </div>
 <p>Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default).</p>
 <section id="id10">
@@ -918,7 +918,7 @@
 <span id="command-load-scenes"></span><h3><code class="docutils literal notranslate"><span class="pre">load-scenes</span></code><a class="headerlink" href="#load-scenes" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <em>none (CLI only)</em> | Config file: <a class="reference internal" href="cli/config_file.html#config-load-scenes"><span class="std std-ref">[load-scenes]</span></a></p>
+<p><strong>Python API:</strong> <em>none (CLI only)</em> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-load-scenes"><span class="std std-ref">[load-scenes]</span></a></p>
 </div>
 <p>Load scenes from CSV instead of detecting. Can be used with CSV generated by <a class="reference internal" href="#command-list-scenes"><span class="std std-ref">list-scenes</span></a>. Scenes are loaded using the specified column as cut locations (frame number or timecode).</p>
 <section id="id12">
@@ -949,7 +949,7 @@
 <span id="command-save-chapters"></span><h3><code class="docutils literal notranslate"><span class="pre">save-chapters</span></code><a class="headerlink" href="#save-chapters" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_ffmetadata" title="scenedetect.output.write_scene_list_ffmetadata"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_ffmetadata()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-chapters"><span class="std std-ref">[save-chapters]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_ffmetadata" title="scenedetect.output.write_scene_list_ffmetadata"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_ffmetadata()</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-save-chapters"><span class="std std-ref">[save-chapters]</span></a></p>
 </div>
 <p>Save scenes as chapters in FFmetadata format.</p>
 <p>The chapters can be added to a video with ffmpeg without re-encoding, e.g.:</p>
@@ -984,7 +984,7 @@
 <span id="command-save-edl"></span><h3><code class="docutils literal notranslate"><span class="pre">save-edl</span></code><a class="headerlink" href="#save-edl" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_edl" title="scenedetect.output.write_scene_list_edl"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_edl()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-edl"><span class="std std-ref">[save-edl]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_edl" title="scenedetect.output.write_scene_list_edl"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_edl()</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-save-edl"><span class="std std-ref">[save-edl]</span></a></p>
 </div>
 <p>Save cuts in EDL format (CMX 3600).</p>
 <p>Timecodes are non-drop-frame (HH:MM:SS:FF), counting frames at the nominal rate: 24 frames per
@@ -1030,7 +1030,7 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <span id="command-save-fcp"></span><h3><code class="docutils literal notranslate"><span class="pre">save-fcp</span></code><a class="headerlink" href="#save-fcp" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_fcpx" title="scenedetect.output.write_scene_list_fcpx"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_fcpx()</span></code></a>, <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_fcp7" title="scenedetect.output.write_scene_list_fcp7"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_fcp7()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-fcp"><span class="std std-ref">[save-fcp]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_fcpx" title="scenedetect.output.write_scene_list_fcpx"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_fcpx()</span></code></a>, <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_fcp7" title="scenedetect.output.write_scene_list_fcp7"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_fcp7()</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-save-fcp"><span class="std std-ref">[save-fcp]</span></a></p>
 </div>
 <p>Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX).</p>
 <section id="id16">
@@ -1061,7 +1061,7 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <span id="command-save-html"></span><h3><code class="docutils literal notranslate"><span class="pre">save-html</span></code><a class="headerlink" href="#save-html" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_html" title="scenedetect.output.write_scene_list_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-html"><span class="std std-ref">[save-html]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_html" title="scenedetect.output.write_scene_list_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-save-html"><span class="std std-ref">[save-html]</span></a></p>
 </div>
 <p>Save scene list to HTML file.</p>
 <p>To customize image generation, specify the <a class="reference internal" href="#command-save-images"><span class="std std-ref">save-images</span></a> command before <a class="reference internal" href="#command-save-html"><span class="std std-ref">save-html</span></a>. This command always uses the result of the preceeding <a class="reference internal" href="#command-save-images"><span class="std std-ref">save-images</span></a> command, or runs it with the default config values unless <code class="docutils literal notranslate"><span class="pre">--no-images</span></code> is set.</p>
@@ -1104,7 +1104,7 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <span id="command-save-images"></span><h3><code class="docutils literal notranslate"><span class="pre">save-images</span></code><a class="headerlink" href="#save-images" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.save_images" title="scenedetect.output.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-images"><span class="std std-ref">[save-images]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/output.html#scenedetect.output.save_images" title="scenedetect.output.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images()</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-save-images"><span class="std std-ref">[save-images]</span></a></p>
 </div>
 <p>Save images from each detected scene.</p>
 <section id="id18">
@@ -1221,7 +1221,7 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <span id="command-save-keyframes"></span><h3><code class="docutils literal notranslate"><span class="pre">save-keyframes</span></code><a class="headerlink" href="#save-keyframes" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <em>none (CLI only)</em> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-keyframes"><span class="std std-ref">[save-keyframes]</span></a></p>
+<p><strong>Python API:</strong> <em>none (CLI only)</em> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-save-keyframes"><span class="std std-ref">[save-keyframes]</span></a></p>
 </div>
 <p>Save detected cuts using keyframe format v1.</p>
 <p>Frame numbers are currently approximate for variable framerate (VFR) video.</p>
@@ -1246,7 +1246,7 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <span id="command-save-otio"></span><h3><code class="docutils literal notranslate"><span class="pre">save-otio</span></code><a class="headerlink" href="#save-otio" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_otio" title="scenedetect.output.write_scene_list_otio"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_otio()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-otio"><span class="std std-ref">[save-otio]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/output.html#scenedetect.output.write_scene_list_otio" title="scenedetect.output.write_scene_list_otio"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_otio()</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-save-otio"><span class="std std-ref">[save-otio]</span></a></p>
 </div>
 <p>Save cuts as an OTIO timeline.</p>
 <p>Uses the Timeline.1 schema. OTIO (OpenTimelineIO) timelines can be imported by many video editors.</p>
@@ -1290,7 +1290,7 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <span id="command-save-qp"></span><h3><code class="docutils literal notranslate"><span class="pre">save-qp</span></code><a class="headerlink" href="#save-qp" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <em>none (CLI only)</em> | Config file: <a class="reference internal" href="cli/config_file.html#config-save-qp"><span class="std std-ref">[save-qp]</span></a></p>
+<p><strong>Python API:</strong> <em>none (CLI only)</em> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-save-qp"><span class="std std-ref">[save-qp]</span></a></p>
 </div>
 <p>Save cuts as keyframes (I-frames) for video encoding.</p>
 <p>The resulting QP file can be used with the <code class="docutils literal notranslate"><span class="pre">--qpfile</span></code> argument in x264/x265.</p>
@@ -1321,7 +1321,7 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <span id="command-split-video"></span><h3><code class="docutils literal notranslate"><span class="pre">split-video</span></code><a class="headerlink" href="#split-video" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api/output.html#scenedetect.output.split_video_ffmpeg" title="scenedetect.output.split_video_ffmpeg"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a>, <a class="reference internal" href="api/output.html#scenedetect.output.split_video_mkvmerge" title="scenedetect.output.split_video_mkvmerge"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a> | Config file: <a class="reference internal" href="cli/config_file.html#config-split-video"><span class="std std-ref">[split-video]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api/output.html#scenedetect.output.split_video_ffmpeg" title="scenedetect.output.split_video_ffmpeg"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a>, <a class="reference internal" href="api/output.html#scenedetect.output.split_video_mkvmerge" title="scenedetect.output.split_video_mkvmerge"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="cli/config_file.html#config-split-video"><span class="std std-ref">[split-video]</span></a></p>
 </div>
 <p>Split input video using ffmpeg or mkvmerge.</p>
 <section id="id23">
@@ -1411,7 +1411,7 @@ timecode second at 23.976 fps, 30 at 29.97 fps, and so on.</p>
 <span id="command-time"></span><h3><code class="docutils literal notranslate"><span class="pre">time</span></code><a class="headerlink" href="#time" title="Permalink to this heading">¶</a></h3>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="api.html#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">start_time</span></code>, <code class="docutils literal notranslate"><span class="pre">end_time</span></code>), <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.detect_scenes" title="scenedetect.scene_manager.SceneManager.detect_scenes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SceneManager.detect_scenes</span></code></a> (<code class="docutils literal notranslate"><span class="pre">duration</span></code>, <code class="docutils literal notranslate"><span class="pre">end_time</span></code>), <a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.seek" title="scenedetect.video_stream.VideoStream.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VideoStream.seek</span></code></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="api.html#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">detect()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">start_time</span></code>, <code class="docutils literal notranslate"><span class="pre">end_time</span></code>), <a class="reference internal" href="api/scene_manager.html#scenedetect.scene_manager.SceneManager.detect_scenes" title="scenedetect.scene_manager.SceneManager.detect_scenes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SceneManager.detect_scenes</span></code></a> (<code class="docutils literal notranslate"><span class="pre">duration</span></code>, <code class="docutils literal notranslate"><span class="pre">end_time</span></code>), <a class="reference internal" href="api/video_stream.html#scenedetect.video_stream.VideoStream.seek" title="scenedetect.video_stream.VideoStream.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">VideoStream.seek</span></code></a></p>
 </div>
 <p>Set start/end/duration of input video.</p>
 <p>Values can be specified as seconds (SSSS.nn), frames (NNNN), or timecode (HH:MM:SS.nnn). For example, to process only the first minute of a video:</p>

@@ -183,7 +183,7 @@ Python:
 Use a Different Video Backend
 -----------------------------
 
-Decode with PyAV instead of OpenCV (see :ref:`Video Backends <scenedetect-backends>`).
+Decode with PyAV instead of OpenCV (see :ref:`Video Backends <cli-backends>`).
 
 Command line:
 

@@ -16,7 +16,7 @@ Logging
 
 PySceneDetect writes log messages to the ``pyscenedetect`` logger, which has no default handlers. Call :func:`scenedetect.init_logger <scenedetect.platform.init_logger>` with ``show_stdout=True`` or a log file path to attach standard handlers, or configure ``logging.getLogger("pyscenedetect")`` directly.
 
-.. seealso:: CLI: :option:`-v/--verbosity <scenedetect -v>`, :option:`-l/--logfile <scenedetect -l>`, :option:`-q/--quiet <scenedetect -q>`
+.. seealso:: **Command Line:** :option:`-v/--verbosity <scenedetect -v>`, :option:`-l/--logfile <scenedetect -l>`, :option:`-q/--quiet <scenedetect -q>`
 
 .. autofunction:: scenedetect.platform.init_logger
 
@@ -24,7 +24,7 @@ PySceneDetect writes log messages to the ``pyscenedetect`` logger, which has no 
 System Information
 ------------------
 
-.. seealso:: CLI: :ref:`version <command-help>`
+.. seealso:: **Command Line:** :ref:`version <command-help>`
 
 .. autofunction:: scenedetect.platform.get_system_version_info
 

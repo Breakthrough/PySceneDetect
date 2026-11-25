@@ -374,7 +374,7 @@
 <span id="cli-backend-opencv"></span><h2>OpenCV<a class="headerlink" href="#opencv" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="../api/backends.html#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a> | Config file: <a class="reference internal" href="config_file.html#config-backend-opencv"><span class="std std-ref">[backend-opencv]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="../api/backends.html#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="config_file.html#config-backend-opencv"><span class="std std-ref">[backend-opencv]</span></a></p>
 </div>
 <p><em>[Default]</em>
 The <a class="reference external" href="https://opencv.org/">OpenCV</a> backend (usually <a class="reference external" href="https://pypi.org/project/opencv-python/">opencv-python</a>) uses OpenCV’s <code class="docutils literal notranslate"><span class="pre">VideoCapture</span></code> to decode video. Select it with <code class="docutils literal notranslate"><span class="pre">-b</span> <span class="pre">opencv</span></code> on the command line, or set <code class="docutils literal notranslate"><span class="pre">backend</span> <span class="pre">=</span> <span class="pre">opencv</span></code> under <code class="docutils literal notranslate"><span class="pre">[global]</span></code> in your <a class="reference internal" href="config_file.html#scenedetect-cli-config-file"><span class="std std-ref">config file</span></a>.</p>
@@ -386,7 +386,7 @@ The <a class="reference external" href="https://opencv.org/">OpenCV</a> backend 
 <span id="cli-backend-pyav"></span><h2>PyAV<a class="headerlink" href="#pyav" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="../api/backends.html#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a> | Config file: <a class="reference internal" href="config_file.html#config-backend-pyav"><span class="std std-ref">[backend-pyav]</span></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="../api/backends.html#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a> | <strong>Config File:</strong> <a class="reference internal" href="config_file.html#config-backend-pyav"><span class="std std-ref">[backend-pyav]</span></a></p>
 </div>
 <p>The <a class="reference external" href="https://github.com/PyAV-Org/PyAV">PyAV</a> backend (<a class="reference external" href="https://pypi.org/project/av/">av package</a>) handles multiple audio tracks and frame decode errors more reliably than OpenCV.</p>
 <p>Variable frame rate (VFR) video is fully supported. PyAV reads native PTS timestamps directly from the video container, giving the most accurate timecodes for VFR content.</p>
@@ -396,7 +396,7 @@ The <a class="reference external" href="https://opencv.org/">OpenCV</a> backend 
 <span id="cli-backend-moviepy"></span><h2>MoviePy<a class="headerlink" href="#moviepy" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Python API: <a class="reference internal" href="../api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></p>
+<p><strong>Python API:</strong> <a class="reference internal" href="../api/backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></p>
 </div>
 <p>MoviePy runs <code class="docutils literal notranslate"><span class="pre">ffmpeg</span></code> as a subprocess and supports many input types. Inputs that support seeking, such as image sequences or AviSynth scripts, work with most commands.</p>
 <div class="admonition warning">

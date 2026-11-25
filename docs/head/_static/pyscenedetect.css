@@ -39,21 +39,15 @@ div.sphinxsidebar code span.pre {
     overflow-wrap: anywhere;
 }
 
-/* CLI <-> Python API cross-links: compact "See also" boxes with the title inline. */
 div.body div.admonition.seealso {
     padding: 0.6rem 0.95rem;
     margin: 0.9rem 0;
 }
 div.body div.admonition.seealso p.admonition-title {
-    display: inline;
-    font-family: var(--psd-font-sans);
-    font-size: 0.94rem;
-    font-weight: 600;
-    line-height: inherit;
-    margin: 0 0.4em 0 0;
+    display: none;
 }
-div.body div.admonition.seealso p.admonition-title + p {
-    display: inline;
+div.body div.admonition.seealso p {
+    margin: 0;
 }
 div.body div.admonition.seealso ul {
     margin-top: 0.4em;

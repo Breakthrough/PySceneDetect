@@ -370,7 +370,7 @@
 <span id="scenedetect-backends"></span><h1>Video Backends<a class="headerlink" href="#video-backends" title="Permalink to this heading">¶</a></h1>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli.html#cmdoption-scenedetect-b"><code class="xref std std-option docutils literal notranslate"><span class="pre">-b/--backend</span></code></a> and <a class="reference internal" href="../cli/backends.html#cli-backends"><span class="std std-ref">Backends</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-global"><span class="std std-ref">[global] backend</span></a></p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli.html#cmdoption-scenedetect-b"><code class="xref std std-option docutils literal notranslate"><span class="pre">-b/--backend</span></code></a> and <a class="reference internal" href="../cli/backends.html#cli-backends"><span class="std std-ref">Backends</span></a> | <strong>Config File:</strong> <a class="reference internal" href="../cli/config_file.html#config-global"><span class="std std-ref">[global] backend</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.backends"></span><p><code class="docutils literal notranslate"><span class="pre">scenedetect.backends</span></code> Module</p>
 <p>This module contains <a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream" title="scenedetect.video_stream.VideoStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStream</span></code></a> implementations
@@ -450,7 +450,7 @@ parameter. These backends must support construction with the following signature
 <h2>OpenCV<a class="headerlink" href="#opencv" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli/backends.html#cli-backend-opencv"><span class="std std-ref">-b opencv</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-backend-opencv"><span class="std std-ref">[backend-opencv]</span></a></p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli/backends.html#cli-backend-opencv"><span class="std std-ref">-b opencv</span></a> | <strong>Config File:</strong> <a class="reference internal" href="../cli/config_file.html#config-backend-opencv"><span class="std std-ref">[backend-opencv]</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.backends.opencv"></span><p><a class="reference internal" href="#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a> is backed by the OpenCV <code class="docutils literal notranslate"><span class="pre">VideoCapture</span></code> object. This is the default
 backend. Works with video files, image sequences, and network streams/URLs.</p>
@@ -801,7 +801,7 @@ milliseconds. The first frame has a PTS of 0.</p>
 <h2>PyAV<a class="headerlink" href="#pyav" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli/backends.html#cli-backend-pyav"><span class="std std-ref">-b pyav</span></a> | Config file: <a class="reference internal" href="../cli/config_file.html#config-backend-pyav"><span class="std std-ref">[backend-pyav]</span></a></p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli/backends.html#cli-backend-pyav"><span class="std std-ref">-b pyav</span></a> | <strong>Config File:</strong> <a class="reference internal" href="../cli/config_file.html#config-backend-pyav"><span class="std std-ref">[backend-pyav]</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.backends.pyav"></span><p><a class="reference internal" href="#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a> provides an adapter for the PyAV av.InputContainer object.</p>
 <dl class="py class">
@@ -1002,7 +1002,7 @@ milliseconds. The first frame has a PTS of 0.</p>
 <h2>MoviePy<a class="headerlink" href="#moviepy" title="Permalink to this heading">¶</a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>CLI: <a class="reference internal" href="../cli/backends.html#cli-backend-moviepy"><span class="std std-ref">-b moviepy</span></a></p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli/backends.html#cli-backend-moviepy"><span class="std std-ref">-b moviepy</span></a></p>
 </div>
 <span class="target" id="module-scenedetect.backends.moviepy"></span><p><a class="reference internal" href="#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a> provides an adapter for MoviePy’s <code class="docutils literal notranslate"><span class="pre">FFMPEG_VideoReader</span></code>.</p>
 <p>MoviePy launches ffmpeg as a subprocess, and can be used with various types of inputs. Generally,
