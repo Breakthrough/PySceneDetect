@@ -16,7 +16,7 @@ The ``scenedetect`` command generates outputs after scene detection finishes. Mo
 OpenCV
 =======================================================================
 
-.. seealso:: Python API: :class:`~scenedetect.backends.opencv.VideoStreamCv2` | Config file: :ref:`[backend-opencv] <config-backend-opencv>`
+.. seealso:: **Python API:** :class:`~scenedetect.backends.opencv.VideoStreamCv2` | **Config File:** :ref:`[backend-opencv] <config-backend-opencv>`
 
 *[Default]*
 The `OpenCV <https://opencv.org/>`_ backend (usually `opencv-python <https://pypi.org/project/opencv-python/>`_) uses OpenCV's ``VideoCapture`` to decode video. Select it with ``-b opencv`` on the command line, or set ``backend = opencv`` under ``[global]`` in your :ref:`config file <scenedetect_cli-config_file>`.
@@ -34,7 +34,7 @@ Variable frame rate (VFR) video is supported. Scene detection uses PTS-derived t
 PyAV
 =======================================================================
 
-.. seealso:: Python API: :class:`~scenedetect.backends.pyav.VideoStreamAv` | Config file: :ref:`[backend-pyav] <config-backend-pyav>`
+.. seealso:: **Python API:** :class:`~scenedetect.backends.pyav.VideoStreamAv` | **Config File:** :ref:`[backend-pyav] <config-backend-pyav>`
 
 The `PyAV <https://github.com/PyAV-Org/PyAV>`_ backend (`av package <https://pypi.org/project/av/>`_) handles multiple audio tracks and frame decode errors more reliably than OpenCV.
 
@@ -49,7 +49,7 @@ Select this backend with ``-b pyav`` on the command line, or set ``backend = pya
 MoviePy
 =======================================================================
 
-.. seealso:: Python API: :class:`~scenedetect.backends.moviepy.VideoStreamMoviePy`
+.. seealso:: **Python API:** :class:`~scenedetect.backends.moviepy.VideoStreamMoviePy`
 
 MoviePy runs ``ffmpeg`` as a subprocess and supports many input types. Inputs that support seeking, such as image sequences or AviSynth scripts, work with most commands.
 

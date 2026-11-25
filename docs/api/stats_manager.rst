@@ -5,7 +5,7 @@
 Stats Manager
 -------------
 
-.. seealso:: CLI: :option:`-s/--stats <scenedetect -s>`
+.. seealso:: **Command Line:** :option:`-s/--stats <scenedetect -s>`
 
 .. automodule:: scenedetect.stats_manager
    :no-members:

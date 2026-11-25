@@ -15,7 +15,7 @@ Output
 Splitting Video
 ---------------
 
-.. seealso:: CLI: :ref:`split-video <command-split-video>` | Config file: :ref:`[split-video] <config-split-video>`
+.. seealso:: **Command Line:** :ref:`split-video <command-split-video>` | **Config File:** :ref:`[split-video] <config-split-video>`
 
 .. autofunction:: scenedetect.output.split_video_ffmpeg
 
@@ -28,14 +28,14 @@ Splitting Video
 Saving Images
 -------------
 
-.. seealso:: CLI: :ref:`save-images <command-save-images>` | Config file: :ref:`[save-images] <config-save-images>`
+.. seealso:: **Command Line:** :ref:`save-images <command-save-images>` | **Config File:** :ref:`[save-images] <config-save-images>`
 
 .. autofunction:: scenedetect.output.save_images
 
 Scene Lists
 -----------
 
-.. seealso:: CLI: :ref:`list-scenes <command-list-scenes>` (CSV), :ref:`save-html <command-save-html>`, :ref:`save-edl <command-save-edl>`, :ref:`save-fcp <command-save-fcp>`, :ref:`save-otio <command-save-otio>`, :ref:`save-chapters <command-save-chapters>`
+.. seealso:: **Command Line:** :ref:`list-scenes <command-list-scenes>` (CSV), :ref:`save-html <command-save-html>`, :ref:`save-edl <command-save-edl>`, :ref:`save-fcp <command-save-fcp>`, :ref:`save-otio <command-save-otio>`, :ref:`save-chapters <command-save-chapters>`
 
 .. autofunction:: scenedetect.output.write_scene_list
 
@@ -54,7 +54,7 @@ Scene Lists
 Filename Formatting
 -------------------
 
-.. seealso:: CLI: the ``-f/--filename`` option of :option:`split-video <scenedetect split-video -f>` and :option:`save-images <scenedetect save-images -f>`
+.. seealso:: **Command Line:** the ``-f/--filename`` option of :option:`split-video <scenedetect split-video -f>` and :option:`save-images <scenedetect save-images -f>`
 
 .. autofunction:: scenedetect.output.default_formatter
 

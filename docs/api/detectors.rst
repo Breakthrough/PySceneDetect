@@ -23,7 +23,7 @@ Detectors
 AdaptiveDetector
 ----------------
 
-.. seealso:: CLI: :ref:`detect-adaptive <command-detect-adaptive>` | Config file: :ref:`[detect-adaptive] <config-detect-adaptive>`
+.. seealso:: **Command Line:** :ref:`detect-adaptive <command-detect-adaptive>` | **Config File:** :ref:`[detect-adaptive] <config-detect-adaptive>`
 
 .. automodule:: scenedetect.detectors.adaptive_detector
    :no-members:
@@ -36,7 +36,7 @@ AdaptiveDetector
 ContentDetector
 ---------------
 
-.. seealso:: CLI: :ref:`detect-content <command-detect-content>` | Config file: :ref:`[detect-content] <config-detect-content>`
+.. seealso:: **Command Line:** :ref:`detect-content <command-detect-content>` | **Config File:** :ref:`[detect-content] <config-detect-content>`
 
 .. automodule:: scenedetect.detectors.content_detector
    :no-members:
@@ -49,7 +49,7 @@ ContentDetector
 HashDetector
 ------------
 
-.. seealso:: CLI: :ref:`detect-hash <command-detect-hash>` | Config file: :ref:`[detect-hash] <config-detect-hash>`
+.. seealso:: **Command Line:** :ref:`detect-hash <command-detect-hash>` | **Config File:** :ref:`[detect-hash] <config-detect-hash>`
 
 .. automodule:: scenedetect.detectors.hash_detector
    :no-members:
@@ -62,7 +62,7 @@ HashDetector
 HistogramDetector
 -----------------
 
-.. seealso:: CLI: :ref:`detect-hist <command-detect-hist>` | Config file: :ref:`[detect-hist] <config-detect-hist>`
+.. seealso:: **Command Line:** :ref:`detect-hist <command-detect-hist>` | **Config File:** :ref:`[detect-hist] <config-detect-hist>`
 
 .. automodule:: scenedetect.detectors.histogram_detector
    :no-members:
@@ -75,7 +75,7 @@ HistogramDetector
 ThresholdDetector
 -----------------
 
-.. seealso:: CLI: :ref:`detect-threshold <command-detect-threshold>` | Config file: :ref:`[detect-threshold] <config-detect-threshold>`
+.. seealso:: **Command Line:** :ref:`detect-threshold <command-detect-threshold>` | **Config File:** :ref:`[detect-threshold] <config-detect-threshold>`
 
 .. automodule:: scenedetect.detectors.threshold_detector
    :no-members:

@@ -370,8 +370,8 @@ Add a row like this one (leave out `api` if it has no Python API):
 CLI_INDEX_PATH = "docs/cli_index.inc"
 
 ROOT_SEEALSO = (
-    "\n.. seealso:: Config file: :ref:`Configuration File <scenedetect_cli-config_file>` | "
-    "Python API: :doc:`api`\n\n"
+    "\n.. seealso:: **Config File:** :ref:`Configuration File <scenedetect_cli-config_file>` | "
+    "**Python API:** :doc:`api`\n\n"
 )
 
 #
@@ -499,9 +499,9 @@ def generate_seealso(entry: Counterpart) -> StrGenerator:
         api = format_api(entry) if entry.api else NO_API
         if entry.command in DETECTOR_OPTIONS:
             api += f" (:ref:`option table <options-{entry.command}>`)"
-        parts.append(f"Python API: {api}")
+        parts.append(f"**Python API:** {api}")
     if entry.config:
-        parts.append(f"Config file: {format_config(entry.config)}")
+        parts.append(f"**Config File:** {format_config(entry.config)}")
     if parts:
         yield f"\n.. seealso:: {' | '.join(parts)}\n\n"
 
