@@ -261,3 +261,38 @@ def test_expand_scenes_to_bounds_does_not_mutate_input():
     expand_scenes_to_bounds(scenes, start=t0, end=t300)
 
     assert scenes == original
+
+
+def _write_blank_video(path: str, width: int, height: int, num_frames: int = 3) -> None:
+    import cv2
+    import numpy as np
+
+    writer = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*"MJPG"), 10.0, (width, height))
+    for _ in range(num_frames):
+        writer.write(np.zeros((height, width, 3), dtype=np.uint8))
+    writer.release()
+
+
+@pytest.mark.parametrize(
+    "crop,warns",
+    [
+        # Bounds are inclusive, so these all lie inside of a 64x48 frame.
+        ((0, 0, 63, 47), False),
+        ((0, 24, 63, 47), False),
+        ((10, 10, 20, 20), False),
+        # One pixel past the right or bottom edge.
+        ((0, 0, 64, 47), True),
+        ((0, 0, 63, 48), True),
+    ],
+)
+def test_crop_boundary_warning(tmp_path, caplog, crop, warns):
+    """The warning about a crop ending outside of the video must use the inclusive bounds."""
+    path = str(tmp_path / "blank.avi")
+    _write_blank_video(path, 64, 48)
+    video = VideoStreamCv2(path)
+    sm = SceneManager()
+    sm.crop = crop
+    sm.add_detector(ContentDetector())
+    with caplog.at_level("WARNING", logger="pyscenedetect"):
+        sm.detect_scenes(video=video)
+    assert any("crop ends outside" in r.getMessage() for r in caplog.records) == warns
