@@ -194,6 +194,7 @@ def test_save_images_resizes_each_frame(tmp_path: Path, threading, resize, expec
         video,
         num_images=2,
         image_extension="png",
+        encoder_param=3,
         output_dir=tmp_path,
         threading=threading,
         **resize,

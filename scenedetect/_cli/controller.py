@@ -345,7 +345,7 @@ def _load_scenes(context: CliContext) -> tuple[SceneList, CutList]:
 
             if left >= stop_limit:
                 continue
-            if left < stop_limit < right:
+            if stop_limit < right:
                 raise ValueError(
                     "The requested range would split a saved scene. "
                     "The CSV does not contain the complete position for that cutoff."

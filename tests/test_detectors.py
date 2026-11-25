@@ -92,8 +92,7 @@ class TestCase:
             video_path=self.path,
             detector=self.detector,
             start_time=self.start_time,
-            # The start seek restarts frame numbering at zero.
-            end_time=self.end_time - self.start_time,
+            end_time=self.end_time,
         )
 
 
