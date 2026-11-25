@@ -266,6 +266,13 @@ def test_cli_time_validate_options():
     assert invoke_scenedetect(base_command, TIME="-s 2.0 -e 8.0 -d 6.0 ") != 0
 
 
+def test_cli_timestamp_start_frame_end_requires_source(caplog):
+    exit_code, output = invoke_cli(["-i", DEFAULT_VIDEO_PATH, "time", "-s", "0.3s", "-e", "15"])
+    assert exit_code != 0, output
+    assert "requires source frame numbering" in caplog.text
+    caplog.clear()
+
+
 def test_cli_time_end():
     """Validate frame counts and last-frame timestamps without a start seek."""
     EXPECTED = """[PySceneDetect] Scene List:

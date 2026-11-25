@@ -15,6 +15,8 @@ These tests demonstrate common workflow patterns used when integrating the PySce
 
 import pytest
 
+from scenedetect.video_stream import FrameNumbering
+
 
 def test_api_detect(test_video_file: str):
     """Demonstrate usage of the `detect()` function to process a complete video."""
@@ -33,6 +35,40 @@ def test_api_detect_start_end_time(test_video_file: str):
     scene_list = detect(test_video_file, ContentDetector(), start_time=10.5, end_time=15.9)
     for i, scene in enumerate(scene_list):
         print(f"Scene {i + 1}: {scene[0].get_timecode()} - {scene[1].get_timecode()}")
+
+
+@pytest.mark.parametrize("start_time,end_time", [(10, 15), ("10", "15")])
+@pytest.mark.parametrize(
+    ("options", "expected_start", "expected_end"),
+    [
+        pytest.param({}, 0, 5, id="default"),
+        pytest.param({"frame_numbering": FrameNumbering.RELATIVE}, 0, 5, id="relative"),
+        pytest.param({"frame_numbering": FrameNumbering.SOURCE}, 10, 15, id="source"),
+    ],
+)
+def test_api_detect_frame_numbering(
+    test_video_file: str,
+    start_time: int | str,
+    end_time: int | str,
+    options: dict[str, FrameNumbering],
+    expected_start: int,
+    expected_end: int,
+):
+    """Apply numbering mode to the detected range after an integer start seek."""
+    from scenedetect import ContentDetector, detect
+
+    scene_list = detect(
+        test_video_file,
+        ContentDetector(),
+        start_time=start_time,
+        end_time=end_time,
+        start_in_scene=True,
+        **options,
+    )
+    assert len(scene_list) == 1
+    start, end = scene_list[0]
+    assert start.frame_number == expected_start
+    assert end.frame_number == expected_end
 
 
 def test_api_detect_stats(test_video_file: str):

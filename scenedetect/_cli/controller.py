@@ -27,8 +27,8 @@ from scenedetect.common import (
     parse_frame_or_time,
 )
 from scenedetect.platform import get_and_create_path
-from scenedetect.scene_manager import CutList, SceneList
-from scenedetect.video_stream import FrameNumbering, SeekError
+from scenedetect.scene_manager import CutList, SceneList, _resolve_end_time
+from scenedetect.video_stream import SeekError
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -136,16 +136,12 @@ def _detect(context: CliContext) -> tuple[SceneList, CutList] | None:
         if beyond_end:
             logger.critical("start time is beyond the end of the video")
             return None
-    if (
-        isinstance(context.start_time, Timecode)
-        and isinstance(context.end_time, int)
-        and context.video_stream is not None
-        and context.video_stream.frame_numbering is FrameNumbering.RELATIVE
-    ):
-        logger.critical(
-            "An integer --end with a timestamp --start requires --frame-numbering source. "
-            "Use a timestamp --end or --duration with relative numbering."
+    try:
+        end_time = _resolve_end_time(
+            context.start_time, context.end_time, context.video_stream.frame_numbering
         )
+    except ValueError as ex:
+        logger.critical("%s", ex)
         return None
 
     context.ensure_detector()
@@ -166,14 +162,6 @@ def _detect(context: CliContext) -> tuple[SceneList, CutList] | None:
             logger.critical("No frames available at requested start %s.", target_description)
             return None
 
-    end_time = context.end_time
-    if (
-        isinstance(context.start_time, int)
-        and isinstance(end_time, int)
-        and context.video_stream.frame_numbering is FrameNumbering.RELATIVE
-    ):
-        # Relative seek resets frame number to 0, so we count till end_time - start_time
-        end_time -= context.start_time
     if end_time is not None:
         if isinstance(end_time, int):
             empty_range = context.video_stream.frame_number + 1 >= end_time

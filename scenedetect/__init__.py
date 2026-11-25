@@ -78,7 +78,7 @@ from scenedetect.backends import (
 )
 from scenedetect.stats_manager import StatsManager as StatsManager
 from scenedetect.stats_manager import StatsFileCorrupt as StatsFileCorrupt
-from scenedetect.scene_manager import SceneManager
+from scenedetect.scene_manager import SceneManager, _resolve_end_time
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
@@ -189,8 +189,8 @@ def detect(
         start_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
             number of seconds ``123.45`` (`float`), a zero-based source frame ordinal ``200``
             (`int`), or a :class:`~scenedetect.common.Timecode`.
-        end_time: Exclusive ending point, in the same formats as `start_time`. Integer limits
-            use `frame_numbering`; timestamps remain on the source timeline.
+        end_time: Exclusive ending point on the source timeline, in the same formats as
+            `start_time`. Integer inputs are zero-based source frame ordinals.
         start_in_scene: Assume the video begins in a scene. This means that when detecting
             fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
             will contain a single scene spanning the processed range (instead of no scenes).
@@ -200,7 +200,7 @@ def detect(
             :data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the
             current system. Defaults to OpenCV; falls back to OpenCV if the requested backend
             is unavailable or fails to open the video.
-        frame_numbering: Origin for returned frame ordinals and integer end limits. RELATIVE
+        frame_numbering: Origin for returned frame ordinals. RELATIVE
             (default) restarts ordinals at 0 after the start seek. SOURCE counts ordinals from
             the beginning and may require decoding the prefix to reach the requested start.
 
@@ -210,10 +210,12 @@ def detect(
     Raises:
         :class:`VideoOpenFailure`: `video_path` could not be opened.
         :class:`StatsFileCorrupt`: `stats_file_path` is an invalid stats file
-        ValueError: `start_time` or `end_time` are incorrectly formatted.
+        ValueError: An input is invalid, or a timestamp start and integer end are combined
+            with RELATIVE frame numbering.
         TypeError: `start_time` or `end_time` are invalid types.
     """
     video = open_video(video_path, backend=backend, frame_numbering=frame_numbering)
+    end_time = _resolve_end_time(start_time, end_time, video.frame_numbering)
     if start_time is not None:
         video.seek(start_time)
     # To reduce memory consumption when not required, we only add a StatsManager if we

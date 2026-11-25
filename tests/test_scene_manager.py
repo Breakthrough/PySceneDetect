@@ -22,7 +22,7 @@ import pytest
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.common import FramePosition, Timecode
 from scenedetect.detectors import AdaptiveDetector, ContentDetector
-from scenedetect.scene_manager import SceneManager, expand_scenes_to_bounds
+from scenedetect.scene_manager import SceneManager, _resolve_end_time, expand_scenes_to_bounds
 from scenedetect.video_stream import FrameNumbering
 
 TEST_VIDEO_START_FRAMES_ACTUAL = [150, 180, 394]
@@ -266,3 +266,27 @@ def test_expand_scenes_to_bounds_does_not_mutate_input():
     expand_scenes_to_bounds(scenes, start=p0, end=p300)
 
     assert scenes == original
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "frame_numbering", "expected"),
+    [
+        (10, None, FrameNumbering.RELATIVE, None),
+        (None, 15, FrameNumbering.RELATIVE, 15),
+        (10, "0.125s", FrameNumbering.RELATIVE, Fraction(1, 8)),
+        ("0.3s", 15, FrameNumbering.SOURCE, 15),
+        (15, 10, FrameNumbering.RELATIVE, 0),
+    ],
+)
+def test_resolve_end_time(start, end, frame_numbering, expected):
+    result = _resolve_end_time(start, end, frame_numbering)
+    if isinstance(expected, Fraction):
+        assert isinstance(result, Timecode)
+        assert result.seconds == expected
+    else:
+        assert result == expected
+
+
+def test_resolve_end_time_rejects_unknown_relative_origin():
+    with pytest.raises(ValueError, match="timestamp start"):
+        _resolve_end_time("0.3s", 15, FrameNumbering.RELATIVE)

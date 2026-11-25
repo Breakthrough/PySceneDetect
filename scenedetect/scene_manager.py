@@ -93,6 +93,7 @@ from scenedetect.common import (
     FramePosition,
     Interpolation,
     SceneList,
+    Timecode,
     TimecodeLike,
     parse_frame_or_time,
 )
@@ -168,6 +169,31 @@ def expand_scenes_to_bounds(
     expanded[0] = (start, expanded[0][1])
     expanded[-1] = (expanded[-1][0], end)
     return expanded
+
+
+def _resolve_end_time(
+    start_time: TimecodeLike | None,
+    end_time: TimecodeLike | None,
+    frame_numbering: FrameNumbering,
+) -> int | Timecode | None:
+    """Translate a source end into the stream's frame-numbering coordinates."""
+    if end_time is None:
+        return None
+
+    end = parse_frame_or_time(end_time)
+    if isinstance(end, Fraction):
+        return Timecode(pts=end.numerator, time_base=Fraction(1, end.denominator))
+
+    if frame_numbering is FrameNumbering.RELATIVE and start_time is not None:
+        start = parse_frame_or_time(start_time)
+        if not isinstance(start, int):
+            raise ValueError(
+                "An integer end with a timestamp start requires source frame numbering. "
+                "Use a timestamp end or source frame numbering."
+            )
+        return max(0, end - start)
+
+    return end
 
 
 def get_scenes_from_cuts(
