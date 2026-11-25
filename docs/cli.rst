@@ -10,7 +10,7 @@
 .. program:: scenedetect
 
 
-.. seealso:: Config file: :ref:`Configuration File <scenedetect_cli-config_file>` | Python API: :doc:`api`
+.. seealso:: **Config File:** :ref:`Configuration File <scenedetect_cli-config_file>` | **Python API:** :doc:`api`
 
 PySceneDetect is a scene cut/transition detection program. PySceneDetect takes an input video, runs detection on it, and uses the resulting scene information to generate output. The syntax for using PySceneDetect is:
 
@@ -208,7 +208,7 @@ Detectors
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :class:`~scenedetect.detectors.adaptive_detector.AdaptiveDetector` (:ref:`option table <options-detect-adaptive>`) | Config file: :ref:`[detect-adaptive] <config-detect-adaptive>`
+.. seealso:: **Python API:** :class:`~scenedetect.detectors.adaptive_detector.AdaptiveDetector` (:ref:`option table <options-detect-adaptive>`) | **Config File:** :ref:`[detect-adaptive] <config-detect-adaptive>`
 
 Find fast cuts using diffs in HSL colorspace (rolling average).
 
@@ -276,7 +276,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :class:`~scenedetect.detectors.content_detector.ContentDetector` (:ref:`option table <options-detect-content>`) | Config file: :ref:`[detect-content] <config-detect-content>`
+.. seealso:: **Python API:** :class:`~scenedetect.detectors.content_detector.ContentDetector` (:ref:`option table <options-detect-content>`) | **Config File:** :ref:`[detect-content] <config-detect-content>`
 
 Find fast cuts using differences in HSL (filtered).
 
@@ -350,7 +350,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :class:`~scenedetect.detectors.hash_detector.HashDetector` (:ref:`option table <options-detect-hash>`) | Config file: :ref:`[detect-hash] <config-detect-hash>`
+.. seealso:: **Python API:** :class:`~scenedetect.detectors.hash_detector.HashDetector` (:ref:`option table <options-detect-hash>`) | **Config File:** :ref:`[detect-hash] <config-detect-hash>`
 
 Find fast cuts using perceptual hashing.
 
@@ -404,7 +404,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :class:`~scenedetect.detectors.histogram_detector.HistogramDetector` (:ref:`option table <options-detect-hist>`) | Config file: :ref:`[detect-hist] <config-detect-hist>`
+.. seealso:: **Python API:** :class:`~scenedetect.detectors.histogram_detector.HistogramDetector` (:ref:`option table <options-detect-hist>`) | **Config File:** :ref:`[detect-hist] <config-detect-hist>`
 
 Find fast cuts by differencing YUV histograms.
 
@@ -452,7 +452,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :class:`~scenedetect.detectors.threshold_detector.ThresholdDetector` (:ref:`option table <options-detect-threshold>`) | Config file: :ref:`[detect-threshold] <config-detect-threshold>`
+.. seealso:: **Python API:** :class:`~scenedetect.detectors.threshold_detector.ThresholdDetector` (:ref:`option table <options-detect-threshold>`) | **Config File:** :ref:`[detect-threshold] <config-detect-threshold>`
 
 Find fade in/out using averaging.
 
@@ -516,7 +516,7 @@ Commands
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :func:`~scenedetect.output.write_scene_list` | Config file: :ref:`[list-scenes] <config-list-scenes>`
+.. seealso:: **Python API:** :func:`~scenedetect.output.write_scene_list` | **Config File:** :ref:`[list-scenes] <config-list-scenes>`
 
 Create scene list CSV file (will be named $VIDEO_NAME-Scenes.csv by default).
 
@@ -570,7 +570,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: *no Python API equivalent* | Config file: :ref:`[load-scenes] <config-load-scenes>`
+.. seealso:: **Python API:** *none (CLI only)* | **Config File:** :ref:`[load-scenes] <config-load-scenes>`
 
 Load saved scene ranges from CSV instead of detecting. Requires start/end frame and time columns, defaulting to those written by :ref:`list-scenes <command-list-scenes>`.
 
@@ -628,7 +628,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :func:`~scenedetect.output.write_scene_list_ffmetadata` | Config file: :ref:`[save-chapters] <config-save-chapters>`
+.. seealso:: **Python API:** :func:`~scenedetect.output.write_scene_list_ffmetadata` | **Config File:** :ref:`[save-chapters] <config-save-chapters>`
 
 Save scenes as chapters in FFmetadata format.
 
@@ -667,7 +667,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :func:`~scenedetect.output.write_scene_list_edl` | Config file: :ref:`[save-edl] <config-save-edl>`
+.. seealso:: **Python API:** :func:`~scenedetect.output.write_scene_list_edl` | **Config File:** :ref:`[save-edl] <config-save-edl>`
 
 Save cuts in EDL format (CMX 3600).
 
@@ -715,7 +715,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :func:`~scenedetect.output.write_scene_list_fcpx`, :func:`~scenedetect.output.write_scene_list_fcp7` | Config file: :ref:`[save-fcp] <config-save-fcp>`
+.. seealso:: **Python API:** :func:`~scenedetect.output.write_scene_list_fcpx`, :func:`~scenedetect.output.write_scene_list_fcp7` | **Config File:** :ref:`[save-fcp] <config-save-fcp>`
 
 Save cuts in Final Cut Pro XML format (FCP7 xmeml or FCPX).
 
@@ -750,7 +750,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :func:`~scenedetect.output.write_scene_list_html` | Config file: :ref:`[save-html] <config-save-html>`
+.. seealso:: **Python API:** :func:`~scenedetect.output.write_scene_list_html` | **Config File:** :ref:`[save-html] <config-save-html>`
 
 Save scene list to HTML file.
 
@@ -793,7 +793,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :func:`~scenedetect.output.save_images` | Config file: :ref:`[save-images] <config-save-images>`
+.. seealso:: **Python API:** :func:`~scenedetect.output.save_images` | **Config File:** :ref:`[save-images] <config-save-images>`
 
 Save images from each detected scene.
 
@@ -899,7 +899,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: *no Python API equivalent* | Config file: :ref:`[save-keyframes] <config-save-keyframes>`
+.. seealso:: **Python API:** *none (CLI only)* | **Config File:** :ref:`[save-keyframes] <config-save-keyframes>`
 
 Save detected cuts using keyframe format v1.
 
@@ -930,7 +930,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :func:`~scenedetect.output.write_scene_list_otio` | Config file: :ref:`[save-otio] <config-save-otio>`
+.. seealso:: **Python API:** :func:`~scenedetect.output.write_scene_list_otio` | **Config File:** :ref:`[save-otio] <config-save-otio>`
 
 Save cuts as an OTIO timeline.
 
@@ -975,7 +975,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: *no Python API equivalent* | Config file: :ref:`[save-qp] <config-save-qp>`
+.. seealso:: **Python API:** *none (CLI only)* | **Config File:** :ref:`[save-qp] <config-save-qp>`
 
 Save cuts as keyframes (I-frames) for video encoding.
 
@@ -1010,7 +1010,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :func:`~scenedetect.output.split_video_ffmpeg`, :func:`~scenedetect.output.split_video_mkvmerge` | Config file: :ref:`[split-video] <config-split-video>`
+.. seealso:: **Python API:** :func:`~scenedetect.output.split_video_ffmpeg`, :func:`~scenedetect.output.split_video_mkvmerge` | **Config File:** :ref:`[split-video] <config-split-video>`
 
 Split input video using ffmpeg or mkvmerge.
 
@@ -1094,7 +1094,7 @@ Options
 ------------------------------------------------------------------------
 
 
-.. seealso:: Python API: :func:`~scenedetect.detect` (``start_time``, ``end_time``), :meth:`SceneManager.detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>` (``duration``, ``end_time``), :meth:`VideoStream.seek <scenedetect.video_stream.VideoStream.seek>`
+.. seealso:: **Python API:** :func:`~scenedetect.detect` (``start_time``, ``end_time``), :meth:`SceneManager.detect_scenes <scenedetect.scene_manager.SceneManager.detect_scenes>` (``duration``, ``end_time``), :meth:`VideoStream.seek <scenedetect.video_stream.VideoStream.seek>`
 
 Set start/end/duration of input video.
 

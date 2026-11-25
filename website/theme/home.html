@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block main %}
+  <main id="main-content" class="container home-main" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero-copy">
+        <a class="release-pill" href="{{ site.base_path }}/download/">
+          <span>Latest release</span>
+          <strong>{{ site.version }}</strong>
+          <span>&middot; {{ site.release_date_short }}</span>
+        </a>
+        <h1 id="hero-heading">Fast, frame-accurate scene cut detection for video.</h1>
+        <p class="hero-lead">Detect fast cuts and fades from the command line or Python. Split videos with ffmpeg or mkvmerge, export timeline files for video editors, or save per-frame metrics.</p>
+        <div class="cta-row">
+          <a class="btn-primary" href="{{ site.base_path }}/cli/">
+            <span>Get Started</span>
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a class="btn-docs" href="/docs/latest/">
+            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+            </svg>
+            <span>Documentation</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-header">
+          <div class="platform-tabs" role="tablist" aria-label="Platform">
+            <button
+              type="button"
+              role="tab"
+              class="platform-tab"
+              id="platform-tab-python"
+              aria-selected="true"
+              tabindex="0"
+            >Python</button>
+            <button
+              type="button"
+              role="tab"
+              class="platform-tab"
+              id="platform-tab-windows"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <svg class="platform-tab-icon" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2 3.75 10.75 2.5v8.75H2V3.75Zm9.75-1.4L22 1v10.25H11.75V2.35ZM2 12.75h8.75v8.75L2 20.25v-7.5Zm9.75 0H22V23l-10.25-1.35v-8.9Z"/>
+              </svg>
+              <span>Windows</span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="platform-tab"
+              id="platform-tab-docker"
+              aria-selected="false"
+              tabindex="-1"
+            >Docker</button>
+          </div>
+          <span class="code-hint" aria-hidden="true">Download</span>
+        </div>
+
+        <div class="platform-panels" data-equalize-panels>
+          <div
+            role="tabpanel"
+            class="platform-panel"
+            id="platform-panel-python"
+            aria-labelledby="platform-tab-python"
+          >
+            <div class="platform-panel-body">
+              <div class="platform-install-section" data-equalize-band="install">
+                <div class="platform-install-bar">
+                  <span class="platform-section-label">Install</span>
+                  <div class="pill-tablist" role="tablist" aria-label="Python package manager">
+                    <button
+                      type="button"
+                      role="tab"
+                      class="pill-tab"
+                      id="install-tab-pip"
+                      aria-selected="true"
+                      tabindex="0"
+                    >pip</button>
+                    <button
+                      type="button"
+                      role="tab"
+                      class="pill-tab"
+                      id="install-tab-uv"
+                      aria-selected="false"
+                      tabindex="-1"
+                      data-sync-tab="hero-tab-cli"
+                    >uv</button>
+                    <button
+                      type="button"
+                      role="tab"
+                      class="pill-tab"
+                      id="install-tab-pipx"
+                      aria-selected="false"
+                      tabindex="-1"
+                      data-sync-tab="hero-tab-cli"
+                    >pipx</button>
+                  </div>
+                </div>
+                <div class="install-subpanels">
+                  <div
+                    role="tabpanel"
+                    class="install-subpanel"
+                    id="install-panel-pip"
+                    aria-labelledby="install-tab-pip"
+                  >
+                    <div class="install-strip">
+                      <span class="prompt" aria-hidden="true">$</span>
+                      <code>pip install --upgrade scenedetect</code>
+                      <button
+                        type="button"
+                        class="copy-inline-btn"
+                        data-copy="pip install --upgrade scenedetect"
+                        aria-label="Copy pip install command"
+                      >
+                        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2"/>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    role="tabpanel"
+                    class="install-subpanel"
+                    id="install-panel-uv"
+                    aria-labelledby="install-tab-uv"
+                    hidden="until-found"
+                  >
+                    <div class="install-strip">
+                      <span class="prompt" aria-hidden="true">$</span>
+                      <code>uv tool install scenedetect</code>
+                      <button
+                        type="button"
+                        class="copy-inline-btn"
+                        data-copy="uv tool install scenedetect"
+                        aria-label="Copy uv install command"
+                      >
+                        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2"/>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    role="tabpanel"
+                    class="install-subpanel"
+                    id="install-panel-pipx"
+                    aria-labelledby="install-tab-pipx"
+                    hidden="until-found"
+                  >
+                    <div class="install-strip">
+                      <span class="prompt" aria-hidden="true">$</span>
+                      <code>pipx install scenedetect</code>
+                      <button
+                        type="button"
+                        class="copy-inline-btn"
+                        data-copy="pipx install scenedetect"
+                        aria-label="Copy pipx install command"
+                      >
+                        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2"/>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="platform-example-bar" data-equalize-band="example-bar">
+                <span class="platform-section-label">Example</span>
+                <div class="pill-tablist" role="tablist" aria-label="Python usage mode">
+                  <button
+                    type="button"
+                    role="tab"
+                    class="pill-tab pill-tab-sans"
+                    id="hero-tab-cli"
+                    aria-selected="true"
+                    tabindex="0"
+                  >Command Line</button>
+                  <button
+                    type="button"
+                    role="tab"
+                    class="pill-tab pill-tab-sans"
+                    id="hero-tab-api"
+                    aria-selected="false"
+                    tabindex="-1"
+                  >Python API</button>
+                </div>
+              </div>
+              <div class="code-panels">
+                <div
+                  role="tabpanel"
+                  class="code-panel"
+                  id="hero-panel-cli"
+                  aria-labelledby="hero-tab-cli"
+                >
+                  <div class="hero-examples">
+                    {% for item in hero_snippets.cli.examples %}
+                    <div class="hero-example-item">
+                      {% if item.caption %}<p class="hero-example-caption">{{ item.caption }}</p>{% endif %}
+                      <div class="codehilite" data-copy-label="{{ item.copy_label }}">
+                        <pre class="code-body" tabindex="0"><code>{{ item.html | safe }}</code></pre>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+                <div
+                  role="tabpanel"
+                  class="code-panel"
+                  id="hero-panel-api"
+                  aria-labelledby="hero-tab-api"
+                  hidden="until-found"
+                >
+                  <div class="hero-examples">
+                    {% for item in hero_snippets.python.examples %}
+                    <div class="hero-example-item">
+                      {% if item.caption %}<p class="hero-example-caption">{{ item.caption }}</p>{% endif %}
+                      <div class="codehilite" data-copy-label="{{ item.copy_label }}">
+                        <pre class="code-body" tabindex="0"><code>{{ item.html | safe }}</code></pre>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+              <div class="platform-card-footer" data-equalize-band="footer">
+                <span>Requires Python 3.10+ &middot; <code>scenedetect-headless</code> also available.</span>
+                <a href="{{ site.base_path }}/download/#install-with-pip-uv-or-pipx">All Python options</a>
+              </div>
+            </div>
+          </div>
+
+          <div
+            role="tabpanel"
+            class="platform-panel"
+            id="platform-panel-windows"
+            aria-labelledby="platform-tab-windows"
+            hidden="until-found"
+          >
+            <div class="platform-panel-body">
+              <div class="platform-win-install" data-equalize-band="install">
+                <div class="install-dl-row">
+                  <a class="install-dl-btn" href="{{ site.win64_msi_url }}">
+                    <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+                    </svg>
+                    <span>Installer <code>.msi</code></span>
+                    <span class="install-dl-badge">Recommended</span>
+                  </a>
+                  <a class="install-dl-btn" href="{{ site.win64_zip_url }}">
+                    <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8m18 0-2.4-4.2A2 2 0 0 0 16.86 3H7.14a2 2 0 0 0-1.74 1.01L3 8m18 0H3m7 4h4"/>
+                    </svg>
+                    <span>Portable <code>.zip</code></span>
+                  </a>
+                </div>
+                <div class="install-panel-meta">
+                  <span class="install-meta-text">Windows 64-bit &middot; {{ site.version }} &middot; CLI + bundled <code>ffmpeg</code> (no Python needed)</span>
+                </div>
+              </div>
+              <div class="platform-example-bar" data-equalize-band="example-bar">
+                <span class="platform-section-label">Command Line Example</span>
+                <span class="code-hint" aria-hidden="true">scenedetect.exe</span>
+              </div>
+              <div class="hero-examples">
+                {% for item in hero_snippets.cli.examples %}
+                <div class="hero-example-item">
+                  {% if item.caption %}<p class="hero-example-caption">{{ item.caption }}</p>{% endif %}
+                  <div class="codehilite" data-copy-label="{{ item.copy_label }}">
+                    <pre class="code-body" tabindex="0"><code>{{ item.html | safe }}</code></pre>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="platform-card-footer" data-equalize-band="footer">
+                <span>Signed via SignPath Foundation.</span>
+                <a href="{{ site.base_path }}/download/#windows-build-64-bit-only">Windows install notes</a>
+              </div>
+            </div>
+          </div>
+
+          <div
+            role="tabpanel"
+            class="platform-panel"
+            id="platform-panel-docker"
+            aria-labelledby="platform-tab-docker"
+            hidden="until-found"
+          >
+            <div class="platform-panel-body">
+              <div class="platform-install-section" data-equalize-band="install">
+                <div class="platform-install-bar">
+                  <span class="platform-section-label">Pull Image</span>
+                  <span class="code-hint" aria-hidden="true">ghcr.io</span>
+                </div>
+                <div class="install-strip">
+                  <span class="prompt" aria-hidden="true">$</span>
+                  <code>docker pull ghcr.io/breakthrough/pyscenedetect</code>
+                  <button
+                    type="button"
+                    class="copy-inline-btn"
+                    data-copy="docker pull ghcr.io/breakthrough/pyscenedetect"
+                    aria-label="Copy docker pull command"
+                  >
+                    <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="platform-example-bar" data-equalize-band="example-bar">
+                <span class="platform-section-label">Run Container</span>
+                <span class="code-hint" aria-hidden="true">Docker / Podman</span>
+              </div>
+              <div class="hero-examples">
+                {% for item in hero_snippets.docker.examples %}
+                <div class="hero-example-item">
+                  {% if item.caption %}<p class="hero-example-caption">{{ item.caption }}</p>{% endif %}
+                  <div class="codehilite" data-copy-label="{{ item.copy_label }}">
+                    <pre class="code-body" tabindex="0"><code>{{ item.html | safe }}</code></pre>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="platform-card-footer" data-equalize-band="footer">
+                <span>Includes CLI, <code>ffmpeg</code>, <code>mkvmerge</code>, PyAV &amp; MoviePy.</span>
+                <a href="{{ site.base_path }}/download/#docker-image">Docker usage</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid-3">
+      <article class="feature-card">
+        <h2>Five Detectors</h2>
+        <p>Choose from Adaptive, Content (HSV and edges), Perceptual Hash, Histogram, and Threshold detectors. All five are tested on BBC Planet Earth, AutoShot, and ClipShots.</p>
+        <footer class="feature-meta">
+          <a href="{{ site.base_path }}/benchmarks/">91.6 F1 on BBC Planet Earth</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="/docs/latest/api/detectors.html">Detectors</a>
+        </footer>
+      </article>
+      <article class="feature-card">
+        <h2>Standard Export Formats</h2>
+        <p>Export <code>HH:MM:SS.nnn</code> CSV scene lists, CMX 3600 EDL, Final Cut Pro XML, OpenTimelineIO (OTIO), x264 QP files, HTML reports, and still frames.</p>
+        <footer class="feature-meta">
+          <a href="/docs/latest/cli.html#save-edl">save-edl</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="/docs/latest/cli.html#save-otio">save-otio</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="/docs/latest/cli.html#save-images">save-images</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="{{ site.base_path }}/features/#output-formats">More<span class="visually-hidden"> export formats</span></a>
+        </footer>
+      </article>
+      <article class="feature-card">
+        <h2>Modular Video Backends</h2>
+        <p>Decode video with OpenCV by default, or switch to PyAV or MoviePy. Install via pip (standard or headless), the signed Windows installer, or Docker.</p>
+        <footer class="feature-meta">
+          <a href="{{ site.base_path }}/download/#install-with-pip-uv-or-pipx">Python 3.10+</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="{{ site.base_path }}/download/#windows-build-64-bit-only">Windows 64-bit</a>
+          <span class="feature-meta-sep" aria-hidden="true">&middot;</span>
+          <a href="{{ site.base_path }}/download/#docker-image">Docker</a>
+        </footer>
+      </article>
+    </div>
+
+    <div class="home-content">
+      <article class="prose home-prose">
+        {{ page.content }}
+      </article>
+
+      <div class="quick-nav-section">
+        <h2>More Resources</h2>
+        <div class="quick-nav-grid">
+          <a class="quick-nav-card" href="{{ site.base_path }}/docs/">
+            <strong>Documentation Versions</strong>
+            <span>Browse stable, development, and legacy CLI and Python API reference manuals.</span>
+          </a>
+          <a class="quick-nav-card" href="{{ site.base_path }}/faq/">
+            <strong>Frequently Asked Questions</strong>
+            <span>Install help, threshold tuning, variable frame rates, and video splitting.</span>
+          </a>
+          <a class="quick-nav-card" href="{{ site.base_path }}/contributing/">
+            <strong>Contributing &amp; Support</strong>
+            <span>Report bugs, open pull requests, and see the tools that support development.</span>
+          </a>
+          <a class="quick-nav-card" href="{{ site.base_path }}/projects/">
+            <strong>Projects &amp; Research</strong>
+            <span>Open-source projects, research papers, and similar tools.</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}

@@ -1,94 +1,130 @@
-
 # Download
 
-PySceneDetect is completely free software, and can be downloaded from the links below.  See the [license and copyright information](copyright.md) page for details.  If you have trouble running PySceneDetect, ensure that you have all the required dependencies listed in the [Dependencies](#dependencies) section below.
+PySceneDetect is free, open-source software released under the BSD 3-Clause License (see [License & Copyright](copyright.md)). If you have trouble running PySceneDetect, verify that you have the packages listed under [Dependencies](#dependencies).
 
-PySceneDetect requires at least Python 3.10 or higher.
+## Windows Build (64-bit Only)
 
-
-## Install via pip &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span> &nbsp; <span class="fa fa-linux"></span> &nbsp; <span class="fa fa-apple"></span></span>
-
-<div class="important">
-<h4 class="wy-text-neutral"><span class="fa fa-angle-double-down wy-text-info"></span> Standard install (recommended):</h4>
-<pre class="command"><code class="nohighlight">pip install --upgrade scenedetect</code></pre>
-<h4 class="wy-text-neutral"><span class="fa fa-angle-down wy-text-info"></span> Headless install (servers, no GUI libs):</h4>
-<pre class="command"><code class="nohighlight">pip install --upgrade scenedetect-headless</code></pre>
+<div class="download-card">
+  <div class="download-card-header">
+    <span class="download-card-title">
+      <svg class="download-os-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M2 3.75 10.75 2.5v8.75H2V3.75Zm9.75-1.4L22 1v10.25H11.75V2.35ZM2 12.75h8.75v8.75L2 20.25v-7.5Zm9.75 0H22V23l-10.25-1.35v-8.9Z"/>
+      </svg>
+      <span>Windows 64-bit &middot; <strong>v0.7.3</strong></span>
+    </span>
+    <span class="download-card-date">November 8, 2026</span>
+  </div>
+  <div class="download-btn-grid">
+    <a class="download-btn download-btn-primary" href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.3/PySceneDetect-0.7.3-win64.msi">
+      <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+      </svg>
+      <span>Installer <code>.msi</code></span>
+      <span class="download-badge">Recommended</span>
+    </a>
+    <a class="download-btn download-btn-secondary" href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.3/PySceneDetect-0.7.3-win64.zip">
+      <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8m18 0-2.4-4.2A2 2 0 0 0 16.86 3H7.14a2 2 0 0 0-1.74 1.01L3 8m18 0H3m7 4h4"/>
+      </svg>
+      <span>Portable <code>.zip</code></span>
+    </a>
+  </div>
 </div>
 
-PySceneDetect is available via `pip` as two packages:
+The `.msi` installer is recommended for most Windows users. Both Windows builds bundle `ffmpeg`. To use `split-video -m`, install MKVToolNix. After installing, see the [Command-Line Interface](cli.md) guide to get started.
 
- - [`scenedetect`](https://pypi.org/project/scenedetect/): full install with the CLI, depends on `opencv-python`
- - [`scenedetect-headless`](https://pypi.org/project/scenedetect-headless/): full install with the CLI, depends on `opencv-python-headless` (servers/containers without GUI libraries)
+## Install with pip, uv, or pipx
 
-Both provide the same `scenedetect` Python module -- install only one of them.
+Installing from PyPI requires Python 3.10 or newer.
 
-## Windows Build (64-bit Only) &nbsp; <span class="wy-text-neutral"><span class="fa fa-windows"></span></span>
+Standard install with `pip` (CLI and Python API):
 
-<div class="important">
-<h3 class="wy-text-neutral"><span class="fa fa-forward wy-text-info"></span> Latest Release: <b class="wy-text-neutral">v0.7.3</b></h3>
-<h4 class="wy-text-neutral"><span class="fa fa-calendar wy-text-info"></span>&nbsp; Release Date:&nbsp; <b>November 8, 2026</b></h4>
-<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.3/PySceneDetect-0.7.3-win64.msi" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Installer</b>&nbsp;&nbsp;(recommended)</a> &nbsp;&nbsp;&nbsp;&nbsp;
-<a href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.3/PySceneDetect-0.7.3-win64.zip" class="btn btn-info" style="margin-bottom:8px;" role="button"><span class="fa fa-download"></span>&nbsp; <b>Portable .zip</b></a> &nbsp;&nbsp;&nbsp;&nbsp;
-<a href="../cli/" class="btn btn-success" style="margin-bottom:8px;" role="button"><span class="fa fa-book"></span>&nbsp; <b>Getting Started</b></a>
-</div>
+```bash
+pip install --upgrade scenedetect
+```
 
-## Docker Image &nbsp; <span class="wy-text-neutral"><span class="fa fa-ship"></span></span>
+Headless install (for servers and containers without GUI libraries):
 
-Official container images are published at [ghcr.io/breakthrough/pyscenedetect](https://github.com/breakthrough/PySceneDetect/pkgs/container/pyscenedetect). The image includes the full CLI, all optional backends (PyAV, MoviePy), and the external tools used for video splitting (`ffmpeg`, `mkvmerge`) -- no other setup is required:
+```bash
+pip install --upgrade scenedetect-headless
+```
+
+Install with `uv` or `pipx`:
+
+```bash
+# uv (isolated CLI tool)
+uv tool install scenedetect
+
+# uv (add to a Python project)
+uv add scenedetect
+
+# pipx (isolated CLI tool)
+pipx install scenedetect
+```
+
+PySceneDetect is published on PyPI as two packages, both including the CLI and the `scenedetect` Python module:
+
+- [`scenedetect`](https://pypi.org/project/scenedetect/): depends on `opencv-python`.
+- [`scenedetect-headless`](https://pypi.org/project/scenedetect-headless/): depends on `opencv-python-headless`.
+
+Install only one of them.
+
+## Docker Image
+
+Official container images are published on GitHub Container Registry at [ghcr.io/breakthrough/pyscenedetect](https://github.com/Breakthrough/PySceneDetect/pkgs/container/pyscenedetect). Each image includes the CLI, all optional video backends (PyAV and MoviePy), `ffmpeg`, and `mkvmerge`:
 
 ```bash
 docker pull ghcr.io/breakthrough/pyscenedetect
 docker run --rm ghcr.io/breakthrough/pyscenedetect version
 ```
 
-To process videos, mount the folder containing them into the container (the image runs as a non-root user, so output files are written with regular permissions):
+To process videos, mount the folder that holds them into the container. The container runs as a non-root user, so output files keep normal permissions:
 
 ```bash
 docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect \
     -i /files/video.mp4 detect-adaptive split-video -o /files
 ```
 
-The `latest` tag (the default when no tag is given) points to the most recent recommended build, the `main` tag tracks the development branch, and version tags (e.g. `0.7.3`) point to specific releases. `podman` can be used in place of `docker` in the commands above.
+The `latest` tag points to the most recent stable release, `main` tracks the development branch, and version tags (such as `0.7.3`) point to specific releases. You can also replace `docker` with `podman` in the commands above.
 
-## Post Installation
+## Post-Installation Check
 
-After installation, you can call PySceneDetect from any terminal/command prompt by typing `scenedetect` (try running `scenedetect --help`, or `scenedetect version`). If you encounter any runtime errors while running PySceneDetect, ensure that you have all the required dependencies listed in the System Requirements section above (you should be able to `import numpy` and `import cv2`).  If you encounter any issues or want to make a feature request, feel free to [report any bugs or share some feature requests/ideas](contributing.md) on the [issue tracker](https://github.com/Breakthrough/PySceneDetect/issues) and help make PySceneDetect even better.
+After installing, open a terminal and run `scenedetect version` or `scenedetect --help`. If you see an import error, verify that `import numpy` and `import cv2` work in Python and review [Dependencies](#dependencies).
 
+If you find a bug or want to suggest a feature, open an issue on [the issue tracker](https://github.com/Breakthrough/PySceneDetect/issues) or see [Contributing & Support](contributing.md).
 
 ## Dependencies
 
-### Python Packages
+### Python packages
 
-PySceneDetect requires [Python 3](https://www.python.org/) and the following packages, all of which the `scenedetect` and `scenedetect-headless` packages install automatically:
+The `scenedetect` and `scenedetect-headless` packages install these dependencies automatically:
 
- - [OpenCV](http://opencv.org/): `pip install opencv-python` (any `opencv-python*` variant works)
- - [Numpy](https://numpy.org/): `pip install numpy`
- - [Click](https://click.palletsprojects.com): `pip install click` (command-line interface only)
- - [tqdm](https://github.com/tqdm/tqdm): `pip install tqdm` (optional, enables progress bars)
- - [platformdirs](https://github.com/tox-dev/platformdirs): `pip install platformdirs` (command-line interface only)
+- [OpenCV](https://opencv.org/): `pip install opencv-python` (or `opencv-python-headless` with `scenedetect-headless`)
+- [NumPy](https://numpy.org/): `pip install numpy`
+- [Click](https://click.palletsprojects.com): `pip install click` (used by the CLI)
+- [tqdm](https://github.com/tqdm/tqdm): `pip install tqdm` (displays progress bars)
+- [platformdirs](https://github.com/tox-dev/platformdirs): `pip install platformdirs` (used by the CLI)
 
-Optional packages:
+Optional video backend packages:
 
- - [PyAV](https://pyav.org/): `pip install av`
+- [PyAV](https://pyav.org/): `pip install av` (or `pip install "scenedetect[pyav]"`)
+- [MoviePy](https://zulko.github.io/moviepy/): `pip install moviepy` (or `pip install "scenedetect[moviepy]"`)
 
-### Video Splitting Tools
+### Video splitting tools
 
-For video splitting support, you need to have one of the following tools available (included in Windows builds):
+To split videos into clips, install at least one of these tools (`ffmpeg` is bundled in the Windows builds; the Docker image has both):
 
- - [ffmpeg](https://ffmpeg.org/download.html), required to split video files (`split-video` or `split-video -c/--copy`)
- - [mkvmerge](https://mkvtoolnix.download/), part of mkvtoolnix, command-line tool, required to split video files in stream copy mode (`split-video -c/--copy` only)
+- [FFmpeg](https://ffmpeg.org/download.html): splits videos with re-encoding (`split-video`) or stream copy (`split-video -c` / `--copy`).
+- [MKVToolNix](https://mkvtoolnix.download/downloads.html) (`mkvmerge`): splits videos in stream-copy mode (`split-video -m` / `--mkvmerge`).
 
-The `ffmpeg` and/or `mkvmerge` command must be available system wide (e.g. in a directory in `PATH`, so it can be used from any terminal/console by typing the command), or alternatively, placed in the same directory where PySceneDetect is installed.  On Windows this is usually `C:\PythonXY\Scripts`, where `XY` is your Python version. For more information, [see the CLI documentation](cli.md).
+See [Video Splitting Requirements](cli.md#video-splitting-requirements) for installation and `PATH` setup steps.
 
-### Building OpenCV from Source
+### Building OpenCV from source
 
-If you have installed OpenCV using `pip`, you will need to uninstall it before installing a different version of OpenCV, or building and installing it from source.
+If you installed OpenCV with `pip`, uninstall it before installing a different OpenCV build or compiling from source. See the [Installing OpenCV guide](https://breakthrough.github.io/Installing-OpenCV/) for steps on Windows and Linux.
 
-You can [click here](http://breakthrough.github.io/Installing-OpenCV/) for a quick guide (OpenCV + Numpy on Windows & Linux) on installing OpenCV/Numpy on [Windows (using pre-built binaries)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-windows-pre-built-binaries) and [Linux (compiling from source)](http://breakthrough.github.io/Installing-OpenCV/#installing-on-linux-compiling-from-source).  If the Python module that comes with OpenCV on Windows is incompatible with your system architecture or Python version, [see this page](http://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv) to obtain a pre-compiled (unofficial) module.
-
-To ensure you have all the requirements installed, open a `python` interpreter, and ensure you can run `import numpy` and `import cv2` without any errors.
-
+To verify your setup, open a Python prompt and run `import numpy` and `import cv2`.
 
 ## Code Signing Policy
 
-This program uses free code signing provided by [SignPath.io](https://signpath.io?utm_source=foundation&utm_medium=website&utm_campaign=PySceneDetect), and a free code signing certificate by the [SignPath Foundation](https://signpath.org?utm_source=foundation&utm_medium=website&utm_campaign=PySceneDetect)
+This program uses free code signing provided by [SignPath.io](https://signpath.io?utm_source=foundation&utm_medium=website&utm_campaign=PySceneDetect), and a free code signing certificate by the [SignPath Foundation](https://signpath.org?utm_source=foundation&utm_medium=website&utm_campaign=PySceneDetect).

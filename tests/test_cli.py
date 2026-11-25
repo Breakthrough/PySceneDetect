@@ -1268,6 +1268,31 @@ def test_cli_backend(backend_type: str):
     )
 
 
+def test_cli_image_sequence_uses_default_backend(test_image_sequence: str):
+    """An image sequence works without -b/--backend, since opencv is the default backend."""
+    exit_code, output = invoke_cli(["-i", test_image_sequence, "-f", "30", "detect-content"])
+    assert exit_code == 0, output
+
+
+def test_cli_image_sequence_uses_config_backend(tmp_path: Path, test_image_sequence: str):
+    """`backend = opencv` in a config file is honored by the image sequence check."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text("[global]\nbackend = opencv\n")
+    exit_code, output = invoke_cli(
+        ["-c", str(config_path), "-i", test_image_sequence, "-f", "30", "detect-content"]
+    )
+    assert exit_code == 0, output
+
+
+def test_cli_image_sequence_rejects_other_backend(tmp_path: Path, test_image_sequence: str):
+    """Other backends still can't open image sequences and give a usage error."""
+    config_path = tmp_path.joinpath("config.cfg")
+    config_path.write_text("[global]\nbackend = moviepy\n")
+    exit_code, output = invoke_cli(["-c", str(config_path), "-i", test_image_sequence])
+    assert exit_code != 0
+    assert "must be used to process image sequences" in output
+
+
 def test_cli_backend_unsupported():
     """Ensure setting an invalid backend returns an error."""
     assert (

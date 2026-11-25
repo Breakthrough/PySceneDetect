@@ -9,4 +9,5 @@ include LICENSE
 include pyproject.toml
 include scenedetect.cfg
 include packaging/package-info.rst
+include scenedetect/py.typed
 recursive-include docs *

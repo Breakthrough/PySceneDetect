@@ -1,13 +1,31 @@
-
 name: Generate Website
 
 on:
   push:
     branches:
       - main
+      - 'website/**'
     paths:
       - 'website/**'
+      - 'docs/LATEST_VERSION'
+      - 'docs/_ext/doc_versions.py'
+      - '.github/workflows/generate-website.yml'
   workflow_dispatch:
+    inputs:
+      target:
+        description: 'Deployment target on gh-pages'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - staging
+          - production
+          - clear-staging
+
+concurrency:
+  group: gh-pages-website
+  cancel-in-progress: false
 
 jobs:
   update_site:
@@ -19,36 +37,109 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
+      - name: Resolve Deployment Target
+        shell: bash
+        env:
+          INPUT_TARGET: ${{ inputs.target || 'auto' }}
+        run: |
+          if [[ "${INPUT_TARGET}" == "auto" ]]; then
+            if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+              target="production"
+            else
+              target="staging"
+            fi
+          else
+            target="${INPUT_TARGET}"
+          fi
+
+          if [[ "$target" == "production" ]] && [[ "${GITHUB_REF}" != "refs/heads/main" ]] && [[ "${GITHUB_REF}" != refs/heads/releases/* ]]; then
+            echo "Refusing production deployment from non-release ref: ${GITHUB_REF}" >&2
+            exit 1
+          fi
+
+          if [[ "$target" == "staging" ]]; then
+            base_path="/staging"
+          else
+            base_path=""
+          fi
+
+          echo "deploy_target=${target}" >> "$GITHUB_ENV"
+          echo "site_base_path=${base_path}" >> "$GITHUB_ENV"
+          echo "Resolved target=${target} (base_path='${base_path}')"
+
       - name: Set up Python 3.12
+        if: env.deploy_target != 'clear-staging'
         uses: actions/setup-python@v7.1.0
         with:
           python-version: '3.12'
-          cache: 'pip'
 
       - name: Install Dependencies
+        if: env.deploy_target != 'clear-staging'
         run: |
-          python -m pip install --upgrade pip build wheel virtualenv
-          pip install .[website]
+          python -m pip install -r website/requirements.txt
 
-      - name: Generate Website
+      - name: Generate Website (--strict)
+        if: env.deploy_target != 'clear-staging'
+        shell: bash
         run: |
-          mkdocs build -f website/mkdocs.yml
+          python -B website/build.py \
+            --strict \
+            --base-path "${SITE_BASE_PATH}" \
+            --out-dir "${RUNNER_TEMP}/site-build"
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          SITE_BASE_PATH: ${{ env.site_base_path }}
 
-      - name: Update Website
+      - name: Update gh-pages Branch
+        shell: bash
         run: |
           git fetch origin gh-pages
-          git checkout gh-pages
-          git rm * -r -f --ignore-unmatch
-          git checkout HEAD -- .nojekyll
-          git checkout HEAD -- CNAME
-          git checkout HEAD -- docs/
-          git rm docs/index.html --ignore-unmatch
-          git add website/build/
-          git mv website/build/* . -f -k
-          git mv website/build/docs/index.html docs/index.html -k
-          git rm website/build/* -r -f --ignore-unmatch
+          git checkout -B gh-pages origin/gh-pages
+          git clean -ffdx
+
+          if [[ "${DEPLOY_TARGET}" == "production" ]]; then
+            # Replace root site while preserving .nojekyll, CNAME, versioned Sphinx
+            # /docs/* trees, and any active /staging/ preview (cleared on demand via
+            # workflow_dispatch target=clear-staging).
+            git rm -r -f --ignore-unmatch *
+            git checkout HEAD -- .nojekyll CNAME docs/
+            if git cat-file -e HEAD:staging 2>/dev/null; then
+              git checkout HEAD -- staging/
+            fi
+            cp -a "${RUNNER_TEMP}/site-build/." .
+            git add -A
+          elif [[ "${DEPLOY_TARGET}" == "staging" ]]; then
+            git rm -r -f --ignore-unmatch staging
+            mkdir -p staging
+            cp -a "${RUNNER_TEMP}/site-build/." staging/
+            git add -A staging
+          elif [[ "${DEPLOY_TARGET}" == "clear-staging" ]]; then
+            git rm -r -f --ignore-unmatch staging
+          else
+            echo "Unknown deploy_target: ${DEPLOY_TARGET}" >&2
+            exit 1
+          fi
+
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
-          git commit -a -m "[docs] @${{ github.triggering_actor }}: Generate Website" \
-            -m "Commit: ${{ github.sha }}"
-          git push
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            git commit -a -m "[docs] @${TRIGGER_ACTOR}: Generate Website (${DEPLOY_TARGET})" \
+              -m "Source: ${GITHUB_REF_NAME} (${GITHUB_SHA})" \
+              -m "Target: ${DEPLOY_TARGET}"
+            for attempt in 1 2 3 4 5; do
+              if git push origin gh-pages; then
+                break
+              fi
+              if [[ "${attempt}" -eq 5 ]]; then
+                echo "Failed to push to gh-pages after ${attempt} attempts." >&2
+                exit 1
+              fi
+              echo "Push failed (attempt ${attempt}/5); rebasing onto origin/gh-pages and retrying..."
+              sleep $((attempt * 2))
+              git fetch origin gh-pages
+              git pull --rebase origin gh-pages
+            done
+          fi
+        env:
+          DEPLOY_TARGET: ${{ env.deploy_target }}
+          TRIGGER_ACTOR: ${{ github.triggering_actor }}

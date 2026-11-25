@@ -78,7 +78,8 @@ from scenedetect.backends import (
 )
 from scenedetect.stats_manager import StatsManager as StatsManager
 from scenedetect.stats_manager import StatsFileCorrupt as StatsFileCorrupt
-from scenedetect.scene_manager import SceneManager, _resolve_end_time
+from scenedetect.scene_manager import SceneManager as SceneManager
+from scenedetect.scene_manager import _resolve_end_time
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).

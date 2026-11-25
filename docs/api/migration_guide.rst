@@ -141,7 +141,7 @@ Requested time limits must retain complete saved scenes; a limit inside a saved 
 Migration Guide (v0.7)
 ----------------------
 
-PySceneDetect v0.7 is a major release that overhauls timestamp handling to support variable framerate (VFR) videos. While the high-level :func:`scenedetect.detect` workflow is largely unchanged, several internal APIs have been restructured. This guide covers the changes needed to update applications from v0.6 to v0.7.
+PySceneDetect v0.7 is a major release that updates timestamp handling to support variable frame rate (VFR) videos. While the high-level :func:`scenedetect.detect` workflow is largely unchanged, several internal APIs changed. This guide lists the updates needed when migrating from v0.6 to v0.7.
 
 The minimum supported Python version is now **Python 3.10**.
 
@@ -217,7 +217,7 @@ The ``frame_num`` parameter (``int``) has been replaced with ``timecode`` (:clas
         def process_frame(self, timecode: FrameTimecode, frame_img) -> List[FrameTimecode]:
             ...
 
-The same change applies to ``post_process()``. Using units of time instead of frame numbers is critical for temporal accuracy. If you need the frame number, use ``timecode.frame_num`` to convert the timecode to an integer.
+The same change applies to ``post_process()``. Using timecodes instead of frame numbers keeps timing accurate on VFR video. Use ``timecode.frame_num`` if you need an integer frame number.
 
 ``SceneDetector`` is Now Abstract
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -275,12 +275,12 @@ Access :attr:`~scenedetect.common.FrameTimecode.frame_num`, :attr:`~scenedetect.
     rate * 0.5                      # 14.985... (float, mixed arithmetic)
     f"{float(rate):.3f}"            # '29.970' (explicit cast for format spec)
 
-The legacy ``framerate`` property (one word, returns ``float``) is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release. Migrate to ``frame_rate``; cast with ``float(...)`` at the call site if you specifically need a ``float``.
+The legacy ``framerate`` property (one word, returns ``float``) is retained as a deprecated alias and emits a ``DeprecationWarning`` (scheduled for removal in v0.9). Migrate to ``frame_rate``; cast with ``float(...)`` at the call site if you specifically need a ``float``.
 
 Renamed Method: ``equal_framerate()``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-:meth:`~scenedetect.common.FrameTimecode.equal_framerate` has been renamed to :meth:`~scenedetect.common.FrameTimecode.equal_frame_rate` for consistency with the :attr:`~scenedetect.common.FrameTimecode.frame_rate` property. The legacy ``equal_framerate()`` method is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release. The new form additionally accepts a ``Fraction`` or another ``FrameTimecode`` (in addition to ``float``).
+:meth:`~scenedetect.common.FrameTimecode.equal_framerate` has been renamed to :meth:`~scenedetect.common.FrameTimecode.equal_frame_rate` for consistency with the :attr:`~scenedetect.common.FrameTimecode.frame_rate` property. The legacy ``equal_framerate()`` method is retained as a deprecated alias and emits a ``DeprecationWarning`` (scheduled for removal in v0.9). The new form additionally accepts a ``Fraction`` or another ``FrameTimecode`` (in addition to ``float``).
 
 Removed Methods
 ^^^^^^^^^^^^^^^
@@ -288,11 +288,11 @@ Removed Methods
 - ``previous_frame()`` - removed, use ``FrameTimecode(tc.frame_num - 1, tc)`` instead (passing a ``FrameTimecode`` as the ``fps`` argument reuses its rate)
 
 
-Framerate and Timestamp Changes
--------------------------------
+Frame Rate and Timestamp Changes
+--------------------------------
 
-Rational Framerates
-^^^^^^^^^^^^^^^^^^^
+Rational Frame Rates
+^^^^^^^^^^^^^^^^^^^^
 
 :attr:`~scenedetect.video_stream.VideoStream.frame_rate` now returns a ``Fraction`` instead of ``float``. Common NTSC rates (23.976, 29.97, 59.94) are automatically detected from float values:
 
@@ -306,7 +306,7 @@ Rational Framerates
 ``frame_rate`` Keyword Argument
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``framerate`` keyword argument has been renamed to ``frame_rate`` on :func:`~scenedetect.open_video` and on every backend constructor (:class:`~scenedetect.backends.opencv.VideoStreamCv2`, :class:`~scenedetect.backends.opencv.VideoCaptureAdapter`, :class:`~scenedetect.backends.pyav.VideoStreamAv`, :class:`~scenedetect.backends.moviepy.VideoStreamMoviePy`). The new form accepts ``float | Fraction | None``. The legacy ``framerate`` keyword is retained as a deprecated alias and will emit a ``DeprecationWarning`` in a future release; if both are supplied, ``frame_rate`` takes precedence.
+The ``framerate`` keyword argument has been renamed to ``frame_rate`` on :func:`~scenedetect.open_video` and on every backend constructor (:class:`~scenedetect.backends.opencv.VideoStreamCv2`, :class:`~scenedetect.backends.opencv.VideoCaptureAdapter`, :class:`~scenedetect.backends.pyav.VideoStreamAv`, :class:`~scenedetect.backends.moviepy.VideoStreamMoviePy`). The new form accepts ``float | Fraction | None``. The legacy ``framerate`` keyword is retained as a deprecated alias and emits a ``DeprecationWarning`` (scheduled for removal in v0.9); if both are supplied, ``frame_rate`` takes precedence.
 
 .. code:: python
 
@@ -335,7 +335,7 @@ The ``StatsManager`` methods :meth:`~scenedetect.stats_manager.StatsManager.get_
 ``SceneDetector`` Annotation Fixes
 ----------------------------------
 
-:meth:`~scenedetect.detector.SceneDetector.post_process` now declares its parameter as ``timecode: FrameTimecode`` (previously typed as ``int``). The method already received a ``FrameTimecode`` at runtime and concrete detectors (e.g. ``ThresholdDetector``, ``ContentDetector``) already used the ``FrameTimecode`` type - only the abstract-base-class annotation was inconsistent. No call-site changes are needed; this just brings the signature into agreement with the documented and actual behavior.
+:meth:`~scenedetect.detector.SceneDetector.post_process` now declares its parameter as ``timecode: FrameTimecode`` (previously typed as ``int``). The method already received a ``FrameTimecode`` at runtime and built-in detectors (such as ``ThresholdDetector`` and ``ContentDetector``) already used ``FrameTimecode``. Only the abstract base class annotation differed; no call-site changes are needed.
 
 
 ``SceneManager.detect_scenes()`` Time Arguments

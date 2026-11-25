@@ -5,7 +5,7 @@
 [global]
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Options of the :doc:`scenedetect </cli>` command; detectors and commands inherit ``min-scene-len`` and ``output`` from here.
+Options of the :ref:`scenedetect <command-scenedetect>` command; detectors and commands inherit ``min-scene-len`` and ``output`` from here.
 
 .. list-table::
    :class: config-keys

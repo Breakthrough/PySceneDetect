@@ -5,7 +5,7 @@
 Video Backends
 --------------
 
-.. seealso:: CLI: :option:`-b/--backend <scenedetect -b>` and :ref:`Backends <cli-backends>` | Config file: :ref:`[global] backend <config-global>`
+.. seealso:: **Command Line:** :option:`-b/--backend <scenedetect -b>` and :ref:`Backends <cli-backends>` | **Config File:** :ref:`[global] backend <config-global>`
 
 .. automodule:: scenedetect.backends
    :no-members:
@@ -22,7 +22,7 @@ Opening Videos
 OpenCV
 ------
 
-.. seealso:: CLI: :ref:`-b opencv <cli-backend-opencv>` | Config file: :ref:`[backend-opencv] <config-backend-opencv>`
+.. seealso:: **Command Line:** :ref:`-b opencv <cli-backend-opencv>` | **Config File:** :ref:`[backend-opencv] <config-backend-opencv>`
 
 .. automodule:: scenedetect.backends.opencv
    :no-members:
@@ -37,7 +37,7 @@ OpenCV
 PyAV
 ----
 
-.. seealso:: CLI: :ref:`-b pyav <cli-backend-pyav>` | Config file: :ref:`[backend-pyav] <config-backend-pyav>`
+.. seealso:: **Command Line:** :ref:`-b pyav <cli-backend-pyav>` | **Config File:** :ref:`[backend-pyav] <config-backend-pyav>`
 
 .. automodule:: scenedetect.backends.pyav
    :no-members:
@@ -49,7 +49,7 @@ PyAV
 MoviePy
 -------
 
-.. seealso:: CLI: :ref:`-b moviepy <cli-backend-moviepy>`
+.. seealso:: **Command Line:** :ref:`-b moviepy <cli-backend-moviepy>`
 
 .. automodule:: scenedetect.backends.moviepy
    :no-members:

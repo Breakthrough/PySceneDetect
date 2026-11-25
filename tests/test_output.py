@@ -18,8 +18,11 @@ import typing as ty
 from fractions import Fraction
 from io import StringIO
 from pathlib import Path
+from unittest.mock import Mock
 from xml.etree import ElementTree
 
+import cv2
+import numpy as np
 import pytest
 
 from scenedetect import (
@@ -46,6 +49,7 @@ from scenedetect.output import (
     write_scene_list_ffmetadata,
     write_scene_list_otio,
 )
+from scenedetect.video_stream import VideoStream
 
 FFMPEG_ARGS = (
     "-vf crop=128:128:0:0 -map 0:v:0 -c:v libx264 -preset ultrafast -qp 0 -tune zerolatency"
@@ -163,6 +167,45 @@ def test_save_images_singlethreaded(test_video_file, tmp_path: Path):
             total_images += 1
 
     assert total_images == len([path for path in tmp_path.glob(image_name_glob)])
+
+
+@pytest.mark.parametrize("threading", [False, True])
+@pytest.mark.parametrize(
+    "resize, expected_shapes",
+    [
+        ({"width": 80}, [(40, 80), (60, 80)]),
+        ({"height": 60}, [(60, 120), (60, 80)]),
+    ],
+)
+def test_save_images_resizes_each_frame(tmp_path: Path, threading, resize, expected_shapes):
+    video = Mock(spec=VideoStream)
+    video.name = "variable-resolution"
+    video.aspect_ratio = 1.0
+    video.frame_rate = Fraction(10)
+    video.read.side_effect = [
+        np.zeros((80, 160, 3), dtype=np.uint8),
+        np.zeros((120, 160, 3), dtype=np.uint8),
+    ]
+    scenes = _fake_scenes(video.frame_rate, [(0, 2)])
+    video.position = scenes[0][0]
+
+    filenames = save_images(
+        scenes,
+        video,
+        num_images=2,
+        image_extension="png",
+        output_dir=tmp_path,
+        threading=threading,
+        **resize,
+    )
+
+    shapes = []
+    for filename in filenames[0]:
+        data = np.fromfile(tmp_path / filename, dtype=np.uint8)
+        image = cv2.imdecode(data, cv2.IMREAD_UNCHANGED)
+        assert image is not None, f"Could not decode {filename}"
+        shapes.append(image.shape[:2])
+    assert shapes == expected_shapes
 
 
 @pytest.mark.parametrize("frame_margin", [1, 0.1, "0.1s", "00:00:00.100"])
