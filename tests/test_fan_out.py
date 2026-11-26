@@ -147,6 +147,45 @@ def test_fan_out_eof_returns_false_on_subsequent_reads(test_video_file):
         fan.close()
 
 
+@pytest.mark.parametrize("frame_numbering", list(FrameNumbering))
+def test_fan_out_end_position_waits_for_consumer_eof(test_video_file, auto_close, frame_numbering):
+    """A lagging consumer cannot expose the source endpoint before reaching EOF itself."""
+    pytest.importorskip("av")
+    source = auto_close(
+        open_video(test_video_file, backend="pyav", frame_numbering=frame_numbering)
+    )
+    frame_count = source.frame_count
+    assert isinstance(frame_count, int)
+    source.seek(frame_count - 2)
+    fan = FanOutVideoStream(source, n=2, prefetch=3)
+    fan.start()
+    try:
+        first, second = fan.stream(0), fan.stream(1)
+        while first.read(decode=False) is True:
+            pass
+
+        expected = source.get_end_position()
+        assert isinstance(expected, FramePosition)
+        assert first.get_end_position() == expected
+        assert first.final_frame_duration == source.final_frame_duration
+        assert second.get_end_position() is None
+        assert second.final_frame_duration is None
+        for _ in range(2):
+            assert second.read(decode=False) is True
+            assert second.get_end_position() is None
+            assert second.final_frame_duration is None
+        assert second.peek_timecode() is None
+        assert second.get_end_position() == expected
+        assert second.final_frame_duration == source.final_frame_duration
+
+        fan.abort()
+        for consumer in (first, second):
+            assert consumer.get_end_position() is None
+            assert consumer.final_frame_duration is None
+    finally:
+        fan.close()
+
+
 def test_fan_out_metadata_forwarded(test_video_file):
     """Consumer's frame_rate / frame_size / duration / path match the source."""
     source = open_video(test_video_file)

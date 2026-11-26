@@ -268,8 +268,8 @@ class SceneManager:
 
         # Position of the first frame accepted for detection.
         self._start_pos: FramePosition | None = None
-        # Position of the last frame read by detect_scenes, including skipped frames.
-        self._last_pos: FramePosition | None = None
+        # Exclusive end of the detected range, including skipped frames.
+        self._end_pos: FramePosition | None = None
         # Size of the decoded frames.
         self._frame_size: tuple[int, int] | None = None
         self._frame_size_errors: int = 0
@@ -388,7 +388,7 @@ class SceneManager:
         cached frame metrics that were computed and saved in the previous call to detect_scenes.
         """
         self._cutting_list.clear()
-        self._last_pos = None
+        self._end_pos = None
         self._start_pos = None
         self._frame_size = None
         self.clear_detectors()
@@ -409,22 +409,16 @@ class SceneManager:
 
         Returns:
             List of (start_pos, end_pos) FramePosition pairs with exclusive end positions.
-            The final end position advances the frame number but uses the last frame's timestamp.
         """
-        if self._start_pos is None or self._last_pos is None:
+        if self._start_pos is None or self._end_pos is None:
             return []
         cut_list = self._get_cutting_list()
         # If we didn't actually detect any cuts, make sure the resulting scene_list is empty
         # unless start_in_scene is True.
         if not cut_list and not start_in_scene:
             return []
-        # TODO: Account for the last frame's duration across backends.
-        end_pos = FramePosition(
-            timecode=self._last_pos.timecode,
-            frame_number=self._last_pos.frame_number + 1,
-        )
         scene_list = get_scenes_from_cuts(
-            cut_list=cut_list, start_pos=self._start_pos, end_pos=end_pos
+            cut_list=cut_list, start_pos=self._start_pos, end_pos=self._end_pos
         )
         return scene_list
 
@@ -614,16 +608,17 @@ class SceneManager:
         )
         decode_thread.start()
         frame_im = None
+        end_pos: FramePosition | None = None
         progress = 0
 
         logger.info("Detecting scenes...")
         try:
             while not self._stop.is_set():
                 next_frame, position = frame_queue.get()
-                if next_frame is None and position is None:
+                if next_frame is None:
+                    end_pos = position
                     break
-                if next_frame is not None:
-                    frame_im = next_frame
+                frame_im = next_frame
                 assert frame_im is not None
                 new_cuts = self._process_frame(position, frame_im, callback)
                 if progress_bar is not None:
@@ -663,8 +658,14 @@ class SceneManager:
 
         last_pos = video.position
         if last_pos is not None and frame_im is not None:
-            self._last_pos = last_pos
-            self._post_process(last_pos)
+            if end_pos is None:
+                # Preserve the existing boundary when detection is stopped manually.
+                end_pos = FramePosition(
+                    timecode=last_pos.timecode,
+                    frame_number=last_pos.frame_number + 1,
+                )
+            self._end_pos = end_pos
+            self._post_process(end_pos)
 
         return video.frame_number - start_frame_num
 
@@ -677,9 +678,12 @@ class SceneManager:
         out_queue: queue.Queue,
     ):
         frames_to_skip = 0
+        end_pos: FramePosition | None = None
         try:
             while not self._stop.is_set():
+                next_timecode = None
                 if isinstance(stop_at, int) and video.frame_number + 1 >= stop_at:
+                    next_timecode = video.peek_timecode()
                     break
                 if isinstance(stop_at, Fraction):
                     next_timecode = video.peek_timecode()
@@ -693,6 +697,7 @@ class SceneManager:
                 # (all of which should be modified under the GIL).
                 frame_im = video.read(decode=not skipping)
                 if frame_im is False:
+                    next_timecode = None
                     break
                 if skipping:
                     frames_to_skip -= 1
@@ -743,6 +748,16 @@ class SceneManager:
 
                 out_queue.put((frame_im, video.position))
                 frames_to_skip = frame_skip
+            if not self._stop.is_set():
+                last_pos = video.position
+                if last_pos is not None:
+                    if next_timecode is None:
+                        end_pos = video.get_end_position()
+                    else:
+                        end_pos = FramePosition(
+                            timecode=next_timecode,
+                            frame_number=last_pos.frame_number + 1,
+                        )
 
         # If *any* exceptions occur, we re-raise them in the main thread so that the caller of
         # detect_scenes can handle it.
@@ -756,7 +771,7 @@ class SceneManager:
 
         finally:
             # Make sure main thread stops processing loop.
-            out_queue.put((None, None))
+            out_queue.put((None, end_pos))
 
     #
     # Deprecated Methods

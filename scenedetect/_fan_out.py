@@ -200,6 +200,19 @@ class _FanOutConsumer(VideoStream):
         return self._parent._source.duration
 
     @property
+    def final_frame_duration(self) -> Fraction | None:
+        """Return the source's final frame duration after this consumer reaches normal EOF."""
+        if not self._eof or self._parent._stop.is_set() or self._parent._reader_exc is not None:
+            return None
+        return self._parent._source.final_frame_duration
+
+    def get_end_position(self) -> FramePosition | None:
+        """Return the source's EOF boundary after this consumer reaches normal EOF."""
+        if not self._eof or self._parent._stop.is_set() or self._parent._reader_exc is not None:
+            return None
+        return self._parent._source.get_end_position()
+
+    @property
     def frame_count(self) -> int | None:
         return self._parent._source.frame_count
 

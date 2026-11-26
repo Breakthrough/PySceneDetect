@@ -111,9 +111,11 @@ Both describe the source independently of the numbering origin. Metadata may be 
 and may be revised during decoding. ``VideoStream.base_timecode`` has been removed.
 
 Custom detectors now receive ``position: FramePosition`` in ``process_frame()`` and
-``post_process()``, and return ``list[FramePosition]``. ``post_process()`` receives the last
-position read. Update callback annotations and any code that constructs cuts to use positions
-with both an ordinal and timestamp. ``TimecodePair`` has been replaced by ``PositionPair``.
+``post_process()``, and return ``list[FramePosition]``. ``post_process()`` receives the exclusive
+end position of the range read, including skipped frames. Do not add another frame when
+calculating final durations from this endpoint. Update callback annotations and any code that
+constructs cuts to use positions with both an ordinal and timestamp. ``TimecodePair`` has been
+replaced by ``PositionPair``.
 
 Construct ``StatsManager()`` without a base timecode. ``get_metrics()``, ``set_metrics()``, and
 ``metrics_exist()`` accept an integer frame number or ``FramePosition``. Use a position with

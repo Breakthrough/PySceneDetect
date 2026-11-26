@@ -569,3 +569,53 @@ def test_peek_timecode(
         assert stream.frame_number == frame_number
         assert stream.position is not None
         assert stream.position.timecode == timecode
+
+
+@pytest.mark.parametrize(
+    ("native_duration", "reported_remaining", "expected_duration"),
+    [
+        pytest.param(Fraction(1, 5), Fraction(7, 10), Fraction(1, 5), id="native-duration"),
+        pytest.param(None, Fraction(7, 10), Fraction(7, 10), id="source-duration"),
+        pytest.param(None, None, None, id="unknown-source-duration"),
+        pytest.param(None, Fraction(0), None, id="nonadvancing-source-duration"),
+    ],
+)
+def test_get_end_position_uses_eof_timing(
+    vs_type: ty.Callable[..., VideoStream],
+    test_video_file,
+    monkeypatch: pytest.MonkeyPatch,
+    auto_close,
+    native_duration,
+    reported_remaining,
+    expected_duration,
+):
+    """Resolve EOF using source timestamps after relative numbering restarts at a seek."""
+    stream = auto_close(vs_type(test_video_file, frame_numbering=FrameNumbering.RELATIVE))
+    stream.seek(1.0)
+    while stream.read(decode=False) is not False:
+        pass
+    position = stream.position
+    assert isinstance(position, FramePosition)
+    reported_end = (
+        position.timecode.seconds + reported_remaining if reported_remaining is not None else None
+    )
+    monkeypatch.setattr(vs_type, "final_frame_duration", property(lambda self: native_duration))
+    monkeypatch.setattr(vs_type, "duration", property(lambda self: reported_end))
+
+    end = stream.get_end_position()
+
+    assert isinstance(end, FramePosition)
+    assert end.frame_number == position.frame_number + 1
+    assert end.timecode.seconds == position.timecode.seconds + (
+        expected_duration if expected_duration is not None else 1 / stream.frame_rate
+    )
+    assert stream.position is position
+
+
+def test_get_end_position_without_frames(
+    vs_type: ty.Callable[..., VideoStream], test_video_file, auto_close
+):
+    """An unread stream has no EOF position to resolve."""
+    stream = auto_close(vs_type(test_video_file))
+    assert stream.get_end_position() is None
+    assert stream.position is None

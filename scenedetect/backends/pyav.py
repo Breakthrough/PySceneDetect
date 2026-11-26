@@ -305,6 +305,19 @@ class VideoStreamAv(VideoStream):
         return self._duration
 
     @property
+    def final_frame_duration(self) -> Fraction | None:
+        """Return the final frame's reported duration in seconds, if available after EOF."""
+        frame = self._frame
+        if frame is None or frame.time_base is None or frame.time_base <= 0:
+            return None
+
+        duration = getattr(frame, "duration", None)
+        if duration is None or duration <= 0:
+            return None
+
+        return _to_fraction(frame.time_base) * duration
+
+    @property
     def frame_count(self) -> int | None:
         """Reported total source frame count, or None if unavailable."""
         return self._frame_count

@@ -77,6 +77,47 @@ def test_decode_multiple(test_fades_clip, backend, auto_close):
     assert video.decode_failures == 0
 
 
+@pytest.mark.parametrize(
+    ("native_duration", "expected_end"),
+    [
+        pytest.param(None, Fraction(999, 50), id="fps-fallback"),
+        pytest.param(Fraction(1, 10), Fraction(503, 25), id="native-duration"),
+    ],
+)
+def test_end_position_uses_child_timing_and_offset(
+    test_fades_clip, tracked_streams, monkeypatch, auto_close, native_duration, expected_end
+):
+    """Native or estimated frame duration contributes to both the seam and final endpoint."""
+    monkeypatch.setattr(_TrackedStream, "duration", property(lambda self: None))
+    monkeypatch.setattr(
+        _TrackedStream, "final_frame_duration", property(lambda self: native_duration)
+    )
+    original_open_source = VideoStreamConcat._open_source
+
+    def open_source(video, index):
+        stream = original_open_source(video, index)
+        monkeypatch.setattr(stream, "_frame_rate", Fraction(25 if index == 0 else 50))
+        return stream
+
+    monkeypatch.setattr(VideoStreamConcat, "_open_source", open_source)
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend="tracked"))
+    assert video.get_end_position() is None
+    while video.read(decode=False) is not False:
+        pass
+
+    last_position = video.position
+    assert isinstance(last_position, FramePosition)
+    assert video.duration is None
+    assert video.final_frame_duration == native_duration
+    assert video.frame_rate == 25
+    end = video.get_end_position()
+    assert isinstance(end, FramePosition)
+    assert end.frame_number == FADES_TOTAL_FRAMES * 2
+    # Each child's final frame starts at 9.96s; their fallback frame rates differ.
+    assert end.timecode.seconds == expected_end
+    assert video.position == last_position
+
+
 @pytest.mark.parametrize("backend", BACKENDS)
 def test_seam_monotonicity(test_fades_clip, backend, auto_close):
     """Position must be strictly increasing across the file seam."""

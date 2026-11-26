@@ -56,9 +56,8 @@ def test_scene_list(test_video_file):
     # The selected source frame range is [150, 300).
     assert scene_list[0][0].frame_number == 150
     assert scene_list[-1][1].frame_number == 300
-    # The final timestamp still belongs to the last processed frame.
-    assert isinstance(video.position, FramePosition)
-    assert scene_list[-1][1].timecode == video.position.timecode
+    # The endpoint uses the first excluded frame's timestamp.
+    assert scene_list[-1][1].timecode == video.peek_timecode()
 
     for i, _ in enumerate(scene_list):
         assert scene_list[i][0].frame_number < scene_list[i][1].frame_number
@@ -295,15 +294,21 @@ def test_resolve_end_time_rejects_unknown_relative_origin():
 
 @pytest.mark.parametrize("backend", ["opencv", "pyav"])
 @pytest.mark.parametrize("frame_skip", [0, 3])
-def test_time_cutoff_preserves_next_frame(
-    test_vfr_drop3_video: str, auto_close, backend: str, frame_skip: int
+@pytest.mark.parametrize("cutoff_type", ["frames", "time"])
+def test_cutoff_preserves_next_frame(
+    test_vfr_drop3_video: str, auto_close, backend: str, frame_skip: int, cutoff_type: str
 ):
-    """Stop before the timestamp cutoff, including during a skipped-frame sequence."""
+    """Stop before either cutoff, including during a skipped-frame sequence."""
     processed: list[int] = []
+    final_positions: list[FramePosition] = []
 
     class RecordingDetector(SceneDetector):
         def process_frame(self, position: FramePosition, frame_img) -> list[FramePosition]:
             processed.append(position.frame_number)
+            return []
+
+        def post_process(self, position: FramePosition) -> list[FramePosition]:
+            final_positions.append(position)
             return []
 
     reference = auto_close(open_video(test_vfr_drop3_video, backend=backend))
@@ -320,7 +325,7 @@ def test_time_cutoff_preserves_next_frame(
     manager.add_detector(RecordingDetector())
     num_frames = manager.detect_scenes(
         video=video,
-        end_time=first_excluded.timecode,
+        end_time=6 if cutoff_type == "frames" else first_excluded.timecode,
         frame_skip=frame_skip,
     )
 
@@ -330,7 +335,8 @@ def test_time_cutoff_preserves_next_frame(
 
     scene_list = manager.get_scene_list(start_in_scene=True)
     assert len(scene_list) == 1
-    assert scene_list[0][1].frame_number == 6
+    assert scene_list[0][1] == first_excluded
+    assert final_positions == [first_excluded]
 
     assert video.peek_timecode() == first_excluded.timecode
     assert video.read(decode=False) is True

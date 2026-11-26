@@ -40,7 +40,7 @@ from pathlib import Path
 
 import numpy as np
 
-from scenedetect.common import FrameRate, Timecode, TimecodeLike, parse_frame_or_time
+from scenedetect.common import FramePosition, FrameRate, Timecode, TimecodeLike, parse_frame_or_time
 from scenedetect.platform import StrPath
 from scenedetect.video_stream import FrameNumbering, SeekError, VideoOpenFailure, VideoStream
 
@@ -226,16 +226,13 @@ class VideoStreamConcat(VideoStream):
     def _finish_current_source(self):
         """Extend later source offsets when the estimated end exceeds the declared duration.
 
-        Estimate the end from the last observed timestamp plus one frame at the child's rate.
+        Resolve the child's end using its native frame duration or the shared fallback policy.
         """
         self._decode_failures_prior += self._cap.decode_failures
-        if self._cap.position is None:
+        end_position = self._cap.get_end_position()
+        if end_position is None:
             return
-        actual_end = (
-            self._offsets[self._index]
-            + self._child_position_seconds()
-            + Fraction(1) / self._cap.frame_rate
-        )
+        actual_end = self._offsets[self._index] + end_position.timecode.seconds
         declared_end = self._offsets[self._index + 1]
         if actual_end > declared_end:
             delta = actual_end - declared_end
@@ -299,6 +296,25 @@ class VideoStreamConcat(VideoStream):
 
             if not self._open_next_source():
                 return None
+
+    def get_end_position(self) -> FramePosition | None:
+        """Return the exclusive EOF position on the concatenated timeline."""
+        position = self.position
+        if position is None:
+            return None
+
+        end_seconds = self._offsets[self._index]
+        child_end = self._cap.get_end_position()
+        if child_end is not None:
+            end_seconds += child_end.timecode.seconds
+
+        return FramePosition(
+            timecode=Timecode(
+                pts=end_seconds.numerator,
+                time_base=Fraction(1, end_seconds.denominator),
+            ),
+            frame_number=position.frame_number + 1,
+        )
 
     def seek(self, target: TimecodeLike):
         """Seek to `target` on the global timeline. Supports seeking across sources in
@@ -442,6 +458,11 @@ class VideoStreamConcat(VideoStream):
         if any(source.duration is None for source in self._sources):
             return None
         return self._offsets[-1]
+
+    @property
+    def final_frame_duration(self) -> Fraction | None:
+        """Return the final input's reported frame duration after EOF, or None if unavailable."""
+        return self._cap.final_frame_duration
 
     @property
     def frame_count(self) -> int | None:

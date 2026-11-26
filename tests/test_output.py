@@ -49,7 +49,8 @@ from scenedetect.output import (
     write_scene_list_ffmetadata,
     write_scene_list_otio,
 )
-from scenedetect.video_stream import VideoStream
+from scenedetect.output.image import _generate_timecode_list, _read_image
+from scenedetect.video_stream import SeekError, VideoStream
 
 FFMPEG_ARGS = (
     "-vf crop=128:128:0:0 -map 0:v:0 -c:v libx264 -preset ultrafast -qp 0 -tune zerolatency"
@@ -262,6 +263,107 @@ def test_save_images_single_frame_scene_stays_in_scene(test_video_file, tmp_path
         image_name_template="$SCENE_NUMBER.$FRAME_NUMBER",
     )
     assert image_filenames == {0: ["001.11.jpg"]}
+
+
+@pytest.mark.parametrize("num_images", [1, 3])
+def test_generate_timecode_list_one_long_frame(num_images):
+    """Every target must use the sole frame's start, regardless of its display duration."""
+    start = FramePosition(Timecode(10, Fraction(1)), 17)
+    end = FramePosition(Timecode(11, Fraction(1)), 18)
+
+    targets = _generate_timecode_list([(start, end)], [num_images], 1, Fraction(25))
+
+    assert [target.seconds for target in targets[0]] == [start.timecode.seconds] * num_images
+
+
+@pytest.mark.parametrize("threading", [False, True])
+@pytest.mark.parametrize("frame_numbering", list(FrameNumbering))
+@pytest.mark.parametrize("single_frame", [False, True])
+def test_save_images_vfr_final_frame(
+    test_vfr_drop3_video: str, tmp_path: Path, threading, frame_numbering, single_frame
+):
+    """A fresh stream must extract the final frame in both EOF sampling cases."""
+    pytest.importorskip("av")
+    with open_video(test_vfr_drop3_video, backend="pyav") as reference:
+        last_image = reference.read()
+        assert isinstance(last_image, np.ndarray)
+        first = reference.position
+        while True:
+            frame = reference.read()
+            if not isinstance(frame, np.ndarray):
+                break
+            last_image = frame
+        last = reference.position
+        end = reference.get_end_position()
+        assert first is not None and last is not None and end is not None
+
+    scene = (last if single_frame else first, end)
+    num_images = 1 if single_frame else 3
+    with open_video(test_vfr_drop3_video, backend="pyav", frame_numbering=frame_numbering) as video:
+        filenames = save_images(
+            [scene],
+            video,
+            num_images=num_images,
+            frame_margin=1 if single_frame else 0,
+            threading=threading,
+            image_extension="png",
+            encoder_param=3,
+            output_dir=tmp_path,
+        )
+
+    assert len(filenames[0]) == num_images
+    actual = cv2.imread(str(tmp_path / filenames[0][-1]))
+    assert actual is not None
+    assert np.array_equal(actual, last_image)
+
+
+@pytest.mark.parametrize(
+    ("timestamps", "eof_seconds", "expected_frame"),
+    [
+        pytest.param([0, 5, 10], None, 1, id="scene-boundary"),
+        pytest.param([0, 5], Fraction(1), 1, id="inside-final-frame"),
+        pytest.param([0, 5], Fraction(3, 4), None, id="exclusive-eof"),
+    ],
+)
+def test_read_image_recovery_bounds(timestamps, eof_seconds, expected_frame):
+    """Recovery retains the image's position and rejects targets outside the source."""
+    video = Mock(spec=VideoStream)
+    frames = iter(
+        (
+            np.full((2, 2, 3), index, dtype=np.uint8),
+            FramePosition(Timecode(pts, Fraction(1, 10)), index),
+        )
+        for index, pts in enumerate(timestamps)
+    )
+
+    def read():
+        item = next(frames, None)
+        if item is None:
+            return False
+        image, video.position = item
+        return image
+
+    video.read.side_effect = read
+    video.seek.side_effect = [SeekError("Target cannot be reached directly."), None]
+    video.get_end_position.return_value = (
+        FramePosition(
+            Timecode(eof_seconds.numerator, Fraction(1, eof_seconds.denominator)),
+            len(timestamps),
+        )
+        if eof_seconds is not None
+        else None
+    )
+    scene = (FramePosition(Timecode(0, Fraction(1)), 0), FramePosition(Timecode(1, Fraction(1)), 2))
+
+    selected = _read_image(video, Timecode(3, Fraction(1, 4)), scene)
+
+    if expected_frame is None:
+        assert selected is None
+    else:
+        assert selected is not None
+        image, position = selected
+        assert position.frame_number == expected_frame
+        assert np.all(image == expected_frame)
 
 
 def test_save_images_sub_frame_scene_stays_in_scene(test_video_file, tmp_path: Path):

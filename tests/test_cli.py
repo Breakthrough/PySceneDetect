@@ -274,12 +274,12 @@ def test_cli_timestamp_start_frame_end_requires_source(caplog):
 
 
 def test_cli_time_end():
-    """Validate frame counts and last-frame timestamps without a start seek."""
+    """Validate frame counts and exclusive end timestamps without a start seek."""
     EXPECTED = """[PySceneDetect] Scene List:
 -----------------------------------------------------------------------
  | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
- |      1  |           1 | 00:00:00.000 |          10 | 00:00:00.375 |
+ |      1  |           1 | 00:00:00.000 |          10 | 00:00:00.417 |
 -----------------------------------------------------------------------
 """
     TEST_CASES = [
@@ -314,7 +314,7 @@ def test_cli_time_start():
 -----------------------------------------------------------------------
  | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
- |      1  |           1 | 00:00:00.125 |           7 | 00:00:00.375 |
+ |      1  |           1 | 00:00:00.125 |           7 | 00:00:00.417 |
 -----------------------------------------------------------------------
 """
     TEST_CASES = [
@@ -365,7 +365,7 @@ def test_cli_time_scene_boundary():
  | Scene # | Start Frame |  Start Time  |  End Frame  |   End Time   |
 -----------------------------------------------------------------------
  |      1  |           1 | 00:00:03.545 |           5 | 00:00:03.754 |
- |      2  |           6 | 00:00:03.754 |          11 | 00:00:03.962 |
+ |      2  |           6 | 00:00:03.754 |          11 | 00:00:04.004 |
 -----------------------------------------------------------------------
 """
     TEST_CASES = [
@@ -409,7 +409,7 @@ def test_cli_time_start_past_end_of_video(backend: str, caplog):
 
 
 def test_cli_time_end_of_video():
-    """Validate relative frame numbers and the final frame timestamp at EOF."""
+    """Validate relative frame numbers and the exclusive end timestamp at EOF."""
     output = subprocess.check_output(
         [
             *SCENEDETECT_CMD.split(" "),
@@ -431,7 +431,7 @@ def test_cli_time_end_of_video():
 -----------------------------------------------------------------------
  |      1  |           1 | 00:01:18.036 |          45 | 00:01:19.913 |
  |      2  |          46 | 00:01:19.913 |          95 | 00:01:21.999 |
- |      3  |          96 | 00:01:21.999 |         109 | 00:01:22.541 |
+ |      3  |          96 | 00:01:21.999 |         109 | 00:01:22.582 |
 -----------------------------------------------------------------------
 """
         in output
@@ -681,7 +681,7 @@ def test_cli_list_scenes(tmp_path: Path):
     EXPECTED_CSV_OUTPUT = """Timecode List:,00:00:03.754
 Scene Number,Start Frame,Start Timecode,Start Time (seconds),End Frame,End Timecode,End Time (seconds),Length (frames),Length (timecode),Length (seconds)
 1,1,00:00:02.002,2.002,42,00:00:03.754,3.754,42,00:00:01.752,1.752
-2,43,00:00:03.754,3.754,96,00:00:05.964,5.964,54,00:00:02.211,2.211
+2,43,00:00:03.754,3.754,96,00:00:06.006,6.006,54,00:00:02.252,2.252
 """
     assert output_path.read_text() == EXPECTED_CSV_OUTPUT
 
@@ -700,7 +700,7 @@ def test_cli_list_scenes_skip_cuts(tmp_path: Path):
     assert os.path.exists(output_path)
     EXPECTED_CSV_OUTPUT = """Scene Number,Start Frame,Start Timecode,Start Time (seconds),End Frame,End Timecode,End Time (seconds),Length (frames),Length (timecode),Length (seconds)
 1,1,00:00:02.002,2.002,42,00:00:03.754,3.754,42,00:00:01.752,1.752
-2,43,00:00:03.754,3.754,96,00:00:05.964,5.964,54,00:00:02.211,2.211
+2,43,00:00:03.754,3.754,96,00:00:06.006,6.006,54,00:00:02.252,2.252
 """
     assert output_path.read_text() == EXPECTED_CSV_OUTPUT
 
@@ -738,7 +738,7 @@ row-separator = \\t
     EXPECTED_CSV_OUTPUT = """Timecode List:,00:00:03.754
 Scene Number,Start Frame,Start Timecode,Start Time (seconds),End Frame,End Timecode,End Time (seconds),Length (frames),Length (timecode),Length (seconds)
 1,1,00:00:02.002,2.002,42,00:00:03.754,3.754,42,00:00:01.752,1.752
-2,43,00:00:03.754,3.754,96,00:00:05.964,5.964,54,00:00:02.211,2.211
+2,43,00:00:03.754,3.754,96,00:00:06.006,6.006,54,00:00:02.252,2.252
 """
     EXPECTED_CSV_OUTPUT = EXPECTED_CSV_OUTPUT.replace(",", "|").replace("\n", "\t")
     assert output_path.read_text() == EXPECTED_CSV_OUTPUT
@@ -942,7 +942,7 @@ def _invoke_save_images(
 @pytest.mark.parametrize(
     "args,expected",
     [
-        # The two scenes are 1.752s and 2.211s long: floor(length / 1s) + 1 images each.
+        # The two scenes are 1.752s and 2.252s long: floor(length / 1s) + 1 images each.
         (["-i", "1s"], [2, 3]),
         (["-i", "1.5s"], [2, 2]),
         (["--interval", "00:00:01.000"], [2, 3]),
@@ -1330,7 +1330,7 @@ def paired_scenes_context(paired_scenes_csv: Path) -> CliContext:
 def test_cli_load_scenes_options():
     """Ensure we can load scenes both with and without the cut row."""
     assert invoke_scenedetect("-i {VIDEO} time {TIME} {DETECTOR} list-scenes") == 0
-    assert invoke_scenedetect("-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv") == 0
+    assert invoke_scenedetect("-i {VIDEO} load-scenes -i {VIDEO_NAME}-Scenes.csv") == 0
     # Specifying a detector with load-scenes should be disallowed.
     assert invoke_scenedetect(
         "-i {VIDEO} time {TIME} {DETECTOR} load-scenes -i {VIDEO_NAME}-Scenes.csv"
@@ -1342,7 +1342,7 @@ def test_cli_load_scenes_options():
     # If `-s`/`--skip-cuts` is specified, the resulting scene list should still be compatible with
     # the `load-scenes` command.
     assert invoke_scenedetect("-i {VIDEO} time {TIME} {DETECTOR} list-scenes -s") == 0
-    assert invoke_scenedetect("-i {VIDEO} time {TIME} load-scenes -i {VIDEO_NAME}-Scenes.csv") == 0
+    assert invoke_scenedetect("-i {VIDEO} load-scenes -i {VIDEO_NAME}-Scenes.csv") == 0
 
 
 def test_cli_load_scenes_output():
@@ -1604,7 +1604,7 @@ title=Scene 1
 [CHAPTER]
 TIMEBASE=1/1000
 START=3754
-END=5965
+END=6006
 title=Scene 2
 """
     assert output_path.read_text() == EXPECTED_CHAPTERS_OUTPUT
@@ -1666,7 +1666,7 @@ TITLE: {DEFAULT_VIDEO_NAME}
 FCM: NON-DROP FRAME
 
 001  AX V     C        00:00:02:00 00:00:03:18 00:00:02:00 00:00:03:18
-002  AX V     C        00:00:03:18 00:00:05:23 00:00:03:18 00:00:05:23
+002  AX V     C        00:00:03:18 00:00:06:00 00:00:03:18 00:00:06:00
 """
     assert output_path.read_text() == EXPECTED_EDL_OUTPUT
 
@@ -1702,7 +1702,7 @@ TITLE: title
 FCM: NON-DROP FRAME
 
 001  BX V     C        00:00:02:00 00:00:03:18 00:00:02:00 00:00:03:18
-002  BX V     C        00:00:03:18 00:00:05:23 00:00:03:18 00:00:05:23
+002  BX V     C        00:00:03:18 00:00:06:00 00:00:03:18 00:00:06:00
 """
     assert output_path.read_text() == EXPECTED_EDL_OUTPUT
 
@@ -1812,7 +1812,7 @@ def test_cli_save_otio(tmp_path: Path):
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 23.976023976023978,
-                                "value": 53.000008
+                                "value": 54.0
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
@@ -1900,7 +1900,7 @@ def test_cli_save_otio(tmp_path: Path):
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 23.976023976023978,
-                                "value": 53.000008
+                                "value": 54.0
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
@@ -2030,7 +2030,7 @@ def test_cli_save_otio_no_audio(tmp_path: Path):
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 23.976023976023978,
-                                "value": 53.000008
+                                "value": 54.0
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
@@ -2117,6 +2117,10 @@ def test_cli_save_fcp_fcpx(tmp_path: Path):
     # Spine contains one `<asset-clip>` per scene (not wrapped in `<clip>`).
     asset_clips = root.findall("library/event/project/sequence/spine/asset-clip")
     assert len(asset_clips) == 2
+    sequence = root.find("library/event/project/sequence")
+    assert sequence is not None
+    assert sequence.attrib["duration"] == "1001/250s"
+    assert asset_clips[-1].attrib["duration"] == "9009/4000s"
     # All clip time attributes are rational strings ending in "s".
     for clip in asset_clips:
         for attr in ("offset", "start", "duration"):
@@ -2165,6 +2169,8 @@ def test_cli_save_fcp_fcp7(tmp_path: Path):
     # Two clipitems produced; first carries the full <file> block, rest reference it by id.
     clipitems = root.findall("project/sequence/media/video/track/clipitem")
     assert len(clipitems) == 2
+    assert root.findtext("project/sequence/duration") == "96"
+    assert clipitems[-1].findtext("end") == clipitems[-1].findtext("out") == "144"
 
     first_file = clipitems[0].find("file")
     assert first_file is not None

@@ -27,13 +27,14 @@ import numpy as np
 from scenedetect.common import (
     FramePosition,
     Interpolation,
+    PositionPair,
     SceneList,
     Timecode,
     TimecodeLike,
     parse_frame_or_time,
 )
 from scenedetect.platform import StrPath, get_and_create_path, get_cv2_imwrite_params, tqdm
-from scenedetect.video_stream import VideoStream
+from scenedetect.video_stream import SeekError, VideoStream
 
 logger = logging.getLogger("pyscenedetect")
 
@@ -87,8 +88,9 @@ def _generate_timecode_list(
     frame_secs = 1 / frame_rate
     result = []
     for (start, end), num_images in zip(scene_list, num_images_per_scene, strict=True):
-        duration_secs = (end - start).elapsed
-        if duration_secs <= 0:
+        duration = end - start
+        duration_secs = duration.elapsed
+        if duration.frames == 1 or duration_secs <= 0:
             result.append([start.timecode] * num_images)
             continue
         segment_secs = duration_secs / num_images
@@ -110,6 +112,60 @@ def _generate_timecode_list(
             timecodes.append(Timecode(pts=t.numerator, time_base=Fraction(1, t.denominator)))
         result.append(timecodes)
     return result
+
+
+def _read_image(
+    video: VideoStream, target: Timecode, scene: PositionPair
+) -> tuple[np.ndarray, FramePosition] | None:
+    """Read an image at target, replaying within the scene if direct seeking fails."""
+    try:
+        video.seek(target)
+        frame_im = video.read()
+    except SeekError:
+        frame_im = False
+
+    if isinstance(frame_im, np.ndarray):
+        position = video.position
+        assert position is not None
+        return frame_im, position
+
+    start, end = scene
+    start_seconds = start.timecode.seconds
+    end_seconds = end.timecode.seconds
+    target_seconds = target.seconds
+    if not start_seconds <= target_seconds < end_seconds:
+        return None
+
+    last_image: tuple[np.ndarray, FramePosition] | None = None
+    try:
+        video.seek(start.timecode)
+        while True:
+            frame_im = video.read()
+            if not isinstance(frame_im, np.ndarray):
+                break
+
+            position = video.position
+            assert position is not None
+            seconds = position.timecode.seconds
+            if seconds >= end_seconds:
+                return last_image
+            if seconds < start_seconds:
+                continue
+
+            last_image = frame_im, position
+            if seconds >= target_seconds:
+                return last_image
+    except SeekError:
+        return None
+
+    eof_position = video.get_end_position()
+    if (
+        last_image is not None
+        and eof_position is not None
+        and target_seconds < eof_position.timecode.seconds
+    ):
+        return last_image
+    return None
 
 
 def _describe_num_images(
@@ -179,8 +235,7 @@ class _ImageExtractor:
                 if `interval` is set.
             frame_margin: Padding around the beginning and end of each scene used when
                 selecting which frames to extract. Accepts an int (frames), float (seconds),
-                or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0, but some video files
-                may then fail to extract the very last frame.
+                or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0.
                 Frame-count margins use the video's frame rate and are approximate for VFR.
             image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
             encoder_param: Quality/compression efficiency, based on type of image:
@@ -328,11 +383,9 @@ class _ImageExtractor:
 
         for i, scene_timecodes in enumerate(timecode_list):
             for j, timecode in enumerate(scene_timecodes):
-                video.seek(timecode)
-                frame_im = video.read()
-                if isinstance(frame_im, np.ndarray):
-                    position = video.position
-                    assert position is not None
+                selected = _read_image(video, timecode, scene_list[i])
+                if selected is not None:
+                    frame_im, position = selected
                     file_path = format_filename(i, j, position)
                     image_filenames[i].append(file_path)
                     checked_put(
@@ -446,12 +499,13 @@ def save_images(
             from calling a SceneManager's detect_scenes() method.
         video: A VideoStream object corresponding to the scene list.
             Note that the video will be closed/re-opened and seeked through.
+            If an image target cannot be reached directly, extraction may replay the scene.
+            SOURCE numbering may also require replaying the source prefix.
         num_images: Number of images to generate for each scene.  Minimum is 1. Defaults to 3
             if `interval` is not set. Cannot be used with `interval`.
         frame_margin: Padding around the beginning and end of each scene used when
             selecting which frames to extract. Accepts an int (frames), float (seconds),
-            or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0, but some video files
-            may then fail to extract the very last frame.
+            or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0.
             Frame-count margins use the video's frame rate and are approximate for VFR.
         image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
         encoder_param: Quality/compression efficiency, based on type of image:
@@ -577,11 +631,9 @@ def save_images(
     logger.debug("Writing images with template %s", filename_template.template)
     for i, scene_timecodes in enumerate(timecode_list):
         for j, image_timecode in enumerate(scene_timecodes):
-            video.seek(image_timecode)
-            frame_im = video.read()
-            if isinstance(frame_im, np.ndarray):
-                position = video.position
-                assert position is not None
+            selected = _read_image(video, image_timecode, scene_list[i])
+            if selected is not None:
+                frame_im, position = selected
                 # TODO: Add extension to template.
                 # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
                 file_path = "{}.{}".format(

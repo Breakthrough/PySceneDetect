@@ -71,7 +71,7 @@ class SceneDetector(ABC):
         """Called after there are no more frames to process.
 
         Arguments:
-            position: The last position in the video which was read.
+            position: Exclusive end position of the range read, including skipped frames.
 
         Returns:
            List of frame positions where scene cuts have been detected, if any.

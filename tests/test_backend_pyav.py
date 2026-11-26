@@ -225,6 +225,36 @@ def test_duration_fallback_from_stream_duration(
     assert stream._get_duration() == Fraction(123, 100)
 
 
+@pytest.mark.parametrize(
+    ("frame", "expected"),
+    [
+        pytest.param(
+            SimpleNamespace(duration=3, time_base=Fraction(1, 100)),
+            Fraction(3, 100),
+            id="native-duration",
+        ),
+        pytest.param(SimpleNamespace(time_base=Fraction(1, 100)), None, id="older-pyav"),
+        pytest.param(
+            SimpleNamespace(duration=None, time_base=Fraction(1, 100)), None, id="unknown-duration"
+        ),
+        pytest.param(
+            SimpleNamespace(duration=0, time_base=Fraction(1, 100)), None, id="zero-duration"
+        ),
+        pytest.param(SimpleNamespace(duration=3, time_base=None), None, id="missing-time-base"),
+        pytest.param(SimpleNamespace(duration=3, time_base=Fraction(0)), None, id="zero-time-base"),
+    ],
+)
+def test_final_frame_duration_compatibility(
+    test_video_file, monkeypatch: pytest.MonkeyPatch, auto_close, frame, expected
+):
+    """Use native duration ticks when available, including older PyAV frames without the field."""
+    stream = auto_close(VideoStreamAv(test_video_file))
+    assert stream.final_frame_duration is None
+    monkeypatch.setattr(stream, "_frame", frame)
+
+    assert stream.final_frame_duration == expected
+
+
 @pytest.mark.parametrize("unset_dar", [None, Fraction(0, 1)], ids=["none", "zero"])
 def test_aspect_ratio_unset_dar(
     test_video_file: str, unset_dar, monkeypatch: pytest.MonkeyPatch, auto_close

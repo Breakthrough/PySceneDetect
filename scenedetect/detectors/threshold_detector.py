@@ -24,7 +24,6 @@ from logging import getLogger
 import numpy
 
 from scenedetect.common import (
-    FrameDuration,
     FramePosition,
     TimecodeLike,
     parse_frame_or_time,
@@ -214,7 +213,7 @@ class ThresholdDetector(SceneDetector):
             self._fade_positions.append(frame)
         return cuts
 
-    def post_process(self, frame: FramePosition) -> list[FramePosition]:
+    def post_process(self, position: FramePosition) -> list[FramePosition]:
         """Writes a final scene cut if the last detected fade was a fade-out.
 
         Only writes the scene cut if add_final_scene is true, and the last fade
@@ -222,6 +221,9 @@ class ThresholdDetector(SceneDetector):
         (since there is no corresponding fade-in) so it will be located at the
         exact frame where the fade-out crossed the detection threshold. The fade-out
         must also meet min_out_length, including the last processed frame.
+
+        Arguments:
+            position: Exclusive end position of the range read.
         """
 
         # If the last fade detected was a fade out, we add a corresponding new
@@ -231,16 +233,12 @@ class ThresholdDetector(SceneDetector):
         if last_scene_cut is None:
             return []
         cuts: list[FramePosition] = []
-        duration = frame - self.last_fade["frame"]
-        # TODO: Define the last frame's duration and exclusive end time across backends.
-        # The fade duration includes the last frame in its count, but not in elapsed time.
-        fade_duration = FrameDuration(frames=duration.frames + 1, elapsed=duration.elapsed)
+        fade_duration = position - self.last_fade["frame"]
         if (
             self.last_fade["type"] == "out"
             and self.add_final_scene
             and self.last_fade["frame"] is not None
-            and self.meets_minimum(frame - last_scene_cut, self.min_scene_len)
-            # frame is the last processed frame, so include it in the fade duration.
+            and self.meets_minimum(position - last_scene_cut, self.min_scene_len)
             and self.meets_minimum(fade_duration, self.min_out_length)
         ):
             cuts.append(self.last_fade["frame"])

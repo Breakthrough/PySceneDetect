@@ -132,6 +132,44 @@ class VideoStream(ABC):
         """
         return self._position.frame_number if self._position is not None else -1
 
+    @property
+    def final_frame_duration(self) -> Fraction | None:
+        """Backend-reported duration of the final frame in seconds, or None if unavailable.
+
+        Query after reading or peeking reaches EOF, before seeking, resetting, or closing.
+        """
+        return None
+
+    def get_end_position(self) -> FramePosition | None:
+        """Return the exclusive EOF position, or None if no frame has been recorded.
+
+        Call after reading or peeking reaches EOF. Prefer native frame duration,
+        then reported source duration, then an estimate from frame_rate.
+        """
+        position = self.position
+        if position is None:
+            return None
+
+        last_seconds = position.timecode.seconds
+        frame_duration = self.final_frame_duration
+
+        if frame_duration is not None and frame_duration > 0:
+            end_seconds = last_seconds + frame_duration
+        else:
+            reported_end = self.duration
+            if reported_end is not None and reported_end > last_seconds:
+                end_seconds = reported_end
+            else:
+                end_seconds = last_seconds + 1 / self.frame_rate
+
+        return FramePosition(
+            timecode=Timecode(
+                pts=end_seconds.numerator,
+                time_base=Fraction(1, end_seconds.denominator),
+            ),
+            frame_number=position.frame_number + 1,
+        )
+
     _decode_failures: int = 0
     """Cumulative count of frames which failed to decode. Backends which can detect and skip
     corrupt frames increment this as an instance attribute."""

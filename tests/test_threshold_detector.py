@@ -35,7 +35,11 @@ def _detect_levels(levels, **kwargs):
             frame_number=index,
         )
         cuts.extend(detector.process_frame(position, np.full((4, 4, 3), level, np.uint8)))
-    cuts.extend(detector.post_process(position))
+    end_position = FramePosition(
+        timecode=Timecode(len(levels), Fraction(1, 10)),
+        frame_number=len(levels),
+    )
+    cuts.extend(detector.post_process(end_position))
     return [cut.frame_number for cut in cuts]
 
 
@@ -104,11 +108,12 @@ def test_negative_min_out_length_rejected(minimum):
 
 @pytest.mark.parametrize("add_final_scene", [False, True])
 @pytest.mark.parametrize("out_length", [3, 4])
-def test_final_fade_counts_last_frame(out_length, add_final_scene):
+@pytest.mark.parametrize("minimum", [4, "0.4s"])
+def test_final_fade_counts_last_frame(out_length, add_final_scene, minimum):
     assert _detect_levels(
         [128] * 10 + [0] * out_length,
         min_scene_len=0,
-        min_out_length=4,
+        min_out_length=minimum,
         add_final_scene=add_final_scene,
     ) == ([10] if add_final_scene and out_length == 4 else [])
 
@@ -133,9 +138,9 @@ def _write_video(path, levels):
     return str(path)
 
 
-# At EOF, four frames span 0.3s between timestamps; five span 0.4s.
+# The final frame's duration counts toward the fade-out minimum at EOF.
 @pytest.mark.parametrize("backend", ["opencv", "pyav"])
-@pytest.mark.parametrize("final_out_length", [4, 5])
+@pytest.mark.parametrize("final_out_length", [3, 4])
 def test_min_out_length_decoded_video(tmp_path, auto_close, backend, final_out_length):
     if backend == "pyav":
         pytest.importorskip("av")
@@ -149,7 +154,7 @@ def test_min_out_length_decoded_video(tmp_path, auto_close, backend, final_out_l
     assert manager.detect_scenes(video) == len(levels) + final_out_length
     scenes = manager.get_scene_list()
     assert [start.frame_number for start, _ in scenes] == (
-        [0, 25, 38] if final_out_length == 5 else [0, 25]
+        [0, 25, 38] if final_out_length == 4 else [0, 25]
     )
     assert scenes[-1][1].frame_number == len(levels) + final_out_length
 
