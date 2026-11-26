@@ -44,13 +44,13 @@ See [`detect-threshold`](/docs/latest/cli.html#detect-threshold) and [`Threshold
 
 ## Creating Custom Detectors
 
-Custom detectors must inherit from [`SceneDetector`](/docs/latest/api/detector.html). Because the `SceneDetector` interface may change before v1.0, pin your dependency to a minor version (for example, `scenedetect~=0.7.0`).
+Custom detectors must inherit from [`SceneDetector`](/docs/latest/api/detector.html). Because the `SceneDetector` interface may change before v1.0, pin your dependency to a minor version (for example, `scenedetect~=0.8.0`).
 
 To create a detector, implement `process_frame` and, if needed, `post_process`:
 
 ```python
 import numpy as np
-from scenedetect import FrameTimecode, SceneDetector
+from scenedetect import FramePosition, SceneDetector
 
 
 class CustomDetector(SceneDetector):
@@ -58,22 +58,22 @@ class CustomDetector(SceneDetector):
 
     def process_frame(
         self,
-        timecode: FrameTimecode,
+        position: FramePosition,
         frame_img: np.ndarray,
-    ) -> list[FrameTimecode]:
-        # Return a list of cut timecodes found on this frame or earlier.
+    ) -> list[FramePosition]:
+        # Return a list of cut positions found on this frame or earlier.
         return []
 
-    def post_process(self, timecode: FrameTimecode) -> list[FrameTimecode]:
+    def post_process(self, position: FramePosition) -> list[FramePosition]:
         # Called after the last frame to emit any pending cuts.
         return []
 ```
 
-PySceneDetect calls `process_frame(timecode, frame_img)` for every frame in sequence:
+PySceneDetect calls `process_frame(position, frame_img)` for each processed frame in sequence:
 
-- `timecode`: `FrameTimecode` of the current frame.
+- `position`: a `FramePosition` containing the current frame's `frame_number` and `timecode`. The `Timecode` stores its presentation timestamp (`pts`) and timestamp unit (`time_base`).
 - `frame_img`: decoded video frame as a NumPy `ndarray`.
 
-After the final frame, PySceneDetect calls `post_process(timecode)` so multi-pass detectors or detectors waiting on an end condition (such as `ThresholdDetector`) can emit remaining cuts. Both methods return a list of `FrameTimecode` cut locations. Note that detectors that emit cuts only in `post_process` will not report cuts live on continuous streams.
+After frame processing ends, PySceneDetect calls `post_process(position)` so multi-pass detectors or detectors waiting on an end condition (such as `ThresholdDetector`) can emit remaining cuts. Both methods return a list of `FramePosition` cut locations. Note that detectors that emit cuts only in `post_process` will not report cuts live on continuous streams.
 
 To save or reuse frame metrics in a CSV stats file, integrate with [`StatsManager`](/docs/latest/api/stats_manager.html). See the built-in detectors in [`scenedetect/detectors/`](https://github.com/Breakthrough/PySceneDetect/tree/main/scenedetect/detectors), [`SceneDetector`](/docs/latest/api/detector.html#scenedetect.detector.SceneDetector), and [`SceneManager`](/docs/latest/api/scene_manager.html) for working examples.

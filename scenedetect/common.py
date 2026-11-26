@@ -12,57 +12,11 @@
 """``scenedetect.common`` Module
 
 This module contains common types and functions used throughout PySceneDetect.
-
-This includes :class:`FrameTimecode` which is used as a way for PySceneDetect to store
-frame-accurate timestamps of each cut. This is done by also specifying the video framerate with the
-timecode, allowing a frame number to be converted to/from a floating-point number of seconds, or
-string in the form `"HH:MM:SS[.nnn]"` where the `[.nnn]` part is optional.
-
-A :class:`FrameTimecode` can be created by specifying a timecode (`int` for number of frames,
-`float` for number of seconds, or `str` in the form "HH:MM:SS" or "HH:MM:SS.nnn") with a framerate:
-
-.. code:: python
-
-    frames = FrameTimecode(29, 29.97)
-    seconds_float = FrameTimecode(10.0, 10.0)
-    timecode_str = FrameTimecode("00:00:10.000", 10.0)
-
-
-Arithmetic/comparison operations with :class:`FrameTimecode` objects is also possible, and the
-other operand can also be of the above types:
-
-.. code:: python
-
-    x = FrameTimecode("00:01:00.000", 10.0)
-    # Can add int (frames), float (seconds), or str (timecode).
-    print(x + 10)
-    print(x + 10.0)
-    print(x + "00:10:00")
-    # Same for all comparison operators.
-    print((x + 10.0) == "00:01:10.000")
-
-
-:class:`FrameTimecode` objects can be added and subtracted, however the current implementation
-disallows negative values, and will clamp negative results to 0.
-
-.. warning::
-
-    Be careful when subtracting :class:`FrameTimecode` objects or adding negative
-    amounts of frames/seconds. In the example below, ``c`` will be at frame 0 since
-    ``b > a``, but ``d`` will be at frame 5:
-
-    .. code:: python
-
-        a = FrameTimecode(5, 10.0)
-        b = FrameTimecode(10, 10.0)
-        c = a - b   # b > a, so c == 0
-        d = b - a
-        assert(c == 0)
-        assert(d == 5)
 """
 
 import math
 import numbers
+import re
 import typing as ty
 import warnings
 from dataclasses import dataclass
@@ -80,27 +34,26 @@ CropRegion = tuple[int, int, int, int]
 to source frame without downscaling.
 """
 
-CutList = list["FrameTimecode"]
-"""Type hint for a list of cuts, where each timecode represents the first frame of a new shot."""
+CutList = list["FramePosition"]
+"""Type hint for a list of cuts, where each position represents the first frame of a new shot."""
 
 FrameRate = float | Fraction
 """Type hint for a video frame rate. ``Fraction`` is the canonical exact form and should be
 preferred (e.g. ``Fraction(30000, 1001)``), while ``float`` is accepted for convenience. Floats
 will be converted to rationals at runtime via :func:`framerate_to_fraction`."""
 
-SceneList = list[tuple["FrameTimecode", "FrameTimecode"]]
-"""Type hint for a list of scenes in the form (start time, end time)."""
+SceneList = list[tuple["FramePosition", "FramePosition"]]
+"""Type hint for a list of scenes in the form (start position, end position)."""
 
-# `Timecode` and `FrameTimecode` are defined later in this module; using `typing.Union` with
+# `Timecode` is defined later in this module; using `typing.Union` with
 # string forward refs is the only form that both works at the top of the file (the PEP 604 `|`
 # syntax can't accept string forward refs) and supports `TimecodeLike | None` at use sites.
-TimecodeLike: ty.TypeAlias = ty.Union[int, float, str, "Timecode", "FrameTimecode"]
-"""Type hint for values that can be converted to a :class:`FrameTimecode`. Accepts a frame number
-(`int`), number of seconds (`float`), timecode string (`str` of the form ``HH:MM:SS[.nnn]``), a
-:class:`Timecode`, or an existing :class:`FrameTimecode`."""
+TimecodeLike: ty.TypeAlias = ty.Union[int, float, str, "Timecode"]
+"""Frame-or-time input accepted by :func:`parse_frame_or_time`: a frame number (`int`),
+seconds (`float`), a frame/seconds/clock string (`str`), or a :class:`Timecode`."""
 
-TimecodePair = tuple["FrameTimecode", "FrameTimecode"]
-"""Type hint for timecode pairs, typically representing the start/end of a scene."""
+PositionPair = tuple["FramePosition", "FramePosition"]
+"""Type hint for position pairs, typically representing the start/end of a scene."""
 
 ##
 ## Constants
@@ -110,22 +63,12 @@ MAX_FPS_DELTA: float = 1.0 / 1000000000.0
 """Maximum amount two framerates can differ by for equality testing. Currently 1 frame/nanosec."""
 
 # `datetime.timedelta` does not expose seconds per minute/hour as constants, so we define our own.
-_SECONDS_PER_MINUTE = 60.0
-_SECONDS_PER_HOUR = 60.0 * _SECONDS_PER_MINUTE
-_MINUTES_PER_HOUR = 60.0
+_SECONDS_PER_MINUTE = 60
+_SECONDS_PER_HOUR = 60 * _SECONDS_PER_MINUTE
 
 # Tolerance for snapping a float value's framerate to an NTSC-derived rational (N * 1000/1001).
 # e.g. 23.976 should be detected as 24000/1001, 29.97 should be detected as 30000/1001, etc.
 _NTSC_DETECTION_TOLERANCE: float = 1e-3
-
-# Float error allowed, in units in the last place (ulps) of the scaled value, when truncating a
-# time to a number of decimal places, e.g. 0.29 * 100 == 28.999999999999996 should truncate to 29,
-# not 28. Converting a time to seconds and scaling it by a power of ten each add at most about one
-# ulp of error, so a few ulps absorb it while staying far below the spacing of real timestamps.
-# The limit is very long videos at high precision: at precision 9 with a 1/90000 time base, the
-# tolerance passes the gap between timestamps after about 40 hours, and the last digit can come
-# out one higher than it should.
-_TRUNCATION_ULPS: int = 4
 
 
 ##
@@ -193,699 +136,164 @@ class Timecode:
             )
 
     @property
-    def seconds(self) -> float:
-        return float(self.time_base * self.pts)
+    def seconds(self) -> Fraction:
+        return self.time_base * self.pts
+
+    def get_timecode(self, precision: int = 3, use_rounding: bool = True) -> str:
+        """Format the timestamp as HH:MM:SS[.nnn]."""
+        if precision < 0:
+            raise ValueError("precision must be non-negative")
+
+        seconds = self.seconds
+        scale = 10**precision
+        scaled = abs(seconds) * scale
+        units = round(scaled) if use_rounding else scaled.numerator // scaled.denominator
+
+        whole_seconds, fraction = divmod(units, scale)
+        hours, remainder = divmod(whole_seconds, _SECONDS_PER_HOUR)
+        minutes, seconds_part = divmod(remainder, _SECONDS_PER_MINUTE)
+
+        sign = "-" if seconds < 0 and units else ""
+        suffix = f".{fraction:0{precision}d}" if precision else ""
+        return f"{sign}{hours:02d}:{minutes:02d}:{seconds_part:02d}{suffix}"
+
+
+def parse_frame_or_time(value: TimecodeLike) -> int | Fraction:
+    """Parse a non-negative input, preserving frames (int) or seconds (Fraction).
+
+    Digit-only strings denote frames. Decimal strings, seconds suffixed with ``s``,
+    and ``MM:SS``/``HH:MM:SS`` strings denote seconds. A Timecode uses its exact
+    ``pts * time_base``; floats use their decimal string representation. No FPS
+    conversion or frame rounding is performed.
+
+    Raises:
+        TypeError: Unsupported input type (including bool).
+        ValueError: Negative, non-finite, or malformed input, or invalid time base.
+    """
+    result: int | Fraction
+    if isinstance(value, bool):
+        raise TypeError("Boolean values are not frame-or-time inputs.")
+    if isinstance(value, int):
+        result = value
+    elif isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("Time must be finite.")
+        result = Fraction(str(value))
+    elif isinstance(value, Timecode):
+        if value.time_base <= 0:
+            raise ValueError("Time base must be positive.")
+        result = value.seconds
+    elif isinstance(value, str):
+        text = value.strip()
+        if re.fullmatch(r"[0-9]+", text):
+            return int(text)
+        parts = text.split(":")
+        if len(parts) not in (1, 2, 3):
+            raise ValueError("Invalid timecode format.")
+        hours = minutes = 0
+        seconds_text = parts[-1]
+        if len(parts) == 1:
+            seconds_text = seconds_text.removesuffix("s")
+        else:
+            if not all(re.fullmatch(r"[0-9]+", part) for part in parts[:-1]):
+                raise ValueError("Invalid timecode format.")
+            hours = int(parts[0]) if len(parts) == 3 else 0
+            minutes = int(parts[-2])
+        if not re.fullmatch(r"(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)", seconds_text):
+            raise ValueError("Invalid timecode seconds.")
+        seconds = Fraction(seconds_text)
+        if len(parts) > 1 and (minutes >= 60 or seconds >= 60):
+            raise ValueError("Timecode minutes and seconds must be less than 60.")
+        result = hours * 3600 + minutes * 60 + seconds
+    else:
+        raise TypeError(f"Unsupported frame-or-time input: {type(value)}")
+    if result < 0:
+        raise ValueError("Frame-or-time input must be non-negative.")
+    return result
 
 
 @dataclass(frozen=True)
-class _FrameNumber:
-    """Represents a time as a frame number."""
+class FramePosition:
+    """Represents a frame's position, including its timecode and frame number.
 
-    value: int
-
-
-@dataclass(frozen=True)
-class _Seconds:
-    """Represents a time in seconds."""
-
-    value: float
-
-
-class FrameTimecode:
-    """Object for frame-based timecodes, using the video framerate to compute back and
-    forth between frame number and seconds/timecode.
-
-    A timecode is valid only if it complies with one of the following three types/formats:
-        1. Timecode as `str` in the form "HH:MM:SS[.nnn]" (`"01:23:45"` or `"01:23:45.678"`)
-        2. Number of seconds as `float`, or `str` in form  "SSSS.nnnn" (`"45.678"`)
-        3. Exact number of frames as `int`, or `str` in form NNNNN (`456` or `"456"`)
-
-    Rate-related properties:
-        * :attr:`framerate` is a ``float`` (legacy / deprecated alias).
-        * :attr:`frame_rate` is a ``Fraction`` and is the canonical form. Both represent
-          the same rate.
-        * :attr:`time_base` equals ``1 / frame_rate`` for CFR sources. For VFR
-          (:class:`Timecode`-backed) instances, ``time_base`` is authoritative and
-          ``frame_rate`` is an approximation.
-
-    Comparisons between two :class:`Timecode`-backed instances with the same rate are performed
-    exactly using ``pts * time_base`` as rational numbers. All other comparisons between two
-    rated instances use frame numbers, which for VFR sources are approximations.
+    Ordering compares frame numbers within the same stream and numbering sequence.
+    Equality uses both fields. String conversion formats the presentation timestamp.
     """
 
-    def __init__(
-        self,
-        timecode: "TimecodeLike",
-        fps: "float | FrameTimecode | Fraction | None" = None,
-    ):
-        """
-        Arguments:
-            timecode: A frame number (`int`), number of seconds (`float`), timecode string in
-                the form `'HH:MM:SS'` or `'HH:MM:SS.nnn'`, or a `Timecode`.
-            fps: The framerate to use for distance between frames and to calculate frame numbers.
-                For a VFR video, this may just be the average framerate.
-        Raises:
-            TypeError: Thrown if either `timecode` or `fps` are unsupported types.
-            ValueError: Thrown when specifying a negative timecode or framerate.
-        """
-        self._time: _FrameNumber | _Seconds | Timecode
-        """Internal time representation."""
-        self._rate: Fraction | None = None
-        """Rate at which time passes between frames, measured in frames/sec."""
+    timecode: Timecode
+    frame_number: int
 
-        # Copy constructor.
-        if isinstance(timecode, FrameTimecode):
-            self._time = timecode._time
-            self._rate = timecode._rate if fps is None else self._ensure_fractional(fps)
-            return
+    def __sub__(self, other: "FramePosition") -> "FrameDuration":
+        if not isinstance(other, FramePosition):
+            return NotImplemented
 
-        # Ensure args are consistent with API.
-        if fps is None:
-            raise TypeError("fps is a required argument.")
-        self._rate = self._ensure_fractional(fps)
+        frames = self.frame_number - other.frame_number
+        elapsed = self.timecode.seconds - other.timecode.seconds
 
-        # Timecode with a time base.
-        if isinstance(timecode, Timecode):
-            self._time = timecode
-            return
+        if frames < 0 or elapsed < 0:
+            raise ArithmeticError("Cannot subtract FramePosition objects with negative result")
 
-        # Process the timecode value, storing it as an exact number of frames only if required.
-        if isinstance(timecode, str) and timecode.isdigit():
-            timecode = int(timecode)
+        return FrameDuration(frames=frames, elapsed=elapsed)
 
-        if isinstance(timecode, str):
-            self._time = _Seconds(self._timecode_to_seconds(timecode))
-        elif isinstance(timecode, float):
-            if timecode < 0.0:
-                raise ValueError("Timecode frame number must be positive and greater than zero.")
-            self._time = _Seconds(timecode)
-        else:
-            # Only `int` remains: `Timecode`/`FrameTimecode` returned earlier and `str`/`float`
-            # were just handled above.
-            if timecode < 0:
-                raise ValueError("Timecode frame number must be positive and greater than zero.")
-            self._time = _FrameNumber(timecode)
-
-    @property
-    def frame_num(self) -> int:
-        """The frame number. For VFR video or Timecode-backed objects, this is an approximation
-        based on the average framerate. Prefer using `pts` and `time_base` for precise timing."""
-        if isinstance(self._time, Timecode):
-            # Calculate approximate frame number from seconds and framerate.
-            if self._rate is not None:
-                return round(self._time.seconds * float(self._rate))
-            # No framerate available - return estimate based on time.
-            return round(self._time.seconds)
-        if isinstance(self._time, _Seconds):
-            return self._seconds_to_frames(self._time.value)
-        return self._time.value
-
-    @property
-    def frame_rate(self) -> Fraction | None:
-        """The frame rate as an exact rational :class:`fractions.Fraction`.
-
-        For CFR sources this equals ``1 / time_base``. For VFR sources the rate may be an
-        approximation (e.g. the average framerate); prefer :attr:`time_base` for exact PTS
-        arithmetic. Returns ``None`` for timecodes constructed without an associated rate
-        (i.e. pure :class:`Timecode` representations).
-        """
-        return self._rate
-
-    @property
-    def framerate(self) -> float | None:
-        """[DEPRECATED] Use :attr:`frame_rate` instead.
-
-        Returns the rate as a ``float`` for legacy compatibility. The new :attr:`frame_rate`
-        property returns an exact :class:`fractions.Fraction` and matches the naming used by
-        :attr:`scenedetect.video_stream.VideoStream.frame_rate`.
-        """
-        warnings.warn(
-            "`framerate` is deprecated and scheduled for removal in v0.9; "
-            "use `frame_rate` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if self._rate is None:
-            return None
-        return float(self._rate)
-
-    @property
-    def time_base(self) -> Fraction:
-        """The time base in which presentation time is calculated."""
-        if isinstance(self._time, Timecode):
-            return self._time.time_base
-        # `_FrameNumber` / `_Seconds` are only assigned after `_rate` is set.
-        assert self._rate is not None
-        return 1 / self._rate
+    def get_timecode(self, precision: int = 3, use_rounding: bool = True) -> str:
+        """Return the timecode as a string in HH:MM:SS[.nnn] format."""
+        return self.timecode.get_timecode(precision=precision, use_rounding=use_rounding)
 
     @property
     def pts(self) -> int:
-        """The presentation timestamp of the frame in units of `time_base`."""
-        if isinstance(self._time, Timecode):
-            return self._time.pts
-        return self.frame_num
+        """Presentation timestamp in units of time_base."""
+        return self.timecode.pts
 
-    def get_frames(self) -> int:
-        """[DEPRECATED] Get the current time/position in number of frames.
+    @property
+    def time_base(self) -> Fraction:
+        """Timestamp unit expressed in seconds."""
+        return self.timecode.time_base
 
-        Use the `frame_num` property instead.
-
-        :meta private:
-        """
-        warnings.warn(
-            "get_frames() is deprecated, use the `frame_num` property instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.frame_num
-
-    def get_framerate(self) -> float | None:
-        """[DEPRECATED] Get Framerate: Returns the framerate used by the FrameTimecode object.
-
-        Use the `frame_rate` property instead.
-
-        :meta private:
-        """
-        warnings.warn(
-            "get_framerate() is deprecated, use the `frame_rate` property instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if self.frame_rate is None:
-            return None
-        return float(self.frame_rate)
-
-    def equal_frame_rate(self, other: "float | Fraction | FrameTimecode") -> bool:
-        """Determine whether the passed frame rate equals this object's frame rate.
-
-        Arguments:
-            other: Frame rate to compare against within the precision constant defined in this
-                module (see :data:`MAX_FPS_DELTA`). May be a ``float``, ``Fraction``, or another
-                :class:`FrameTimecode`.
-        Returns:
-            bool: True if ``other`` matches this :class:`FrameTimecode`'s frame rate within
-            tolerance, False otherwise.
-
-        """
-        if self.frame_rate is None:
-            return False
-        if isinstance(other, FrameTimecode):
-            if other.frame_rate is None:
-                return False
-            other = other.frame_rate
-        return math.fabs(float(self.frame_rate) - float(other)) < MAX_FPS_DELTA
-
-    def equal_framerate(self, fps) -> bool:
-        """[DEPRECATED] Use :meth:`equal_frame_rate` instead."""
-        warnings.warn(
-            "`equal_framerate()` is deprecated and scheduled for removal in v0.9; "
-            "use `equal_frame_rate()` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.equal_frame_rate(fps)
+    def __str__(self) -> str:
+        return self.timecode.get_timecode()
 
     @property
     def seconds(self) -> float:
-        """The frame's position in number of seconds."""
-        if isinstance(self._time, Timecode):
-            return self._time.seconds
-        if isinstance(self._time, _Seconds):
-            return self._time.value
-        # `_FrameNumber` is only assigned after `_rate` is set.
-        assert self._rate is not None
-        return float(self._time.value / self._rate)
+        """Return the timecode in seconds as a float. This is a convenience property for
+        compatibility with legacy code that expects a float value. Use `timecode.seconds` for
+        the underlying Fraction value."""
+        return float(self.timecode.seconds)
 
-    def get_seconds(self) -> float:
-        """[DEPRECATED] Get the frame's position in number of seconds.
-
-        Use the `seconds` property instead.
-
-        If using to compare a :class:`FrameTimecode` with a frame number,
-        you can do so directly against the object (e.g. ``FrameTimecode(10, 10.0) <= 1.0``).
-
-        Returns:
-            float: The current time/position in seconds.
-
-        :meta private:
-        """
+    @property
+    def frame_num(self) -> int:
+        """Deprecated alias for frame_number"""
         warnings.warn(
-            "get_seconds() is deprecated, use the `seconds` property instead.",
+            "`frame_num` is deprecated; use `frame_number` instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.seconds
+        return self.frame_number
 
-    # TODO(https://scenedetect.com/issue/168): We should remove `nearest_frame` if possible, it
-    # assumes constant framerate and causes more problems than it solves. Setting it to False makes
-    # test_cli_load_scenes_with_time_frames in test_cli.py fail due to differences in end time.
-    # We may also just need to clamp end time to the one specified by the user, this may not be
-    # happening in the code.
-    def get_timecode(
-        self, precision: int = 3, use_rounding: bool = True, nearest_frame: bool = True
-    ) -> str:
-        """Get a formatted timecode string of the form HH:MM:SS[.nnn].
+    def get_frames(self) -> int:
+        """Return the frame number. This is a convenience method for compatibility with legacy
+        code that expects a `get_frames()` method. Use `frame_number` for the underlying value."""
+        return self.frame_number
 
-        Arguments:
-            precision: The number of decimal places to include in the output ``[.nnn]``.
-            use_rounding: Rounds the output to the desired precision. If False, the value
-                will be truncated to the specified precision.
-            nearest_frame: Ensures that the timecode is moved to the nearest frame boundary if this
-                object has a defined framerate, otherwise has no effect.
+    def get_seconds(self) -> float:
+        """Return the timecode in seconds as a float. This is a convenience method for
+        compatibility with legacy code that expects a `get_seconds()` method. Use
+        `timecode.seconds` for the underlying Fraction value."""
+        return float(self.timecode.seconds)
 
-        Returns:
-            str: The current time in the form ``"HH:MM:SS[.nnn]"``. A negative time (e.g. from a
-            negative PTS) is shown as zero.
+    def __lt__(self, other: "FramePosition") -> bool:
+        if not isinstance(other, FramePosition):
+            return NotImplemented
+        return self.frame_number < other.frame_number
 
-        Raises:
-            ValueError: `precision` is negative.
-        """
-        if precision < 0:
-            raise ValueError("precision must not be negative")
-        # Compute hours and minutes based off of seconds, and update seconds.
-        # For PTS-backed timecodes, the PTS already represents an exact frame boundary, so we use
-        # `seconds` directly. For non-PTS timecodes, `nearest_frame` snaps to the nearest frame
-        # boundary using frame_num, which avoids floating point drift in CFR video display.
-        if nearest_frame and self.frame_rate and not isinstance(self._time, Timecode):
-            secs = self.frame_num / float(self.frame_rate)
-        else:
-            secs = self.seconds
-        # Negative times (e.g. from a negative PTS) are shown as zero on both paths below.
-        secs = max(0.0, secs)
-        if not use_rounding:
-            # Truncate in whole units of the output precision, allowing for float error (see
-            # _TRUNCATION_ULPS). The split into hours, minutes and seconds is done with integers so
-            # that no further float error can creep in.
-            scaled = secs * 10**precision
-            units = math.floor(scaled + _TRUNCATION_ULPS * math.ulp(scaled))
-            whole_secs, fraction = divmod(units, 10**precision)
-            hrs, whole_secs = divmod(whole_secs, int(_SECONDS_PER_HOUR))
-            mins, whole_secs = divmod(whole_secs, int(_SECONDS_PER_MINUTE))
-            msec_str = f".{fraction:0{precision}d}" if precision else ""
-            return f"{hrs:02d}:{mins:02d}:{whole_secs:02d}{msec_str}"
-        hrs = int(secs / _SECONDS_PER_HOUR)
-        secs -= hrs * _SECONDS_PER_HOUR
-        mins = int(secs / _SECONDS_PER_MINUTE)
-        secs = max(0.0, secs - (mins * _SECONDS_PER_MINUTE))
-        secs = round(secs, precision)
-        secs = min(_SECONDS_PER_MINUTE, secs)
-        # Guard against emitting timecodes with 60 seconds after rounding/floating point errors.
-        if int(secs) == _SECONDS_PER_MINUTE:
-            secs = 0.0
-            mins += 1
-            if mins >= _MINUTES_PER_HOUR:
-                mins = 0
-                hrs += 1
-        # We have to extend the precision by 1 here, since `format` will round up.
-        msec = format(secs, f".{precision + 1}f") if precision else ""
-        # Need to include decimal place in `msec_str`.
-        msec_str = msec[-(2 + precision) : -1]
-        secs_str = f"{int(secs):02d}{msec_str}"
-        # Return hours, minutes, and seconds as a formatted timecode string.
-        return f"{hrs:02d}:{mins:02d}:{secs_str}"
-
-    @staticmethod
-    def _ensure_fractional(fps: "FrameRate | numbers.Rational | FrameTimecode") -> Fraction:
-        """Validate and convert an `fps` argument into a positive `Fraction`. NTSC-like frame rates
-        are handled via :func:`framerate_to_fraction`."""
-        if isinstance(fps, FrameTimecode):
-            if fps._rate is None:
-                raise TypeError("FrameTimecode passed as fps must have a known rate.")
-            return fps._rate
-        # Accept floats and non-integral rationals (`Fraction`, PyAV 19's `av.AVRational`), but
-        # keep rejecting `int`/`bool` so an accidental frame count is not treated as a frame rate.
-        if isinstance(fps, (float, numbers.Rational)) and not isinstance(fps, numbers.Integral):
-            return framerate_to_fraction(fps)
-        raise TypeError(
-            f"Wrong type for fps: {type(fps)} - expected float, Fraction (or another non-integral"
-            " rational), or FrameTimecode"
-        )
-
-    def _seconds_to_frames(self, seconds: float) -> int:
-        """Convert `seconds` to the nearest number of frames using the current framerate.
-
-        *NOTE*: This will not be correct for variable framerate videos.
-        """
-        assert self._rate is not None
-        return round(seconds * self._rate)
-
-    def _timecode_to_seconds(self, input: str) -> float:
-        """Parses a string based on the three possible forms (in timecode format, as an integer
-        number of frames, or floating-point seconds, ending with 's'). Exact frame numbers (int)
-        requires the `framerate` property was set when the timecode was created. Assuming a
-        framerate of 30.0 FPS, the strings '00:05:00.000', '00:05:00', '9000', '300s', and
-        '300.0' are all possible valid values. These values represent periods of time equal to
-        5 minutes, 300 seconds, or 9000 frames (at 30 FPS).
-
-        Raises:
-            ValueError: Value could not be parsed correctly.
-        """
-        assert self._rate is not None and self._rate > MAX_FPS_DELTA
-        input = input.strip()
-        # Exact number of frames N
-        if input.isdigit():
-            timecode = int(input)
-            if timecode < 0:
-                raise ValueError("Timecode frame number must be positive.")
-            return timecode / float(self._rate)
-        # Timecode in string format 'HH:MM:SS[.nnn]' or 'MM:SS[.nnn]'
-        elif input.find(":") >= 0:
-            values = input.split(":")
-            if len(values) not in (2, 3):
-                raise ValueError("Invalid timecode (too many separators).")
-            # Case of 'HH:MM:SS[.nnn]'
-            if len(values) == 3:
-                hrs, mins = int(values[0]), int(values[1])
-                secs = float(values[2]) if "." in values[2] else int(values[2])
-            # Case of 'MM:SS[.nnn]'
-            elif len(values) == 2:
-                hrs = 0
-                mins = int(values[0])
-                secs = float(values[1]) if "." in values[1] else int(values[1])
-            if not (hrs >= 0 and mins >= 0 and secs >= 0 and mins < 60 and secs < 60):
-                raise ValueError("Invalid timecode range (values outside allowed range).")
-            secs += (hrs * 60 * 60) + (mins * 60)
-            return secs
-        # Try to parse the number as seconds in the format 1234.5 or 1234s
-        if input.endswith("s"):
-            input = input[:-1]
-        if not input.replace(".", "").isdigit():
-            raise ValueError("All characters in timecode seconds string must be digits.")
-        as_float = float(input)
-        if as_float < 0.0:
-            raise ValueError("Timecode seconds value must be positive.")
-        return as_float
-
-    def _get_other_as_frames(self, other: "TimecodeLike") -> int:
-        """Get the frame number from `other` for arithmetic operations."""
-        if isinstance(other, int):
-            return other
-        if isinstance(other, float):
-            return self._seconds_to_frames(other)
-        if isinstance(other, str):
-            return self._seconds_to_frames(self._timecode_to_seconds(other))
-        if isinstance(other, Timecode):
-            return self._seconds_to_frames(other.seconds)
-        if isinstance(other, FrameTimecode):
-            # If comparing two FrameTimecodes, they must have the same framerate for frame-based
-            # operations.
-            if self._rate and other._rate and not self.equal_frame_rate(other._rate):
-                raise ValueError(
-                    "FrameTimecode instances require equal frame rate for frame-based arithmetic."
-                )
-            if isinstance(other._time, _FrameNumber):
-                return other._time.value
-            # If other has no frame_num, it must have a timecode. Convert to frames.
-            return self._seconds_to_frames(other.seconds)
-        raise TypeError("Cannot obtain frame number for this timecode.")
-
-    def __eq__(self, other: "TimecodeLike") -> bool:
-        if other is None:
-            return False
-        exact = _compare_as_exact(other, self)
-        if exact is not None:
-            return exact[0] == exact[1]
-        if _compare_as_fixed(other, self):
-            return self.frame_num == other.frame_num
-        # For integer comparison, use frame numbers to avoid floating point precision issues.
-        if isinstance(other, int):
-            return self.frame_num == other
-        if isinstance(self._time, (Timecode, _Seconds)):
-            return self.seconds == self._get_other_as_seconds(other)
-        return self.frame_num == self._get_other_as_frames(other)
-
-    def __ne__(self, other: "TimecodeLike") -> bool:
-        if other is None:
-            return True
-        exact = _compare_as_exact(other, self)
-        if exact is not None:
-            return exact[0] != exact[1]
-        if _compare_as_fixed(other, self):
-            return self.frame_num != other.frame_num
-        # For integer comparison, use frame numbers to avoid floating point precision issues.
-        if isinstance(other, int):
-            return self.frame_num != other
-        if isinstance(self._time, (Timecode, _Seconds)):
-            return self.seconds != self._get_other_as_seconds(other)
-        return self.frame_num != self._get_other_as_frames(other)
-
-    def __lt__(self, other: "TimecodeLike") -> bool:
-        exact = _compare_as_exact(other, self)
-        if exact is not None:
-            return exact[0] < exact[1]
-        if _compare_as_fixed(other, self):
-            return self.frame_num < other.frame_num
-        # For integer comparison, use frame numbers to avoid floating point precision issues.
-        if isinstance(other, int):
-            return self.frame_num < other
-        if isinstance(self._time, (Timecode, _Seconds)):
-            return self.seconds < self._get_other_as_seconds(other)
-        return self.frame_num < self._get_other_as_frames(other)
-
-    def __le__(self, other: "TimecodeLike") -> bool:
-        exact = _compare_as_exact(other, self)
-        if exact is not None:
-            return exact[0] <= exact[1]
-        if _compare_as_fixed(other, self):
-            return self.frame_num <= other.frame_num
-        # For integer comparison, use frame numbers to avoid floating point precision issues.
-        if isinstance(other, int):
-            return self.frame_num <= other
-        if isinstance(self._time, (Timecode, _Seconds)):
-            return self.seconds <= self._get_other_as_seconds(other)
-        return self.frame_num <= self._get_other_as_frames(other)
-
-    def __gt__(self, other: "TimecodeLike") -> bool:
-        exact = _compare_as_exact(other, self)
-        if exact is not None:
-            return exact[0] > exact[1]
-        if _compare_as_fixed(other, self):
-            return self.frame_num > other.frame_num
-        # For integer comparison, use frame numbers to avoid floating point precision issues.
-        if isinstance(other, int):
-            return self.frame_num > other
-        if isinstance(self._time, (Timecode, _Seconds)):
-            return self.seconds > self._get_other_as_seconds(other)
-        return self.frame_num > self._get_other_as_frames(other)
-
-    def __ge__(self, other: "TimecodeLike") -> bool:
-        exact = _compare_as_exact(other, self)
-        if exact is not None:
-            return exact[0] >= exact[1]
-        if _compare_as_fixed(other, self):
-            return self.frame_num >= other.frame_num
-        # For integer comparison, use frame numbers to avoid floating point precision issues.
-        if isinstance(other, int):
-            return self.frame_num >= other
-        if isinstance(self._time, (Timecode, _Seconds)):
-            return self.seconds >= self._get_other_as_seconds(other)
-        return self.frame_num >= self._get_other_as_frames(other)
-
-    def __iadd__(self, other: "TimecodeLike") -> "FrameTimecode":
-        # Narrow `other`'s internal time once so pyright can track it through the dispatch below.
-        # A bare `Timecode` is treated as its own internal time.
-        if isinstance(other, FrameTimecode):
-            other_inner = other._time
-        elif isinstance(other, Timecode):
-            other_inner = other
-        else:
-            other_inner = None
-
-        if isinstance(self._time, Timecode) and isinstance(other_inner, Timecode):
-            if self._time.time_base == other_inner.time_base:
-                self._time = Timecode(
-                    pts=max(0, self._time.pts + other_inner.pts),
-                    time_base=self._time.time_base,
-                )
-                return self
-            # Different time bases: use the finer (smaller) one for better precision.
-            time_base = min(self._time.time_base, other_inner.time_base)
-            self_pts = round(Fraction(self._time.pts) * self._time.time_base / time_base)
-            other_pts = round(Fraction(other_inner.pts) * other_inner.time_base / time_base)
-            self._time = Timecode(pts=max(0, self_pts + other_pts), time_base=time_base)
-            return self
-
-        # If either input is a timecode, the output shall also be one. The input which isn't a
-        # timecode is converted into seconds, after which the equivalent timecode is computed.
-        if isinstance(self._time, Timecode):
-            seconds = self._get_other_as_seconds(other)
-            self._time = Timecode(
-                pts=max(0, self._time.pts + round(seconds / self._time.time_base)),
-                time_base=self._time.time_base,
-            )
-            if self._rate is None and isinstance(other, FrameTimecode):
-                self._rate = other._rate
-            return self
-        if isinstance(other_inner, Timecode):
-            self._time = Timecode(
-                pts=max(0, other_inner.pts + round(self.seconds / other_inner.time_base)),
-                time_base=other_inner.time_base,
-            )
-            if self._rate is None and isinstance(other, FrameTimecode):
-                self._rate = other._rate
-            return self
-
-        if isinstance(self._time, _Seconds) and isinstance(other_inner, _Seconds):
-            self._time = _Seconds(max(0.0, self._time.value + other_inner.value))
-            return self
-
-        if isinstance(self._time, _Seconds):
-            self._time = _Seconds(max(0.0, self._time.value + self._get_other_as_seconds(other)))
-            return self
-
-        self._time = _FrameNumber(max(0, self._time.value + self._get_other_as_frames(other)))
-        return self
-
-    def __add__(self, other: "TimecodeLike") -> "FrameTimecode":
-        to_return = FrameTimecode(timecode=self)
-        to_return += other
-        return to_return
-
-    def __isub__(self, other: "TimecodeLike") -> "FrameTimecode":
-        # Narrow `other`'s internal time once so pyright can track it through the dispatch below.
-        # A bare `Timecode` is treated as its own internal time.
-        if isinstance(other, FrameTimecode):
-            other_inner = other._time
-        elif isinstance(other, Timecode):
-            other_inner = other
-        else:
-            other_inner = None
-
-        if isinstance(self._time, Timecode) and isinstance(other_inner, Timecode):
-            if self._time.time_base == other_inner.time_base:
-                self._time = Timecode(
-                    pts=max(0, self._time.pts - other_inner.pts),
-                    time_base=self._time.time_base,
-                )
-                return self
-            # Different time bases: use the finer (smaller) one for better precision.
-            time_base = min(self._time.time_base, other_inner.time_base)
-            self_pts = round(Fraction(self._time.pts) * self._time.time_base / time_base)
-            other_pts = round(Fraction(other_inner.pts) * other_inner.time_base / time_base)
-            self._time = Timecode(pts=max(0, self_pts - other_pts), time_base=time_base)
-            return self
-
-        # If either input is a timecode, the output shall also be one. The input which isn't a
-        # timecode is converted into seconds, after which the equivalent timecode is computed.
-        if isinstance(self._time, Timecode):
-            seconds = self._get_other_as_seconds(other)
-            self._time = Timecode(
-                pts=max(0, self._time.pts - round(seconds / self._time.time_base)),
-                time_base=self._time.time_base,
-            )
-            if self._rate is None and isinstance(other, FrameTimecode):
-                self._rate = other._rate
-            return self
-        if isinstance(other_inner, Timecode):
-            # Compute `self - other` in `other`'s time base.
-            self_pts_in_other_base = round(self.seconds / other_inner.time_base)
-            self._time = Timecode(
-                pts=max(0, self_pts_in_other_base - other_inner.pts),
-                time_base=other_inner.time_base,
-            )
-            if self._rate is None and isinstance(other, FrameTimecode):
-                self._rate = other._rate
-            return self
-
-        if isinstance(self._time, _Seconds) and isinstance(other_inner, _Seconds):
-            self._time = _Seconds(max(0.0, self._time.value - other_inner.value))
-            return self
-
-        if isinstance(self._time, _Seconds):
-            self._time = _Seconds(max(0.0, self._time.value - self._get_other_as_seconds(other)))
-            return self
-
-        self._time = _FrameNumber(max(0, self._time.value - self._get_other_as_frames(other)))
-        return self
-
-    def __sub__(self, other: "TimecodeLike") -> "FrameTimecode":
-        to_return = FrameTimecode(timecode=self)
-        to_return -= other
-        return to_return
-
-    # TODO(v1.0): __int__ and __float__ should be removed. Mark as deprecated, and indicate
-    # need to use relevant property instead.
-
-    def __int__(self) -> int:
-        if isinstance(self._time, _FrameNumber):
-            return self._time.value
-        return self.frame_num
-
-    def __float__(self) -> float:
-        return self.seconds
-
-    def __str__(self) -> str:
-        return self.get_timecode()
-
-    def __repr__(self) -> str:
-        if isinstance(self._time, Timecode):
-            return f"{self.get_timecode()} [pts={self._time.pts}, time_base={self._time.time_base}]"
-        if isinstance(self._time, _Seconds):
-            return f"{self.get_timecode()} [seconds={self._time.value}, fps={self._rate}]"
-        return f"{self.get_timecode()} [frame_num={self._time.value}, fps={self._rate}]"
-
-    def __hash__(self) -> int:
-        # Use frame_num for consistent hashing regardless of internal representation.
-        # This ensures that FrameTimecodes representing the same frame have the same hash,
-        # enabling proper dictionary lookups in StatsManager (including int-key interop).
-        # Exact (PTS-based) equality requires equal rates (`_compare_as_exact`), and equal exact
-        # times with equal rates always derive the same frame_num, so a == b still implies
-        # hash(a) == hash(b). Distinct exact times which round to the same frame number compare
-        # unequal and coexist as a hash collision.
-        return self.frame_num
-
-    def _get_other_as_seconds(self, other: "TimecodeLike") -> float:
-        """Get the time in seconds from `other` for arithmetic operations."""
-        if isinstance(other, int):
-            # Convert frame number to seconds using framerate.
-            if self._rate is None:
-                raise NotImplementedError(
-                    "Cannot convert frame number to seconds without framerate"
-                )
-            return float(other) / float(self._rate)
-        if isinstance(other, float):
-            return other
-        if isinstance(other, str):
-            return self._timecode_to_seconds(other)
-        if isinstance(other, Timecode):
-            return other.seconds
-        if isinstance(other, FrameTimecode):
-            return other.seconds
-        raise TypeError("Unsupported type for performing arithmetic with FrameTimecode.")
+    def __gt__(self, other: "FramePosition") -> bool:
+        if not isinstance(other, FramePosition):
+            return NotImplemented
+        return self.frame_number > other.frame_number
 
 
-def _compare_as_fixed(other: ty.Any, base: FrameTimecode) -> ty.TypeGuard[FrameTimecode]:
-    """Type guard: True (and narrows `other` to `FrameTimecode`) iff both timecodes have a known
-    framerate, in which case frame-based comparison is exact and preferred over float seconds.
+@dataclass(frozen=True)
+class FrameDuration:
+    """Represents a duration of time, including its length in frames and seconds."""
 
-    This is the fallback when `_compare_as_exact` does not apply (i.e. at least one operand
-    lacks an exact presentation time, or the rates differ)."""
-    return base._rate is not None and isinstance(other, FrameTimecode) and other._rate is not None
-
-
-def _compare_as_exact(other: ty.Any, base: FrameTimecode) -> "tuple[Fraction, Fraction] | None":
-    """If both operands carry exact presentation times (are :class:`Timecode`-backed) and share
-    the same nominal rate, return both times as exact rational seconds (``pts * time_base``) for
-    comparison, otherwise return ``None``.
-
-    For Timecode-backed instances (e.g. VFR video positions), `frame_num` is an approximation
-    derived from the average framerate, so distinct presentation times can round to the same
-    frame number; the rational times are exact. The same-rate requirement keeps cross-rate
-    comparisons on the frame-number path, which both preserves existing cross-rate semantics and
-    guarantees ``__eq__``/``__hash__`` consistency: ``__hash__`` is derived from ``frame_num``
-    (rate-dependent), and for equal rates, equal exact times always produce equal frame numbers.
-
-    Returns the extracted pair instead of acting as a type guard since a TypeGuard can only
-    narrow `other`, not `other._time` or `base._time`.
-    """
-    if (
-        isinstance(base._time, Timecode)
-        and isinstance(other, FrameTimecode)
-        and isinstance(other._time, Timecode)
-        and base._rate == other._rate
-    ):
-        return (
-            base._time.pts * base._time.time_base,
-            other._time.pts * other._time.time_base,
-        )
-    return None
+    frames: int
+    elapsed: Fraction

@@ -30,6 +30,9 @@ Options of the :ref:`scenedetect <command-scenedetect>` command; detectors and c
    * - ``backend``
      - ``opencv``
      - :option:`-b/--backend <scenedetect -b>`
+   * - ``frame-numbering``
+     - ``relative``
+     - :option:`--frame-numbering <scenedetect --frame-numbering>`
    * - ``min-scene-len``
      - ``0.6s``
      - :option:`-m/--min-scene-len <scenedetect -m>`
@@ -70,6 +73,10 @@ Options of the :ref:`scenedetect <command-scenedetect>` command; detectors and c
 
     # Video backend interface, must be one of: opencv, pyav, moviepy.
     #backend = opencv
+
+    # Frame numbering: relative restarts at 0 after a seek; source counts from video start.
+    # Source numbering may require decoding earlier frames when seeking.
+    #frame-numbering = relative
 
     # Minimum length of a given scene.
     #min-scene-len = 0.6s
@@ -454,15 +461,29 @@ Options of :ref:`load-scenes <command-load-scenes>`.
    * - Key
      - Default
      - CLI option
-   * - ``start-col-name``
+   * - ``start-frame-col-name``
      - ``Start Frame``
-     - :option:`-c/--start-col-name <scenedetect load-scenes -c>`
+     - :option:`--start-frame-col-name <scenedetect load-scenes --start-frame-col-name>`
+   * - ``start-time-col-name``
+     - ``Start Time (seconds)``
+     - :option:`--start-time-col-name <scenedetect load-scenes --start-time-col-name>`
+   * - ``end-frame-col-name``
+     - ``End Frame``
+     - :option:`--end-frame-col-name <scenedetect load-scenes --end-frame-col-name>`
+   * - ``end-time-col-name``
+     - ``End Time (seconds)``
+     - :option:`--end-time-col-name <scenedetect load-scenes --end-time-col-name>`
 
 .. code-block:: ini
 
     [load-scenes]
-    # Name of column used to mark scene cut points.
-    #start-col-name = Start Frame
+    # Column names for paired scene boundaries, as written by list-scenes.
+    # Start frames are one-based; end frames are exclusive zero-based ordinals.
+    # Time columns accept seconds or timecodes.
+    #start-frame-col-name = Start Frame
+    #start-time-col-name = Start Time (seconds)
+    #end-frame-col-name = End Frame
+    #end-time-col-name = End Time (seconds)
 
 .. _config-save-chapters:
 
@@ -857,7 +878,7 @@ Options of :ref:`save-qp <command-save-qp>`.
     # Folder to output QP file to. Overrides [global] output option.
     #output = /usr/tmp/images
 
-    # Disable shifting frame numbers by start time (yes/no).
+    # Keep frame numbers instead of subtracting the first scene's frame number (yes/no).
     #disable-shift = no
 
 .. _config-split-video:

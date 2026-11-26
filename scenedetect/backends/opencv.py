@@ -30,13 +30,14 @@ import numpy as np
 from scenedetect.common import (
     MAX_FPS_DELTA,
     FrameRate,
-    FrameTimecode,
     Timecode,
     TimecodeLike,
     framerate_to_fraction,
+    parse_frame_or_time,
 )
 from scenedetect.platform import StrPath, get_file_name
 from scenedetect.video_stream import (
+    FrameNumbering,
     FrameRateUnavailable,
     SeekError,
     VideoOpenFailure,
@@ -97,6 +98,8 @@ class VideoStreamCv2(VideoStream):
         max_decode_attempts: int = 5,
         path_or_device: StrPath | int | None = None,
         framerate: float | None = None,
+        *,
+        frame_numbering: FrameNumbering = FrameNumbering.RELATIVE,
     ):
         """Open a video file, image sequence, or network stream.
 
@@ -108,19 +111,22 @@ class VideoStreamCv2(VideoStream):
             max_decode_attempts: Number of attempts to continue decoding the video
                 after a frame fails to decode. This allows processing videos that
                 have a few corrupted frames or metadata (in which case accuracy
-                of detection algorithms may be lower). Once this limit is passed,
-                decoding will stop and emit an error.
+                of detection algorithms may be lower). If all attempts fail,
+                `read()` returns False.
             path_or_device: [DEPRECATED] Specify `path` for files, image sequences, or
                 network streams/URLs.  Use `VideoCaptureAdapter` for devices/pipes.
             framerate: [DEPRECATED] Use `frame_rate` instead. Retained as a deprecated
                 alias for backwards compatibility; ignored when `frame_rate` is provided.
+            frame_numbering: RELATIVE (default) numbers the first frame read after each
+                successful seek as 0. SOURCE counts from the source beginning, including
+                seek preroll. Neither mode resets presentation timestamps.
 
         Raises:
             OSError: file could not be found or access was denied
             VideoOpenFailure: video could not be opened (may be corrupted)
             ValueError: specified frame rate is invalid
         """
-        super().__init__()
+        super().__init__(frame_numbering=frame_numbering)
         if framerate is not None:
             warnings.warn(
                 "`framerate` is deprecated and scheduled for removal in v0.9; "
@@ -153,7 +159,7 @@ class VideoStreamCv2(VideoStream):
         self._is_device = isinstance(self._path_or_device, int)
 
         # VideoCapture state
-        self._has_grabbed = False
+        self._pending_grab = False
         self._max_decode_attempts = max_decode_attempts
         self._decode_failures = 0
         self._warning_displayed = False
@@ -224,13 +230,26 @@ class VideoStreamCv2(VideoStream):
         )
 
     @property
-    def duration(self) -> FrameTimecode | None:
-        """Duration of the stream as a FrameTimecode, or None if non terminating."""
+    def duration(self) -> Fraction | None:
+        """Estimated source duration in seconds, or None if unavailable.
+
+        Calculated from reported frame count and frame rate; may be inaccurate for VFR.
+        """
+        frame_count = self.frame_count
+        if frame_count is None:
+            return None
+        return frame_count / self.frame_rate
+
+    @property
+    def frame_count(self) -> int | None:
+        """Reported total source frame count, or None if unavailable."""
         if self._is_device:
             return None
         if self._closed:
-            return self.base_timecode + math.trunc(self._closed_frame_count)
-        return self.base_timecode + math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            frame_count = math.trunc(self._closed_frame_count)
+        else:
+            frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        return frame_count if frame_count > 0 else None
 
     @property
     def aspect_ratio(self) -> float:
@@ -241,80 +260,90 @@ class VideoStreamCv2(VideoStream):
 
     @property
     def timecode(self) -> Timecode:
-        """Current position within stream as a Timecode."""
-        # *NOTE*: Although OpenCV has `CAP_PROP_PTS`, it doesn't seem to be reliable. For now, we
-        # use `CAP_PROP_POS_MSEC` instead, converting to microseconds for sufficient precision to
-        # avoid frame-boundary rounding errors at common framerates like 24000/1001.
+        """Timestamp of the current capture frame.
+
+        Video timestamps are rounded to integer microseconds from CAP_PROP_POS_MSEC.
+        Image-sequence timestamps use the source image index and configured frame rate.
+        """
         if self._eof_timecode is not None:
             return self._eof_timecode
+        if self._cap.get(cv2.CAP_PROP_BACKEND) == cv2.CAP_IMAGES:
+            source_index = max(0, math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES)) - 1)
+            return Timecode(
+                pts=source_index,
+                time_base=1 / self.frame_rate,
+            )
+        # *NOTE*: CAP_PROP_PTS can be unreliable, so use CAP_PROP_POS_MSEC instead.
+        # Its FPS-based units can discard VFR timestamp precision.
         ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
         time_base = Fraction(1, 1000000)
         return Timecode(pts=round(ms * 1000), time_base=time_base)
 
-    @property
-    def position(self) -> FrameTimecode:
-        timecode = self.timecode
-        # If PTS is non-positive but we've read frames, derive from frame number. This handles
-        # image sequences and cases where CAP_PROP_POS_MSEC is unreliable. OpenCV 5 reports
-        # CAP_PROP_POS_MSEC as -1 (rather than 0) for image sequences on Windows, so check <= 0.
-        if timecode.pts <= 0 and self.frame_number > 0:
-            fps = self.frame_rate
-            time_base = Fraction(1, fps.numerator)
-            pts = (self.frame_number - 1) * fps.denominator
-            timecode = Timecode(pts=pts, time_base=time_base)
-        return FrameTimecode(timecode=timecode, fps=self.frame_rate)
-
-    @property
-    def position_ms(self) -> float:
-        return self._cap.get(cv2.CAP_PROP_POS_MSEC)
-
-    @property
-    def frame_number(self) -> int:
-        return math.trunc(self._cap.get(cv2.CAP_PROP_POS_FRAMES))
-
     def seek(self, target: TimecodeLike):
+        """Position the next read at a source frame ordinal or presentation time.
+
+        Integer targets use sequential grabbing in both numbering modes. RELATIVE numbering
+        restarts at 0; SOURCE numbering includes the skipped prefix. Image-sequence time
+        targets select the first image at or after the target using the configured frame rate.
+
+        Other time targets use native seeking in RELATIVE mode and sequential grabbing in
+        SOURCE mode. Preroll retains the first qualifying frame for the next read. Comparisons
+        use microsecond precision. Native seeking can land late and skip eligible frames.
+
+        Arguments:
+            target: A zero-based source ordinal (int or digit-only string), or a presentation
+                time (float seconds, time string, or Timecode).
+
+        Raises:
+            SeekError: Seeking is unsupported or the required preroll cannot be completed.
+            TypeError: The target type is unsupported.
+            ValueError: The target is negative, non-finite, malformed, or has an invalid time base.
+        """
         self._check_open()
-        if self._is_device:
+        if not self.is_seekable:
             raise SeekError("Cannot seek if input is a device!")
-        if not isinstance(target, FrameTimecode):
-            target = FrameTimecode(target, self.frame_rate)
-        if target < 0:
+        parsed = parse_frame_or_time(target)
+        if parsed < 0:
             raise ValueError("Target seek position cannot be negative!")
-        target_secs = (self.base_timecode + target).seconds
-        self._has_grabbed = False
-        self._eof_timecode = None
-        if target_secs > 0:
-            # Seek one frame before target so the next read() returns the frame at target.
-            one_frame_ms = 1000.0 / float(self._frame_rate)
-            seek_ms = max(0.0, target_secs * 1000.0 - one_frame_ms)
-            self._cap.set(cv2.CAP_PROP_POS_MSEC, seek_ms)
-            self._has_grabbed = self._cap.grab()
-            if self._has_grabbed:
-                # VFR correction: set(CAP_PROP_POS_MSEC) converts time using avg_fps internally,
-                # which can land ~1s too early for VFR video. Read forward until we reach the
-                # intended position. The threshold (2x one_frame_ms) never triggers for CFR.
-                actual_ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
-                corrections = 0
-                while actual_ms < seek_ms - 2.0 * one_frame_ms and corrections < 100:
-                    if not self._cap.grab():
-                        break
-                    actual_ms = self._cap.get(cv2.CAP_PROP_POS_MSEC)
-                    corrections += 1
-            # If we seeked past the end, back up one frame.
-            if not self._has_grabbed:
-                pos = self._cap.get(cv2.CAP_PROP_POS_FRAMES)
-                # OpenCV 5 can report NaN here after a seek past EOF, which would crash
-                # round()/trunc and hang the CLI decode thread (#380).
-                if not math.isfinite(pos):
-                    raise SeekError("Target frame is beyond end of video!")
-                seek_pos = round(pos - 1.0)
-                self._cap.set(cv2.CAP_PROP_POS_FRAMES, max(0, seek_pos))
-                self._has_grabbed = self._cap.grab()
+
+        # TODO: Optimize seeking for CAP_IMAGES
+        if isinstance(parsed, Fraction) and self._cap.get(cv2.CAP_PROP_BACKEND) == cv2.CAP_IMAGES:
+            parsed = math.ceil(parsed * self.frame_rate)
+        if isinstance(parsed, Fraction):
+            # Compare the target at the same precision as the reported video timestamps.
+            target_time = Fraction(round(parsed * 1_000_000), 1_000_000)
+            if self.frame_numbering is FrameNumbering.RELATIVE:
+                self._pending_grab = False
+                self._eof_timecode = None
+                if not self._cap.set(cv2.CAP_PROP_POS_MSEC, float(parsed * 1000)):
+                    raise SeekError("Could not seek to the requested time.")
+            elif self._position is not None and self._position.timecode.seconds >= target_time:
+                self.reset()
+
+            while self._grab_next_frame():
+                if self.timecode.seconds >= target_time:
+                    self._pending_grab = True
+                    if self.frame_numbering is FrameNumbering.RELATIVE:
+                        self._position = None
+                    return
+                if self.frame_numbering is FrameNumbering.SOURCE:
+                    self._record_frame(self.timecode)
+
+            raise SeekError("Could not seek to the requested time.")
+
         else:
-            self._cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            if self.frame_numbering is FrameNumbering.RELATIVE or self.frame_number >= parsed:
+                self.reset()
+            for _ in range(self.frame_number + 1, parsed):
+                if not self._grab_next_frame():
+                    raise SeekError("Could not seek to the requested frame.")
+                if self.frame_numbering is FrameNumbering.SOURCE:
+                    self._record_frame(self.timecode)
+
+            return
 
     def reset(self):
-        """Close and re-open the VideoStream (should be equivalent to calling `seek(0)`)."""
+        """Reopen at the source beginning and clear the recorded position and pending frame."""
         self._check_open()
         self._cap.release()
         self._open_capture(float(self._frame_rate))
@@ -330,41 +359,19 @@ class VideoStreamCv2(VideoStream):
         self._closed_frame_count = self._cap.get(cv2.CAP_PROP_FRAME_COUNT)
         self._closed_aspect_ratio = self.aspect_ratio
         self._closed = True
+        self._pending_grab = False
         self._cap.release()
 
     def read(self, decode: bool = True) -> np.ndarray | bool:
         self._check_open()
-        if not self._cap.isOpened():
+        if not self._grab_next_frame():
             return False
-        # At the end of some VFR streams OpenCV reports an earlier CAP_PROP_POS_MSEC once grab()
-        # fails, so keep `position` on the last frame read like the other backends do (#561).
-        last_timecode = self.timecode if self._has_grabbed else None
-        has_grabbed = self._cap.grab()
-        # If we failed to grab the frame, retry a few times if required.
-        if not has_grabbed:
-            duration = self.duration
-            if duration is not None and duration > 0 and self.position < (duration - 1):
-                for _ in range(self._max_decode_attempts):
-                    has_grabbed = self._cap.grab()
-                    if has_grabbed:
-                        break
-            # Report previous failure in debug mode.
-            if has_grabbed:
-                self._decode_failures += 1
-                logger.debug("Frame failed to decode.")
-                if not self._warning_displayed and self._decode_failures > 1:
-                    logger.warning("Failed to decode some frames, results may be inaccurate.")
-        # We didn't manage to grab a frame even after retrying, so just return.
-        if not has_grabbed:
-            self._eof_timecode = last_timecode
-            return False
-        self._has_grabbed = True
-        self._eof_timecode = None
+        self._record_frame(self.timecode)
         # Need to make sure we actually grabbed a frame before calling retrieve.
-        if decode and self._has_grabbed:
-            _, frame = self._cap.retrieve()
-            return frame
-        return self._has_grabbed
+        if decode:
+            success, frame = self._cap.retrieve()
+            return frame if success else False
+        return True
 
     #
     # Private Methods
@@ -420,15 +427,62 @@ class VideoStreamCv2(VideoStream):
                 raise FrameRateUnavailable()
 
         self._cap: cv2.VideoCapture = cap
+        self._position = None
         self._frame_rate: Fraction = framerate_to_fraction(frame_rate)
-        self._has_grabbed = False
+        self._pending_grab = False
         self._eof_timecode: Timecode | None = None
         cap.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1.0)  # https://github.com/opencv/opencv/issues/26795
+
+    def _grab_next_frame(self) -> bool:
+        """Consume a pending seek frame or grab the next frame without recording a position."""
+        if self._pending_grab:
+            self._pending_grab = False
+            return True
+        if not self._cap.isOpened():
+            return False
+        last_timecode = self.timecode
+        has_grabbed = self._cap.grab()
+        # If we failed to grab the frame, retry a few times if required.
+        if not has_grabbed:
+            for _ in range(self._max_decode_attempts):
+                has_grabbed = self._cap.grab()
+                if has_grabbed:
+                    break
+            # Report previous failure in debug mode.
+            if has_grabbed:
+                self._decode_failures += 1
+                logger.debug("Frame failed to decode.")
+                if not self._warning_displayed and self._decode_failures > 1:
+                    logger.warning("Failed to decode some frames, results may be inaccurate.")
+
+        if has_grabbed:
+            self._eof_timecode = None
+        else:
+            self._eof_timecode = last_timecode
+        return has_grabbed
+
+    def peek_timecode(self) -> Timecode | None:
+        """Return the presentation time of the next frame without advancing the stream.
+
+        Returns:
+            Timecode of the next frame, or None if end of video.
+        """
+        self._check_open()
+        if self._pending_grab:
+            return self.timecode
+        if not self._grab_next_frame():
+            return None
+        self._pending_grab = True
+        return self.timecode
 
 
 class VideoCaptureAdapter(VideoStream):
     """Adapter for existing VideoCapture objects. Unlike VideoStreamCv2, this class supports
     VideoCaptures which may not support seeking.
+
+    Ordinals and timestamps start at zero with the first frame read through this adapter,
+    even if the capture was already advanced. Timestamps use frame count and frame_rate,
+    not capture-provided timestamps, so variable frame intervals are not preserved.
 
     The VideoCapture remains owned by the caller: closing the adapter (e.g. by leaving a `with`
     block) does not release it.
@@ -452,8 +506,8 @@ class VideoCaptureAdapter(VideoStream):
             max_read_attempts: Number of attempts to continue decoding the video
                 after a frame fails to decode. This allows processing videos that
                 have a few corrupted frames or metadata (in which case accuracy
-                of detection algorithms may be lower). Once this limit is passed,
-                decoding will stop and emit an error.
+                of detection algorithms may be lower). If all attempts fail,
+                `read()` returns False.
             framerate: [DEPRECATED] Use `frame_rate` instead. Retained as a deprecated
                 alias for backwards compatibility; ignored when `frame_rate` is provided.
 
@@ -484,11 +538,10 @@ class VideoCaptureAdapter(VideoStream):
 
         self._cap = cap
         self._frame_rate: Fraction = framerate_to_fraction(frame_rate)
-        self._num_frames = 0
         self._max_read_attempts = max_read_attempts
         self._decode_failures = 0
         self._warning_displayed = False
-        self._time_base: float = 0.0
+        self._pending_grab = False
 
     #
     # Backend-Specific Methods/Properties
@@ -528,7 +581,7 @@ class VideoCaptureAdapter(VideoStream):
 
     @property
     def is_seekable(self) -> bool:
-        """Always False, as the underlying VideoCapture is assumed to not support seeking."""
+        """Always False; this adapter does not expose seeking."""
         return False
 
     @property
@@ -540,48 +593,39 @@ class VideoCaptureAdapter(VideoStream):
         )
 
     @property
-    def duration(self) -> FrameTimecode | None:
-        """Duration of the stream as a FrameTimecode, or None if non terminating."""
+    def duration(self) -> Fraction | None:
+        """Estimated source duration in seconds, or None if unavailable.
+
+        Calculated from reported frame count and frame rate; may be inaccurate for VFR.
+        """
+        frame_count = self.frame_count
+        if frame_count is None:
+            return None
+        return frame_count / self.frame_rate
+
+    @property
+    def frame_count(self) -> int | None:
+        """Reported total source frame count, or None if unavailable."""
         frame_count = math.trunc(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        if frame_count > 0:
-            return self.base_timecode + frame_count
-        return None
+        return frame_count if frame_count > 0 else None
 
     @property
     def aspect_ratio(self) -> float:
         """Display/pixel aspect ratio as a float (1.0 represents square pixels)."""
         return _get_aspect_ratio(self._cap)
 
-    @property
-    def position(self) -> FrameTimecode:
-        if self.frame_number < 1:
-            return self.base_timecode
-        # Synthesize a Timecode from frame count and rational framerate.
-        fps = self.frame_rate
-        time_base = Fraction(1, fps.numerator)
-        pts = (self.frame_number - 1) * fps.denominator
-        timecode = Timecode(pts=pts, time_base=time_base)
-        return FrameTimecode(timecode=timecode, fps=fps)
-
-    @property
-    def position_ms(self) -> float:
-        if self._num_frames == 0:
-            return 0.0
-        return self._cap.get(cv2.CAP_PROP_POS_MSEC) - self._time_base
-
-    @property
-    def frame_number(self) -> int:
-        return self._num_frames
-
     def seek(self, target: TimecodeLike):
-        """The underlying VideoCapture is assumed to not support seeking."""
+        """Seeking is not supported by this adapter."""
         raise NotImplementedError("Seeking is not supported.")
 
     def reset(self):
         """Not supported."""
         raise NotImplementedError("Reset is not supported.")
 
-    def read(self, decode: bool = True) -> np.ndarray | bool:
+    def _grab_next_frame(self) -> bool:
+        if self._pending_grab:
+            self._pending_grab = False
+            return True
         if not self._cap.isOpened():
             return False
         has_grabbed = self._cap.grab()
@@ -597,14 +641,29 @@ class VideoCaptureAdapter(VideoStream):
                 logger.debug("Frame failed to decode.")
                 if not self._warning_displayed and self._decode_failures > 1:
                     logger.warning("Failed to decode some frames, results may be inaccurate.")
-        # We didn't manage to grab a frame even after retrying, so just return.
-        if not has_grabbed:
+        return has_grabbed
+
+    def read(self, decode: bool = True) -> np.ndarray | bool:
+        if not self._grab_next_frame():
             return False
-        if self._num_frames == 0:
-            self._time_base = self._cap.get(cv2.CAP_PROP_POS_MSEC)
-        self._num_frames += 1
+        # TODO: Define a timestamp policy for timed and untimed captures.
+        # The FPS-derived clock below does not preserve variable frame intervals.
+        self._record_frame(Timecode(pts=self.frame_number + 1, time_base=1 / self.frame_rate))
         # Need to make sure we actually grabbed a frame before calling retrieve.
-        if decode and self._num_frames > 0:
-            _, frame = self._cap.retrieve()
-            return frame
+        if decode:
+            success, frame = self._cap.retrieve()
+            return frame if success else False
         return True
+
+    def peek_timecode(self) -> Timecode | None:
+        """Return the next frame's timestamp on the FPS-derived clock."""
+        self._check_open()
+        if not self._pending_grab:
+            if not self._grab_next_frame():
+                return None
+            self._pending_grab = True
+
+        return Timecode(
+            pts=self.frame_number + 1,
+            time_base=1 / self.frame_rate,
+        )

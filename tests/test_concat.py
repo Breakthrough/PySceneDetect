@@ -14,6 +14,7 @@
 Validates the multi-video concatenation logic in `scenedetect.backends.concat`."""
 
 import typing as ty
+from fractions import Fraction
 
 import pytest
 
@@ -21,7 +22,8 @@ from scenedetect import SceneManager, ThresholdDetector, open_video
 from scenedetect.backends import AVAILABLE_BACKENDS
 from scenedetect.backends.concat import VideoStreamConcat
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.video_stream import VideoOpenFailure
+from scenedetect.common import FramePosition, Timecode
+from scenedetect.video_stream import FrameNumbering, VideoOpenFailure
 
 FADES_TOTAL_FRAMES = 250
 FADES_DURATION = 10.0
@@ -58,7 +60,8 @@ def test_decode_single(test_fades_clip, backend, auto_close):
     video = auto_close(VideoStreamConcat([test_fades_clip], backend=backend))
     while video.read(decode=False) is not False:
         pass
-    assert video.frame_number == FADES_TOTAL_FRAMES
+    assert video.frame_count == FADES_TOTAL_FRAMES
+    assert video.frame_number == FADES_TOTAL_FRAMES - 1
     assert video.decode_failures == 0
 
 
@@ -69,8 +72,50 @@ def test_decode_multiple(test_fades_clip, backend, auto_close):
     video = auto_close(VideoStreamConcat([test_fades_clip] * splice_amount, backend=backend))
     while video.read(decode=False) is not False:
         pass
-    assert video.frame_number == FADES_TOTAL_FRAMES * splice_amount
+    assert video.frame_count == FADES_TOTAL_FRAMES * splice_amount
+    assert video.frame_number == FADES_TOTAL_FRAMES * splice_amount - 1
     assert video.decode_failures == 0
+
+
+@pytest.mark.parametrize(
+    ("native_duration", "expected_end"),
+    [
+        pytest.param(None, Fraction(999, 50), id="fps-fallback"),
+        pytest.param(Fraction(1, 10), Fraction(503, 25), id="native-duration"),
+    ],
+)
+def test_end_position_uses_child_timing_and_offset(
+    test_fades_clip, tracked_streams, monkeypatch, auto_close, native_duration, expected_end
+):
+    """Native or estimated frame duration contributes to both the seam and final endpoint."""
+    monkeypatch.setattr(_TrackedStream, "duration", property(lambda self: None))
+    monkeypatch.setattr(
+        _TrackedStream, "final_frame_duration", property(lambda self: native_duration)
+    )
+    original_open_source = VideoStreamConcat._open_source
+
+    def open_source(video, index):
+        stream = original_open_source(video, index)
+        monkeypatch.setattr(stream, "_frame_rate", Fraction(25 if index == 0 else 50))
+        return stream
+
+    monkeypatch.setattr(VideoStreamConcat, "_open_source", open_source)
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend="tracked"))
+    assert video.get_end_position() is None
+    while video.read(decode=False) is not False:
+        pass
+
+    last_position = video.position
+    assert isinstance(last_position, FramePosition)
+    assert video.duration is None
+    assert video.final_frame_duration == native_duration
+    assert video.frame_rate == 25
+    end = video.get_end_position()
+    assert isinstance(end, FramePosition)
+    assert end.frame_number == FADES_TOTAL_FRAMES * 2
+    # Each child's final frame starts at 9.96s; their fallback frame rates differ.
+    assert end.timecode.seconds == expected_end
+    assert video.position == last_position
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
@@ -80,7 +125,8 @@ def test_seam_monotonicity(test_fades_clip, backend, auto_close):
     last_seconds = -1.0
     max_delta = 0.0
     while video.read(decode=False) is not False:
-        seconds = video.position.seconds
+        assert isinstance(video.position, FramePosition)
+        seconds = video.position.timecode.seconds
         assert seconds > last_seconds, f"position went backwards: {seconds} <= {last_seconds}"
         if last_seconds >= 0:
             max_delta = max(max_delta, seconds - last_seconds)
@@ -91,18 +137,35 @@ def test_seam_monotonicity(test_fades_clip, backend, auto_close):
 
 
 @pytest.mark.parametrize("backend", BACKENDS)
-def test_seek(test_fades_clip, backend, auto_close):
+@pytest.mark.parametrize("frame_numbering", list(FrameNumbering))
+def test_seek(test_fades_clip, backend, auto_close, frame_numbering):
     """Seeking should work on the global timeline, in either direction, across sources."""
-    video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend=backend))
+    video = auto_close(
+        VideoStreamConcat([test_fades_clip] * 2, backend=backend, frame_numbering=frame_numbering)
+    )
     # Seek into the second source.
     target = FADES_DURATION + 5.0
     video.seek(target)
     assert video.read(decode=False) is not False
-    assert abs(video.position.seconds - target) < 0.25
+    assert isinstance(video.position, FramePosition)
+    assert abs(video.position.timecode.seconds - target) < 0.25
+    # The CFR fixture has 250 frames per 10 seconds.
+    assert video.frame_number == (375 if frame_numbering is FrameNumbering.SOURCE else 0)
     # Seek backwards into the first source.
     video.seek(5.0)
     assert video.read(decode=False) is not False
-    assert abs(video.position.seconds - 5.0) < 0.25
+    assert isinstance(video.position, FramePosition)
+    assert abs(video.position.timecode.seconds - 5.0) < 0.25
+    assert video.frame_number == (125 if frame_numbering is FrameNumbering.SOURCE else 0)
+    # Integer targets are global source ordinals in either numbering mode.
+    for target_frame in (FADES_TOTAL_FRAMES + 1, 1):
+        video.seek(target_frame)
+        assert video.read(decode=False) is not False
+        assert isinstance(video.position, FramePosition)
+        assert video.frame_number == (
+            target_frame if frame_numbering is FrameNumbering.SOURCE else 0
+        )
+        assert video.position.timecode.seconds == Fraction(target_frame, 25)
 
 
 def test_seek_backward_then_cross_seam(test_fades_clip, auto_close):
@@ -111,17 +174,21 @@ def test_seek_backward_then_cross_seam(test_fades_clip, auto_close):
     video = auto_close(VideoStreamConcat([test_fades_clip] * 2))
     # Read across the seam once.
     video.seek(FADES_DURATION - 0.5)
-    while video.position.seconds < FADES_DURATION + 0.5:
+    assert video.read(decode=False) is not False
+    assert isinstance(video.position, FramePosition)
+    while video.position.timecode.seconds < FADES_DURATION + 0.5:
         assert video.read(decode=False) is not False
-    first_pass = video.position.seconds
+    first_pass = video.position.timecode.seconds
     # Seek backward before the seam and cross it again.
     video.seek(FADES_DURATION - 0.5)
-    last = video.position.seconds
-    while video.position.seconds < FADES_DURATION + 0.5:
+    assert video.read(decode=False) is not False
+    assert isinstance(video.position, FramePosition)
+    last = video.position.timecode.seconds
+    while video.position.timecode.seconds < FADES_DURATION + 0.5:
         assert video.read(decode=False) is not False
-        assert video.position.seconds > last
-        last = video.position.seconds
-    assert abs(video.position.seconds - first_pass) < 0.25
+        assert video.position.timecode.seconds > last
+        last = video.position.timecode.seconds
+    assert abs(video.position.timecode.seconds - first_pass) < 0.25
 
 
 def test_seam_monotonicity_vfr(test_vfr_drop3_video, auto_close):
@@ -130,7 +197,8 @@ def test_seam_monotonicity_vfr(test_vfr_drop3_video, auto_close):
     video = auto_close(VideoStreamConcat([test_vfr_drop3_video] * 2))
     last_seconds = -1.0
     while video.read(decode=False) is not False:
-        seconds = video.position.seconds
+        assert isinstance(video.position, FramePosition)
+        seconds = video.position.timecode.seconds
         assert seconds > last_seconds, f"position went backwards: {seconds} <= {last_seconds}"
         last_seconds = seconds
 
@@ -139,8 +207,8 @@ def test_map_span(test_fades_clip, auto_close):
     """A span crossing the seam between two inputs must map to two local spans."""
     video = auto_close(VideoStreamConcat([test_fades_clip] * 2))
     duration = FADES_DURATION
-    start = video.base_timecode + (duration - 3.0)
-    end = video.base_timecode + (duration + 3.0)
+    start = Timecode(pts=7, time_base=Fraction(1))
+    end = Timecode(pts=13, time_base=Fraction(1))
     spans = video.map_span(start, end)
     assert len(spans) == 2
     assert spans[0].source_index == 0 and spans[1].source_index == 1
@@ -149,7 +217,9 @@ def test_map_span(test_fades_clip, auto_close):
     assert spans[1].local_start.seconds == 0.0
     assert abs(spans[1].local_end.seconds - 3.0) < 0.01
     # A span entirely within the first source maps to a single span.
-    spans = video.map_span(video.base_timecode + 1.0, video.base_timecode + 2.0)
+    spans = video.map_span(
+        Timecode(pts=1, time_base=Fraction(1)), Timecode(pts=2, time_base=Fraction(1))
+    )
     assert len(spans) == 1 and spans[0].source_index == 0
 
 
@@ -170,7 +240,8 @@ def test_open_video_list(test_fades_clip, auto_close):
     """`open_video` accepts a list of paths and returns a concatenated stream."""
     video = auto_close(open_video([test_fades_clip, test_fades_clip]))
     assert isinstance(video, VideoStreamConcat)
-    assert video.duration.seconds == pytest.approx(2 * FADES_DURATION, abs=0.1)
+    assert isinstance(video.duration, Fraction)
+    assert video.duration == pytest.approx(2 * FADES_DURATION, abs=0.1)
     # A single-element list also returns a concatenated stream.
     video = auto_close(open_video([test_fades_clip]))
     assert isinstance(video, VideoStreamConcat)
@@ -233,7 +304,9 @@ def test_switching_sources_closes_outgoing(test_fades_clip, tracked_streams, aut
 
     # Read across the seam into the second source.
     video.seek(FADES_DURATION - 0.5)
-    while video.position.seconds < FADES_DURATION + 0.5:
+    assert video.read(decode=False) is not False
+    assert isinstance(video.position, FramePosition)
+    while video.position.timecode.seconds < FADES_DURATION + 0.5:
         assert video.read(decode=False) is not False
     assert_only_latest_open(3)
     # Seek back into the first source, then forward into the second.
@@ -246,8 +319,8 @@ def test_switching_sources_closes_outgoing(test_fades_clip, tracked_streams, aut
 
 
 def test_close(test_fades_clip, tracked_streams, auto_close):
-    """`close()` closes the current source and is idempotent. Afterwards `read()`, `seek()`,
-    and `reset()` raise `ValueError` without opening any source."""
+    """`close()` closes the current source and is idempotent. Afterwards `read()`, `peek_timecode()`,
+    `seek()`, and `reset()` raise `ValueError` without opening any source."""
     video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend="tracked"))
     assert video.read(decode=False) is not False
     video.close()
@@ -256,6 +329,8 @@ def test_close(test_fades_clip, tracked_streams, auto_close):
     num_opened = len(tracked_streams)
     with pytest.raises(ValueError):
         video.read()
+    with pytest.raises(ValueError):
+        video.peek_timecode()
     with pytest.raises(ValueError):
         video.seek(FADES_DURATION + 5.0)
     with pytest.raises(ValueError):
@@ -285,6 +360,7 @@ def test_properties_after_close(test_fades_clip, backend, auto_close):
             video.name,
             video.frame_rate,
             video.duration,
+            video.frame_count,
             video.frame_size,
             video.aspect_ratio,
             video.child_backend,
@@ -293,3 +369,25 @@ def test_properties_after_close(test_fades_clip, backend, auto_close):
     expected = properties()
     video.close()
     assert properties() == expected
+
+
+@pytest.mark.parametrize("backend", BACKENDS)
+def test_peek_timecode_across_seam(test_fades_clip, backend, auto_close):
+    """Peeking across a source boundary preserves the position and retains the next frame."""
+    video = auto_close(VideoStreamConcat([test_fades_clip] * 2, backend=backend))
+    video.seek(FADES_TOTAL_FRAMES - 1)
+    assert video.read(decode=False) is not False
+    assert isinstance(video.position, FramePosition)
+    assert video.position.timecode.seconds == Fraction(249, 25)
+    previous_position = video.position
+
+    timecode = video.peek_timecode()
+    assert isinstance(timecode, Timecode)
+    assert timecode.seconds == Fraction(10)
+    assert video.peek_timecode() == timecode
+    assert video.position == previous_position
+
+    assert video.read(decode=False) is not False
+    assert isinstance(video.position, FramePosition)
+    assert video.position.timecode.seconds == timecode.seconds
+    assert video.frame_number == previous_position.frame_number + 1

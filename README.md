@@ -79,9 +79,9 @@ for i, scene in enumerate(scene_list):
         % (
             i + 1,
             scene[0].get_timecode(),
-            scene[0].frame_num,
+            scene[0].frame_number,
             scene[1].get_timecode(),
-            scene[1].frame_num,
+            scene[1].frame_number,
         )
     )
 ```

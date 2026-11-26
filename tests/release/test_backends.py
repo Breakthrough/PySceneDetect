@@ -77,7 +77,7 @@ def test_cross_backend_consistency(rel_path, is_vfr):
         if is_vfr:
             results[backend] = [s[0].seconds for s in scenes[1:]]
         else:
-            results[backend] = [s[0].frame_num for s in scenes[1:]]
+            results[backend] = [s[0].frame_number for s in scenes[1:]]
 
     reference = backends[0]
     expected = results[reference]
@@ -124,8 +124,8 @@ def test_cross_backend_threshold_determinism():
         sm = SceneManager()
         sm.add_detector(ThresholdDetector())
         sm.detect_scenes(video)
-        # `frame_num` of the first frame of each cut, excluding the implicit 0th cut.
-        results[backend] = [s[0].frame_num for s in sm.get_scene_list()[1:]]
+        # `frame_number` of the first frame of each cut, excluding the implicit 0th cut.
+        results[backend] = [s[0].frame_number for s in sm.get_scene_list()[1:]]
 
     reference = backends[0]
     expected = results[reference]

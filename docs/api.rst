@@ -7,7 +7,7 @@
 
 The ``scenedetect`` API integrates into Python applications and supports custom detectors and video backends. See `Usage`_ below for common examples. The ``scenedetect`` package is organized into these submodules:
 
-    * :ref:`Functions <scenedetect-functions>`: high-level functions such as :func:`scenedetect.detect() <scenedetect.detect>` to analyze a video with any :ref:`detector <scenedetect-detectors>` (:ref:`example <scenedetect-usage>`) and return a list of timecode pairs
+    * :ref:`Functions <scenedetect-functions>`: high-level functions such as :func:`scenedetect.detect() <scenedetect.detect>` to analyze a video with any :ref:`detector <scenedetect-detectors>` (:ref:`example <scenedetect-usage>`) and return a list of frame position pairs
 
     * :doc:`api/detectors`: built-in detectors:
 
@@ -39,7 +39,7 @@ The ``scenedetect`` API integrates into Python applications and supports custom 
 
         * Multiple videos can be read as one continuous stream with :class:`VideoStreamConcat <scenedetect.backends.concat.VideoStreamConcat>` (for example, ``open_video(["part1.mp4", "part2.mp4"])``)
 
-    * :doc:`api/common`: common types such as :class:`FrameTimecode <scenedetect.common.FrameTimecode>` for timecode handling
+    * :doc:`api/common`: common types such as :class:`FramePosition <scenedetect.common.FramePosition>`, :class:`FrameDuration <scenedetect.common.FrameDuration>`, and :class:`Timecode <scenedetect.common.Timecode>` for frame positions and timing
 
     * :doc:`api/scene_manager`: :class:`SceneManager <scenedetect.scene_manager.SceneManager>` runs scene detection on a video with one or more detectors
 
@@ -58,9 +58,9 @@ Most common types and functions can be imported directly from the top-level ``sc
 
     The PySceneDetect API may change before v1.0. Pin ``scenedetect`` to a minor release in your dependencies:
 
-    .. code:: python
+    .. code:: text
 
-        scenedetect~=0.7.0
+        scenedetect~=0.8.0
 
 
 .. _scenedetect-usage:
@@ -78,7 +78,7 @@ Find scene cuts in a video with :func:`scenedetect.detect`:
     for (scene_start, scene_end) in scenes:
         print(f"{scene_start}-{scene_end}")
 
-``scenes`` is a list of :class:`FrameTimecode <scenedetect.common.FrameTimecode>` pairs giving the start and end of each scene. Pass ``show_progress=True`` to :func:`detect <scenedetect.detect>` to show a progress bar with estimated time remaining.
+``scenes`` is a list of :class:`FramePosition <scenedetect.common.FramePosition>` pairs giving the start and exclusive end of each scene. Pass ``show_progress=True`` to :func:`detect <scenedetect.detect>` to show a progress bar with estimated time remaining.
 
 This example uses :class:`ContentDetector <scenedetect.detectors.content_detector.ContentDetector>` to find fast cuts. You can choose from several :ref:`detectors <scenedetect-detectors>` for fast cuts and fades. PySceneDetect can also export scene lists in several formats and :ref:`split the input video <scenedetect-output>` when ``ffmpeg`` is installed:
 

@@ -22,7 +22,7 @@ interface for video input. To open a video by path, use :func:`scenedetect.open_
             frame = video.read()
             if frame is False:
                 break
-        print("Read %d frames" % video.frame_number)
+        print("Read %d frames" % (video.frame_number + 1))
 
 Leaving the ``with`` block closes the video, releasing resources such as file handles and decoders.
 A stream can also be closed explicitly by calling :meth:`VideoStream.close`.
@@ -36,12 +36,18 @@ tested by adding it to the test suite in `tests/test_video_stream.py`.
 
 import typing as ty
 from abc import ABC, abstractmethod
+from enum import Enum
 from fractions import Fraction
 from types import TracebackType
 
 import numpy as np
 
-from scenedetect.common import FrameTimecode, TimecodeLike
+from scenedetect.common import FramePosition, Timecode, TimecodeLike
+
+
+class FrameNumbering(Enum):
+    RELATIVE = "relative"
+    SOURCE = "source"
 
 
 class SeekError(Exception):
@@ -89,6 +95,81 @@ class VideoStream(ABC):
     # Default Implementations
     #
 
+    def __init__(self, frame_numbering: FrameNumbering = FrameNumbering.RELATIVE):
+        """
+        Arguments:
+            frame_numbering: The frame numbering scheme to use.
+        """
+        self._frame_numbering: FrameNumbering = frame_numbering
+        self._position: FramePosition | None = None
+
+    @property
+    def frame_numbering(self) -> FrameNumbering:
+        """Returns the frame numbering scheme used by this VideoStream."""
+        return self._frame_numbering
+
+    @property
+    def position(self) -> FramePosition | None:
+        """Most recently recorded frame position, or None before a frame has been recorded.
+
+        SOURCE-mode seeks may record preroll frames without returning their images.
+        """
+        return self._position
+
+    @property
+    def position_ms(self) -> float:
+        """Presentation time of the recorded position in milliseconds, or 0.0 if there is none.
+
+        Restarting relative frame numbering does not reset presentation time.
+        """
+        return self.position.timecode.seconds * 1000.0 if self.position is not None else 0.0
+
+    @property
+    def frame_number(self) -> int:
+        """Zero-based ordinal of the most recently recorded frame, or -1 if there is none.
+
+        The ordinal's origin is determined by `frame_numbering`.
+        """
+        return self._position.frame_number if self._position is not None else -1
+
+    @property
+    def final_frame_duration(self) -> Fraction | None:
+        """Backend-reported duration of the final frame in seconds, or None if unavailable.
+
+        Query after reading or peeking reaches EOF, before seeking, resetting, or closing.
+        """
+        return None
+
+    def get_end_position(self) -> FramePosition | None:
+        """Return the exclusive EOF position, or None if no frame has been recorded.
+
+        Call after reading or peeking reaches EOF. Prefer native frame duration,
+        then reported source duration, then an estimate from frame_rate.
+        """
+        position = self.position
+        if position is None:
+            return None
+
+        last_seconds = position.timecode.seconds
+        frame_duration = self.final_frame_duration
+
+        if frame_duration is not None and frame_duration > 0:
+            end_seconds = last_seconds + frame_duration
+        else:
+            reported_end = self.duration
+            if reported_end is not None and reported_end > last_seconds:
+                end_seconds = reported_end
+            else:
+                end_seconds = last_seconds + 1 / self.frame_rate
+
+        return FramePosition(
+            timecode=Timecode(
+                pts=end_seconds.numerator,
+                time_base=Fraction(1, end_seconds.denominator),
+            ),
+            frame_number=position.frame_number + 1,
+        )
+
     _decode_failures: int = 0
     """Cumulative count of frames which failed to decode. Backends which can detect and skip
     corrupt frames increment this as an instance attribute."""
@@ -96,11 +177,6 @@ class VideoStream(ABC):
     _closed: bool = False
     """True once the stream has been closed. Backends which implement `close()` set this as an
     instance attribute, and call `_check_open()` from methods which require an open stream."""
-
-    @property
-    def base_timecode(self) -> FrameTimecode:
-        """FrameTimecode object to use as a time base."""
-        return FrameTimecode(timecode=0, fps=self.frame_rate)
 
     @property
     def decode_failures(self) -> int:
@@ -145,6 +221,10 @@ class VideoStream(ABC):
         if self._closed:
             raise ValueError("I/O operation on closed video stream.")
 
+    def _record_frame(self, timecode: Timecode) -> FramePosition:
+        self._position = FramePosition(timecode=timecode, frame_number=self.frame_number + 1)
+        return self._position
+
     #
     # Backend Identification
     #
@@ -182,8 +262,20 @@ class VideoStream(ABC):
 
     @property
     @abstractmethod
-    def duration(self) -> FrameTimecode | None:
-        """Duration of the stream as a FrameTimecode, or None if non terminating."""
+    def duration(self) -> Fraction | None:
+        """Reported source duration in seconds, or None if unavailable.
+
+        This is metadata and may be inaccurate. Estimates may be revised during decoding.
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def frame_count(self) -> int | None:
+        """Reported total source frame count, or None if unavailable.
+
+        This is metadata and may be inaccurate. Seeking and frame numbering does not change it.
+        """
         ...
 
     @property
@@ -196,30 +288,6 @@ class VideoStream(ABC):
     @abstractmethod
     def aspect_ratio(self) -> float:
         """Pixel aspect ratio as a float (1.0 represents square pixels)."""
-        ...
-
-    @property
-    @abstractmethod
-    def position(self) -> FrameTimecode:
-        """Current position within stream as FrameTimecode.
-
-        This can be interpreted as presentation time stamp, thus frame 1 corresponds
-        to the presentation time 0.  Returns 0 even if `frame_number` is 1."""
-        ...
-
-    @property
-    @abstractmethod
-    def position_ms(self) -> float:
-        """Current position within stream as a float of the presentation time in
-        milliseconds. The first frame has a PTS of 0."""
-        ...
-
-    @property
-    @abstractmethod
-    def frame_number(self) -> int:
-        """Current position within stream as the frame number.
-
-        Will return 0 until the first frame is `read`."""
         ...
 
     #
@@ -244,6 +312,15 @@ class VideoStream(ABC):
         ...
 
     @abstractmethod
+    def peek_timecode(self) -> Timecode | None:
+        """Return the presentation time of the next frame without advancing the stream.
+
+        Returns:
+            Timecode of the next frame, or None if end of video.
+        """
+        ...
+
+    @abstractmethod
     def reset(self) -> None:
         """Close and re-open the VideoStream (equivalent to seeking back to beginning).
 
@@ -254,13 +331,12 @@ class VideoStream(ABC):
 
     @abstractmethod
     def seek(self, target: TimecodeLike) -> None:
-        """Seek to the given timecode. If given as a frame number, represents the current seek
-        pointer (e.g. if seeking to 0, the next frame decoded will be the first frame of the video).
+        """Position the next read at a source frame ordinal or presentation time.
 
-        For 1-based indices (first frame is frame #1), the target frame number needs to be converted
-        to 0-based by subtracting one. For example, if we want to seek to the first frame, we call
-        seek(0) followed by read(). If we want to seek to the 5th frame, we call seek(4) followed
-        by read(), at which point frame_number will be 5.
+        Frame targets are zero-based source ordinals regardless of the numbering mode. For
+        example, `seek(4)` followed by `read()` reads the fifth source frame. Its ordinal is 4 in
+        SOURCE mode and 0 in RELATIVE mode. A successful seek restarts RELATIVE numbering at 0
+        without changing source-relative presentation timestamps.
 
         May not be supported on all backend types or inputs (e.g. cameras). If `SeekError` is
         raised, the stream position is undefined. `reset()` can be called to restore the stream.

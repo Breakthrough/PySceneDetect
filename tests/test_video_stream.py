@@ -16,9 +16,11 @@ backends implemented in scenedetect.backends.  These tests enforce a consistent 
 all supported backends, and verify that they are functionally equivalent where possible.
 """
 
+import math
 import os.path
 import typing as ty
 from dataclasses import dataclass
+from fractions import Fraction
 
 import numpy
 import pytest
@@ -26,7 +28,8 @@ import pytest
 from scenedetect import open_video
 from scenedetect.backends import VideoStreamAv, VideoStreamMoviePy
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.video_stream import SeekError, VideoStream
+from scenedetect.common import FramePosition, Timecode
+from scenedetect.video_stream import FrameNumbering, SeekError, VideoStream
 
 # Accuracy a framerate is checked to for testing purposes.
 FRAMERATE_TOLERANCE = 0.001
@@ -87,6 +90,7 @@ class VideoParameters:
     frame_rate: float
     total_frames: int
     aspect_ratio: float
+    duration: float
 
 
 # TODO: Save two "golden" frames from each video on a shot boundary, and use that to validate
@@ -101,6 +105,7 @@ def get_test_video_params() -> list[VideoParameters]:
             frame_rate=29.97,
             total_frames=720,
             aspect_ratio=1.0,
+            duration=24.024,
         ),
         VideoParameters(
             path=get_absolute_path("resources/goldeneye.mp4"),
@@ -109,6 +114,7 @@ def get_test_video_params() -> list[VideoParameters]:
             frame_rate=23.976,
             total_frames=1980,
             aspect_ratio=1.0,
+            duration=82.5825,
         ),
         VideoParameters(
             path=get_absolute_path("resources/issue-195-aspect-ratio.mp4"),
@@ -117,6 +123,7 @@ def get_test_video_params() -> list[VideoParameters]:
             frame_rate=25.0,
             total_frames=628,
             aspect_ratio=1.4545454545,
+            duration=25.12,
         ),
     ]
 
@@ -147,8 +154,12 @@ class TestVideoStream:
         stream = auto_close(vs_type(test_video.path))
         assert stream.frame_size == (test_video.width, test_video.height)
         assert stream.frame_rate == pytest.approx(test_video.frame_rate, FRAMERATE_TOLERANCE)
-        assert stream.duration is not None
-        assert stream.duration.frame_num == test_video.total_frames
+        assert isinstance(stream.duration, Fraction)
+        assert stream.duration == pytest.approx(test_video.duration, abs=0.01)
+        if vs_type is VideoStreamMoviePy:
+            assert stream.frame_count is None
+        else:
+            assert stream.frame_count == test_video.total_frames
         file_name = os.path.basename(test_video.path)
         last_dot_pos = file_name.rfind(".")
         assert stream.name == file_name[:last_dot_pos]
@@ -165,7 +176,7 @@ class TestVideoStream:
         assert isinstance(frame, numpy.ndarray)
         # For now hard-code 3 channels/pixel for each test video
         assert frame.shape == (test_video.height, test_video.width, 3)
-        assert stream.frame_number == 1
+        assert stream.frame_number == 0
 
     def test_read_no_decode(
         self, vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close
@@ -173,31 +184,37 @@ class TestVideoStream:
         """Validate invoking `read` with `decode` set to False."""
         stream = auto_close(vs_type(test_video.path))
         assert stream.read(decode=False) is True
-        assert stream.frame_number == 1
+        assert stream.frame_number == 0
 
     def test_time_invariants(
         self, vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close
     ):
         """Validate the `frame_number`, `position`, and `position_ms` properties."""
         stream = auto_close(vs_type(test_video.path))
-        # The video starts "before" the first frame, with everything set to zero.
-        assert stream.frame_number == 0
-        assert stream.position == stream.base_timecode
+        # No frame has been recorded yet.
+        assert stream.frame_number == -1
+        assert stream.position is None
         assert stream.position_ms == pytest.approx(0.0, abs=TIME_TOLERANCE_MS)
-        # Read the first frame (frame number 1).
+        # Read the first frame (frame number 0).
         assert stream.read() is not False
-        assert stream.frame_number == 1
+        assert stream.frame_number == 0
         # The `position`/`position_ms` properties represent the presentation time, so they
         # should still be zero for the first frame.
-        assert stream.position == stream.base_timecode
+        assert isinstance(stream.position, FramePosition)
+        assert stream.position.frame_number == 0
+        assert stream.position.timecode.seconds == 0
         assert stream.position_ms == pytest.approx(0.0, abs=TIME_TOLERANCE_MS)
-        # Test that the invariants hold for the first few frames.
-        for i in range(2, 10):
+        # These fixtures are CFR, so their expected timestamps follow their frame rates.
+        for i in range(1, 10):
             assert stream.read() is not False
             assert stream.frame_number == i
-            assert stream.position == stream.base_timecode + (i - 1)
+            assert isinstance(stream.position, FramePosition)
+            assert stream.position.frame_number == i
+            assert stream.position.timecode.seconds == pytest.approx(
+                float(i / stream.frame_rate), abs=TIME_TOLERANCE_MS / 1000
+            )
             assert stream.position_ms == pytest.approx(
-                1000.0 * (i - 1) / float(stream.frame_rate), abs=TIME_TOLERANCE_MS
+                1000.0 * i / float(stream.frame_rate), abs=TIME_TOLERANCE_MS
             )
 
     def test_reset(
@@ -208,117 +225,159 @@ class TestVideoStream:
         # Decode some frames, then reset the VideoStream and validate the time invariants.
         for _ in range(10):
             stream.read()
-        assert stream.frame_number == 10
+        assert stream.frame_number == 9
+        assert stream.peek_timecode() is not None
         stream.reset()
-        assert stream.frame_number == 0
-        assert stream.position == 0
+        assert stream.frame_number == -1
+        assert stream.position is None
         assert stream.position_ms == pytest.approx(0, abs=TIME_TOLERANCE_MS)
+        assert stream.read() is not False
+        assert stream.frame_number == 0
+        assert isinstance(stream.position, FramePosition)
+        assert stream.position.timecode.seconds == 0
 
+    @pytest.mark.parametrize("frame_numbering", list(FrameNumbering))
     def test_seek(
-        self, vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close
+        self,
+        vs_type: ty.Callable[..., VideoStream],
+        test_video: VideoParameters,
+        auto_close,
+        frame_numbering: FrameNumbering,
     ):
         """Validate `seek()` functionality with different offset types."""
-        stream = auto_close(vs_type(test_video.path))
+        stream = auto_close(vs_type(test_video.path, frame_numbering=frame_numbering))
+        assert stream.frame_numbering is frame_numbering
 
         # Seek to a given frame number (int).
         stream.seek(200)
-        assert stream.frame_number == 200
-        assert stream.position == stream.base_timecode + 199
-        assert stream.position_ms == pytest.approx(
-            1000.0 * (199.0 / float(stream.frame_rate)), abs=TIME_TOLERANCE_MS
-        )
+        if frame_numbering is FrameNumbering.SOURCE:
+            assert stream.frame_number == 199
+            assert isinstance(stream.position, FramePosition)
+            assert stream.position_ms == pytest.approx(
+                float(1000 * 199.0 / float(stream.frame_rate)), abs=TIME_TOLERANCE_MS
+            )
+        else:
+            assert stream.frame_number == -1
+            assert stream.position is None
+            assert stream.position_ms == 0.0
         stream.read()
-        assert stream.frame_number == 201
-        assert stream.position == stream.base_timecode + 200
+        assert stream.frame_number == (200 if frame_numbering is FrameNumbering.SOURCE else 0)
+        assert isinstance(stream.position, FramePosition)
+        assert stream.position.timecode.seconds == pytest.approx(
+            float(200 / stream.frame_rate), abs=TIME_TOLERANCE_MS / 1000
+        )
         assert stream.position_ms == pytest.approx(
             1000.0 * (200.0 / float(stream.frame_rate)), abs=TIME_TOLERANCE_MS
         )
 
-        # Seek to a time in seconds (float).
-        stream.seek(2.0)
-        assert stream.frame_number == round(stream.frame_rate * 2.0)
-        # FrameTimecode is currently one "behind" the frame_number since it
-        # starts counting from zero. This should eventually be changed.
-        assert stream.position == (stream.base_timecode + 2.0) - 1
-        assert stream.position_ms == pytest.approx(
-            2000.0 - (1000.0 / stream.frame_rate), abs=1000.0 / stream.frame_rate
-        )
-        stream.read()
-        assert stream.frame_number == 1 + round(stream.frame_rate * 2.0)
-        assert stream.position == stream.base_timecode + 2.0
-        assert stream.position_ms == pytest.approx(2000.0, abs=1000.0 / stream.frame_rate)
+        # These CFR fixtures select the first frame at or after 2 seconds.
+        target_frame = math.ceil(2 * stream.frame_rate)
+        for target in (2.0, Timecode(pts=2, time_base=Fraction(1))):
+            stream.seek(target)
 
-        # Seek to a FrameTimecode.
-        stream.seek(stream.base_timecode + 2.0)
-        assert stream.frame_number == round(stream.frame_rate * 2.0)
-        # FrameTimecode is currently one "behind" the frame_number since it
-        # starts counting from zero. This should eventually be changed.
-        assert stream.position == (stream.base_timecode + 2.0) - 1
-        assert stream.position_ms == pytest.approx(
-            2000.0 - (1000.0 / stream.frame_rate), abs=1000.0 / stream.frame_rate
-        )
-        stream.read()
-        assert stream.frame_number == 1 + round(stream.frame_rate * 2.0)
-        assert stream.position == stream.base_timecode + 2.0
-        assert stream.position_ms == pytest.approx(2000.0, abs=1000.0 / stream.frame_rate)
+            if frame_numbering is FrameNumbering.SOURCE:
+                assert stream.frame_number == target_frame - 1
+                assert isinstance(stream.position, FramePosition)
+                assert stream.position.timecode.seconds == pytest.approx(
+                    float((target_frame - 1) / stream.frame_rate),
+                    abs=TIME_TOLERANCE_MS / 1000,
+                )
+            else:
+                assert stream.frame_number == -1
+                assert stream.position is None
+                assert stream.position_ms == 0.0
 
+            assert stream.read() is not False
+            assert stream.frame_number == (
+                target_frame if frame_numbering is FrameNumbering.SOURCE else 0
+            )
+            assert isinstance(stream.position, FramePosition)
+            assert stream.position.timecode.seconds == pytest.approx(
+                float(target_frame / stream.frame_rate),
+                abs=TIME_TOLERANCE_MS / 1000,
+            )
+            assert stream.position_ms == pytest.approx(
+                float(1000 * target_frame / stream.frame_rate),
+                abs=TIME_TOLERANCE_MS,
+            )
+
+    @pytest.mark.parametrize("frame_numbering", list(FrameNumbering))
     def test_seek_start(
-        self, vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close
+        self,
+        vs_type: ty.Callable[..., VideoStream],
+        test_video: VideoParameters,
+        auto_close,
+        frame_numbering: FrameNumbering,
     ):
         """Validate behaviour of `seek()` at the start of a video."""
-        stream = auto_close(vs_type(test_video.path))
+        stream = auto_close(vs_type(test_video.path, frame_numbering=frame_numbering))
         # Here we check similar invariants to test_time_invariants, but using seek().
-        assert stream.frame_number == 0
-        assert stream.position == stream.base_timecode
-        assert stream.position_ms == pytest.approx(0.0, abs=TIME_TOLERANCE_MS)
+        assert stream.frame_number == -1
+        assert stream.position is None
+        assert stream.position_ms == 0.0
         # Seeking to frame 0 (or time 0) is equivalent to seeking "before" the first frame.
         stream.seek(0)
-        assert stream.frame_number == 0
-        assert stream.position == stream.base_timecode
-        assert stream.position_ms == pytest.approx(0.0, abs=TIME_TOLERANCE_MS)
+        assert stream.frame_number == -1
+        assert stream.position is None
+        assert stream.position_ms == 0.0
         # Ensure invariants hold for the first few frames.
-        for i in range(1, 10):
+        for i in range(10):
             assert stream.read() is not False
+            assert isinstance(stream.position, FramePosition)
             assert stream.frame_number == i
-            assert stream.position == stream.base_timecode + (i - 1)
+            assert stream.position.timecode.seconds == pytest.approx(
+                i / float(stream.frame_rate), abs=TIME_TOLERANCE_MS / 1000
+            )
             assert stream.position_ms == pytest.approx(
-                1000.0 * (i - 1) / float(stream.frame_rate), abs=TIME_TOLERANCE_MS
+                1000.0 * i / float(stream.frame_rate), abs=TIME_TOLERANCE_MS
             )
         stream.seek(0)
-        assert stream.frame_number == 0
-        assert stream.position == stream.base_timecode
-        assert stream.position_ms == pytest.approx(0.0, abs=TIME_TOLERANCE_MS)
+        assert stream.frame_number == -1
+        assert stream.position is None
+        assert stream.position_ms == 0.0
 
-        # Seek to the first frame (1) instead of the start (0) and verify the invariants.
+        # Seek to the second source frame (ordinal 1).
         stream.seek(1)
-        assert stream.frame_number == 1
-        # Position and position_ms represent the presentation time, and thus are still zero.
-        assert stream.position == stream.base_timecode
-        assert stream.position_ms == pytest.approx(0.0, abs=TIME_TOLERANCE_MS)
-        stream.read()
-        assert stream.frame_number == 2
-        stream = auto_close(vs_type(test_video.path))
+        # SOURCE has recorded frame 0; RELATIVE has no recorded position yet.
+        if frame_numbering is FrameNumbering.SOURCE:
+            assert isinstance(stream.position, FramePosition)
+            assert stream.frame_number == 0
+            assert stream.position.timecode.seconds == 0
+        else:
+            assert stream.frame_number == -1
+            assert stream.position is None
+        assert stream.read() is not False
+        assert isinstance(stream.position, FramePosition)
+        assert stream.frame_number == (1 if stream.frame_numbering is FrameNumbering.SOURCE else 0)
+        assert stream.position.timecode.seconds == pytest.approx(
+            float(1 / stream.frame_rate), abs=TIME_TOLERANCE_MS / 1000
+        )
 
     def test_read_eof(
         self, vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close
     ):
         """Ensure calling `read()` handles the end of the video correctly."""
-        stream = auto_close(vs_type(test_video.path))
-        # To make the test faster, we seek to the second last frame.
+        stream = auto_close(vs_type(test_video.path, frame_numbering=FrameNumbering.SOURCE))
+        # Seek to the final expected source frame.
         stream.seek(test_video.total_frames - 1)
         while stream.read() is not False:
             pass
         # TODO: On some videos, the PyAV backend seems to drop a frame. See where this occurs.
         if vs_type == VideoStreamAv:
-            assert stream.frame_number in (test_video.total_frames, test_video.total_frames - 1)
+            assert stream.frame_number in (test_video.total_frames - 1, test_video.total_frames - 2)
         else:
-            assert stream.frame_number == test_video.total_frames
+            assert stream.frame_number == test_video.total_frames - 1
+
+        last_position = stream.position
+        assert stream.peek_timecode() is None
+        assert stream.read() is False
+        assert stream.position == last_position
 
     def test_seek_past_eof(
         self, vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close
     ):
         """Validate calling `seek()` to offset past end of video."""
-        stream = auto_close(vs_type(test_video.path))
+        stream = auto_close(vs_type(test_video.path, frame_numbering=FrameNumbering.SOURCE))
         # Seek to a large seek offset past the end of the video. Some backends only support 32-bit
         # frame numbers so that's our max offset. Certain backends disallow seek offsets past EOF,
         # in which case they should raise a SeekError (and the test is considered a pass).
@@ -331,9 +390,9 @@ class TestVideoStream:
         assert stream.read() is False
         # TODO: On some videos, the PyAV backend seems to drop a frame. See where this occurs.
         if vs_type == VideoStreamAv:
-            assert stream.frame_number in (test_video.total_frames, test_video.total_frames - 1)
+            assert stream.frame_number in (test_video.total_frames - 1, test_video.total_frames - 2)
         else:
-            assert stream.frame_number == test_video.total_frames
+            assert stream.frame_number == test_video.total_frames - 1
 
     def test_seek_invalid(
         self, vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close
@@ -411,8 +470,9 @@ def test_delayed_start_normalized(
     backend (the fixture has a start time of 1.075s)."""
     stream = auto_close(vs_type(delayed_start_video))
     assert stream.read(decode=False) is not False
-    assert stream.position.seconds < 0.1
-    assert stream.frame_number == 1
+    assert stream.position is not None
+    assert 0 <= stream.position.timecode.seconds < Fraction(1, 10)
+    assert stream.frame_number == 0
 
 
 #
@@ -429,6 +489,7 @@ def _video_properties(stream: VideoStream) -> tuple:
         stream.duration,
         stream.frame_size,
         stream.aspect_ratio,
+        stream.frame_count,
     )
 
 
@@ -443,13 +504,15 @@ def test_close_is_idempotent(vs_type: ty.Callable[..., VideoStream], auto_close)
 
 
 def test_use_after_close(vs_type: ty.Callable[..., VideoStream], auto_close):
-    """`read()`, `seek()`, and `reset()` must raise `ValueError` once a stream is closed."""
+    """`read()`, `peek_timecode()`, `seek()`, and `reset()` must raise after closing."""
     stream = auto_close(vs_type(get_absolute_path("resources/testvideo.mp4")))
     stream.close()
     with pytest.raises(ValueError):
         stream.read()
     with pytest.raises(ValueError):
         stream.read(decode=False)
+    with pytest.raises(ValueError):
+        stream.peek_timecode()
     with pytest.raises(ValueError):
         stream.seek(10)
     with pytest.raises(ValueError):
@@ -484,3 +547,75 @@ def test_context_manager_closes_on_error(vs_type: ty.Callable[..., VideoStream],
         raise RuntimeError("raised in with block")
     with pytest.raises(ValueError):
         stream.read()
+
+
+@pytest.mark.parametrize("test_video", get_test_video_params())
+def test_peek_timecode(
+    vs_type: ty.Callable[..., VideoStream], test_video: VideoParameters, auto_close
+):
+    """Peeking retains the next frame without changing the recorded position."""
+    stream = auto_close(vs_type(test_video.path))
+
+    for frame_number in range(3):
+        previous_position = stream.position
+        timecode = stream.peek_timecode()
+
+        assert isinstance(timecode, Timecode)
+        assert stream.peek_timecode() == timecode
+        assert stream.position == previous_position
+        assert stream.frame_number == frame_number - 1
+
+        assert stream.read(decode=False) is True
+        assert stream.frame_number == frame_number
+        assert stream.position is not None
+        assert stream.position.timecode == timecode
+
+
+@pytest.mark.parametrize(
+    ("native_duration", "reported_remaining", "expected_duration"),
+    [
+        pytest.param(Fraction(1, 5), Fraction(7, 10), Fraction(1, 5), id="native-duration"),
+        pytest.param(None, Fraction(7, 10), Fraction(7, 10), id="source-duration"),
+        pytest.param(None, None, None, id="unknown-source-duration"),
+        pytest.param(None, Fraction(0), None, id="nonadvancing-source-duration"),
+    ],
+)
+def test_get_end_position_uses_eof_timing(
+    vs_type: ty.Callable[..., VideoStream],
+    test_video_file,
+    monkeypatch: pytest.MonkeyPatch,
+    auto_close,
+    native_duration,
+    reported_remaining,
+    expected_duration,
+):
+    """Resolve EOF using source timestamps after relative numbering restarts at a seek."""
+    stream = auto_close(vs_type(test_video_file, frame_numbering=FrameNumbering.RELATIVE))
+    stream.seek(1.0)
+    while stream.read(decode=False) is not False:
+        pass
+    position = stream.position
+    assert isinstance(position, FramePosition)
+    reported_end = (
+        position.timecode.seconds + reported_remaining if reported_remaining is not None else None
+    )
+    monkeypatch.setattr(vs_type, "final_frame_duration", property(lambda self: native_duration))
+    monkeypatch.setattr(vs_type, "duration", property(lambda self: reported_end))
+
+    end = stream.get_end_position()
+
+    assert isinstance(end, FramePosition)
+    assert end.frame_number == position.frame_number + 1
+    assert end.timecode.seconds == position.timecode.seconds + (
+        expected_duration if expected_duration is not None else 1 / stream.frame_rate
+    )
+    assert stream.position is position
+
+
+def test_get_end_position_without_frames(
+    vs_type: ty.Callable[..., VideoStream], test_video_file, auto_close
+):
+    """An unread stream has no EOF position to resolve."""
+    stream = auto_close(vs_type(test_video_file))
+    assert stream.get_end_position() is None
+    assert stream.position is None

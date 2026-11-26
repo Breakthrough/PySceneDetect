@@ -17,6 +17,7 @@ import queue
 import sys
 import threading
 import typing as ty
+from fractions import Fraction
 from pathlib import Path
 from string import Template
 
@@ -24,20 +25,18 @@ import cv2
 import numpy as np
 
 from scenedetect.common import (
-    FrameTimecode,
+    FramePosition,
     Interpolation,
+    PositionPair,
     SceneList,
+    Timecode,
     TimecodeLike,
+    parse_frame_or_time,
 )
 from scenedetect.platform import StrPath, get_and_create_path, get_cv2_imwrite_params, tqdm
-from scenedetect.video_stream import VideoStream
+from scenedetect.video_stream import SeekError, VideoStream
 
 logger = logging.getLogger("pyscenedetect")
-
-# Added to the ratio of scene length to interval (a number of intervals, so it has no unit) before
-# rounding down, so floating point error doesn't drop an image from a scene that is a whole number
-# of intervals long (e.g. 0.3 / 0.1 gives 2.9999999999999996).
-_INTERVAL_COUNT_TOLERANCE: float = 1e-9
 
 
 def _get_num_images(
@@ -55,13 +54,12 @@ def _get_num_images(
     if interval is None:
         assert num_images is not None
         return [num_images] * len(scene_list)
-    frame_rate = scene_list[0][0].frame_rate
-    assert frame_rate is not None
-    interval_secs = FrameTimecode(timecode=interval, fps=frame_rate).seconds
+    parsed_interval = parse_frame_or_time(interval)
     result = []
     for start, end in scene_list:
-        duration_secs = max((end - start).seconds, 0.0)
-        num_intervals = math.floor(duration_secs / interval_secs + _INTERVAL_COUNT_TOLERANCE)
+        duration = end - start
+        scene_length = duration.frames if isinstance(parsed_interval, int) else duration.elapsed
+        num_intervals = scene_length // parsed_interval
         scene_images = max(num_intervals + 1, min_images)
         if max_images is not None:
             scene_images = min(scene_images, max_images)
@@ -73,42 +71,101 @@ def _generate_timecode_list(
     scene_list: SceneList,
     num_images_per_scene: list[int],
     frame_margin: TimecodeLike,
-) -> list[list[FrameTimecode]]:
-    """Generate per-scene image timecodes using PTS-accurate seconds-based timing.
+    frame_rate: Fraction,
+) -> list[list[Timecode]]:
+    """Generate per-scene image targets using timestamps and frame-rate estimates.
 
     `num_images_per_scene` is the number of images to generate for each scene in `scene_list`.
     `frame_margin` accepts any :data:`TimecodeLike` value (e.g. ``int`` frames, ``float``
     seconds, or ``str`` such as ``"0.1s"``).
+    Frame-count margins and the final-frame clamp use ``frame_rate`` and are
+    approximate for VFR sources.
     """
-    frame_rate = scene_list[0][0].frame_rate
-    assert frame_rate is not None
-    margin_secs = FrameTimecode(timecode=frame_margin, fps=frame_rate).seconds
-    frame_secs = float(1 / frame_rate)
+    # TODO: Define VFR sampling and padding semantics. Handle any frame-count
+    # margins during extraction without FPS conversion.
+    parsed_margin = parse_frame_or_time(frame_margin)
+    margin_secs = parsed_margin / frame_rate if isinstance(parsed_margin, int) else parsed_margin
+    frame_secs = 1 / frame_rate
     result = []
     for (start, end), num_images in zip(scene_list, num_images_per_scene, strict=True):
-        duration_secs = (end - start).seconds
-        if duration_secs <= 0:
-            result.append([start] * num_images)
+        duration = end - start
+        duration_secs = duration.elapsed
+        if duration.frames == 1 or duration_secs <= 0:
+            result.append([start.timecode] * num_images)
             continue
         segment_secs = duration_secs / num_images
-        # `end` is exclusive, so the last frame of the scene is one frame before it. Scenes can be
-        # shorter than one frame (e.g. VFR), so never go before the start of the scene.
-        last_frame_secs = max(end.seconds - frame_secs, start.seconds)
+        # Estimate the final frame time using the frame rate, without going before scene start.
+        last_frame_secs = max(end.timecode.seconds - frame_secs, start.timecode.seconds)
         timecodes = []
         for j in range(num_images):
-            seg_start = start.seconds + j * segment_secs
-            seg_end = start.seconds + (j + 1) * segment_secs
+            seg_start = start.timecode.seconds + j * segment_secs
+            seg_end = start.timecode.seconds + (j + 1) * segment_secs
             if num_images == 1:
-                t = start.seconds + duration_secs / 2.0
+                t = start.timecode.seconds + duration_secs / 2
             elif j == 0:
                 t = min(seg_start + margin_secs, seg_end)
             elif j == num_images - 1:
                 t = max(last_frame_secs - margin_secs, seg_start)
             else:
-                t = (seg_start + seg_end) / 2.0
-            timecodes.append(FrameTimecode(min(t, last_frame_secs), fps=frame_rate))
+                t = (seg_start + seg_end) / 2
+            t = min(t, last_frame_secs)
+            timecodes.append(Timecode(pts=t.numerator, time_base=Fraction(1, t.denominator)))
         result.append(timecodes)
     return result
+
+
+def _read_image(
+    video: VideoStream, target: Timecode, scene: PositionPair
+) -> tuple[np.ndarray, FramePosition] | None:
+    """Read an image at target, replaying within the scene if direct seeking fails."""
+    try:
+        video.seek(target)
+        frame_im = video.read()
+    except SeekError:
+        frame_im = False
+
+    if isinstance(frame_im, np.ndarray):
+        position = video.position
+        assert position is not None
+        return frame_im, position
+
+    start, end = scene
+    start_seconds = start.timecode.seconds
+    end_seconds = end.timecode.seconds
+    target_seconds = target.seconds
+    if not start_seconds <= target_seconds < end_seconds:
+        return None
+
+    last_image: tuple[np.ndarray, FramePosition] | None = None
+    try:
+        video.seek(start.timecode)
+        while True:
+            frame_im = video.read()
+            if not isinstance(frame_im, np.ndarray):
+                break
+
+            position = video.position
+            assert position is not None
+            seconds = position.timecode.seconds
+            if seconds >= end_seconds:
+                return last_image
+            if seconds < start_seconds:
+                continue
+
+            last_image = frame_im, position
+            if seconds >= target_seconds:
+                return last_image
+    except SeekError:
+        return None
+
+    eof_position = video.get_end_position()
+    if (
+        last_image is not None
+        and eof_position is not None
+        and target_seconds < eof_position.timecode.seconds
+    ):
+        return last_image
+    return None
 
 
 def _describe_num_images(
@@ -178,8 +235,8 @@ class _ImageExtractor:
                 if `interval` is set.
             frame_margin: Padding around the beginning and end of each scene used when
                 selecting which frames to extract. Accepts an int (frames), float (seconds),
-                or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0, but some video files
-                may then fail to extract the very last frame.
+                or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0.
+                Frame-count margins use the video's frame rate and are approximate for VFR.
             image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
             encoder_param: Quality/compression efficiency, based on type of image:
                 'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
@@ -233,7 +290,7 @@ class _ImageExtractor:
             output_dir: Directory to write files to.
             show_progress: If `true` and tqdm is available, shows a progress bar.
         """
-        timecode_list = self.generate_timecode_list(scene_list)
+        timecode_list = self.generate_timecode_list(scene_list, video.frame_rate)
         total_images = sum(len(timecodes) for timecodes in timecode_list)
         max_scene_images = max(len(timecodes) for timecodes in timecode_list)
 
@@ -256,15 +313,15 @@ class _ImageExtractor:
         image_num_format = "%0"
         image_num_format += str(math.floor(math.log(max_scene_images, 10)) + 2) + "d"
 
-        def format_filename(scene_number: int, image_number: int, image_timecode: FrameTimecode):
+        def format_filename(scene_number: int, image_number: int, position: FramePosition):
             return "{}.{}".format(
                 filename_template.safe_substitute(
                     VIDEO_NAME=video.name,
                     SCENE_NUMBER=scene_num_format % (scene_number + 1),
                     IMAGE_NUMBER=image_num_format % (image_number + 1),
-                    FRAME_NUMBER=image_timecode.frame_num,
-                    TIMESTAMP_MS=int(image_timecode.seconds * 1000),
-                    TIMECODE=image_timecode.get_timecode().replace(":", ";"),
+                    FRAME_NUMBER=position.frame_number,
+                    TIMESTAMP_MS=int(position.timecode.seconds * 1000),
+                    TIMECODE=position.timecode.get_timecode().replace(":", ";"),
                 ),
                 self._image_extension,
             )
@@ -326,10 +383,10 @@ class _ImageExtractor:
 
         for i, scene_timecodes in enumerate(timecode_list):
             for j, timecode in enumerate(scene_timecodes):
-                video.seek(timecode)
-                frame_im = video.read()
-                if frame_im is not None and frame_im is not False:
-                    file_path = format_filename(i, j, timecode)
+                selected = _read_image(video, timecode, scene_list[i])
+                if selected is not None:
+                    frame_im, position = selected
+                    file_path = format_filename(i, j, position)
                     image_filenames[i].append(file_path)
                     checked_put(
                         encode_queue, (frame_im, get_and_create_path(file_path, output_dir))
@@ -390,16 +447,20 @@ class _ImageExtractor:
             if progress_bar is not None:
                 progress_bar.update(1)
 
-    def generate_timecode_list(self, scene_list: SceneList) -> list[list[FrameTimecode]]:
+    def generate_timecode_list(
+        self, scene_list: SceneList, frame_rate: Fraction
+    ) -> list[list[Timecode]]:
         """Generates a list of timecodes for each scene in `scene_list` based on the current config
         parameters.
 
-        Uses PTS-accurate seconds-based timing so results are correct for both CFR and VFR video.
+        Uses scene timestamps to calculate image extraction targets.
         """
         num_images_per_scene = _get_num_images(
             scene_list, self._num_images, self._interval, self._min_images, self._max_images
         )
-        return _generate_timecode_list(scene_list, num_images_per_scene, self._frame_margin)
+        return _generate_timecode_list(
+            scene_list, num_images_per_scene, self._frame_margin, frame_rate
+        )
 
     def resize_image(
         self,
@@ -434,16 +495,18 @@ def save_images(
     and the associated video/frame source.
 
     Arguments:
-        scene_list: A list of scenes (pairs of FrameTimecode objects) returned
+        scene_list: A list of scenes (pairs of FramePosition objects) returned
             from calling a SceneManager's detect_scenes() method.
         video: A VideoStream object corresponding to the scene list.
             Note that the video will be closed/re-opened and seeked through.
+            If an image target cannot be reached directly, extraction may replay the scene.
+            SOURCE numbering may also require replaying the source prefix.
         num_images: Number of images to generate for each scene.  Minimum is 1. Defaults to 3
             if `interval` is not set. Cannot be used with `interval`.
         frame_margin: Padding around the beginning and end of each scene used when
             selecting which frames to extract. Accepts an int (frames), float (seconds),
-            or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0, but some video files
-            may then fail to extract the very last frame.
+            or str (e.g. ``"0.1s"``, ``"00:00:00.100"``). Can be 0.
+            Frame-count margins use the video's frame rate and are approximate for VFR.
         image_extension: Type of image to save (must be one of 'jpg', 'png', or 'webp').
         encoder_param: Quality/compression efficiency, based on type of image:
             'jpg' / 'webp':  Quality 0-100, higher is better quality.  100 is lossless for webp.
@@ -492,9 +555,7 @@ def save_images(
     if interval is not None:
         if num_images is not None:
             raise ValueError("num_images and interval cannot both be set")
-        frame_rate = scene_list[0][0].frame_rate
-        assert frame_rate is not None
-        if FrameTimecode(timecode=interval, fps=frame_rate).seconds <= 0:
+        if parse_frame_or_time(interval) <= 0:
             raise ValueError("interval must be greater than 0")
         if min_images <= 0:
             raise ValueError("min_images must be greater than 0")
@@ -540,6 +601,7 @@ def save_images(
         scene_list,
         _get_num_images(scene_list, num_images, interval, min_images, max_images),
         frame_margin,
+        video.frame_rate,
     )
     total_images = sum(len(timecodes) for timecodes in timecode_list)
     max_scene_images = max(len(timecodes) for timecodes in timecode_list)
@@ -569,9 +631,9 @@ def save_images(
     logger.debug("Writing images with template %s", filename_template.template)
     for i, scene_timecodes in enumerate(timecode_list):
         for j, image_timecode in enumerate(scene_timecodes):
-            video.seek(image_timecode)
-            frame_im = video.read()
-            if isinstance(frame_im, np.ndarray):
+            selected = _read_image(video, image_timecode, scene_list[i])
+            if selected is not None:
+                frame_im, position = selected
                 # TODO: Add extension to template.
                 # TODO: Allow NUM to be a valid suffix in addition to NUMBER.
                 file_path = "{}.{}".format(
@@ -579,9 +641,9 @@ def save_images(
                         VIDEO_NAME=video.name,
                         SCENE_NUMBER=scene_num_format % (i + 1),
                         IMAGE_NUMBER=image_num_format % (j + 1),
-                        FRAME_NUMBER=image_timecode.frame_num,
-                        TIMESTAMP_MS=int(image_timecode.seconds * 1000),
-                        TIMECODE=image_timecode.get_timecode().replace(":", ";"),
+                        FRAME_NUMBER=position.frame_number,
+                        TIMESTAMP_MS=int(position.timecode.seconds * 1000),
+                        TIMECODE=position.timecode.get_timecode().replace(":", ";"),
                     ),
                     image_extension,
                 )

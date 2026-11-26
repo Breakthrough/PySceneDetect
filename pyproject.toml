@@ -95,9 +95,6 @@ markers = [
     "release: opt-in release-validation tests; excluded by default (run with `pytest -m release`)",
 ]
 addopts = "-m 'not release'"
-filterwarnings = [
-    "ignore:TODO.*Update caller to handle VFR:UserWarning",
-]
 
 [tool.ruff]
 line-length = 100

@@ -18,12 +18,15 @@ For VideoStream tests that validate conformance, see test_video_stream.py.
 """
 
 import os
+from fractions import Fraction
 
 import cv2
 import pytest
 
 from scenedetect import ContentDetector, SceneManager
 from scenedetect.backends.opencv import VideoCaptureAdapter, VideoStreamCv2
+from scenedetect.common import FramePosition
+from scenedetect.video_stream import SeekError
 
 GROUND_TRUTH_CAPTURE_ADAPTER_TEST = [1, 90, 210]
 GROUND_TRUTH_CAPTURE_ADAPTER_CALLBACK_TEST = [180, 394]
@@ -35,10 +38,16 @@ def test_open_image_sequence(test_image_sequence: str):
     assert sequence.is_seekable
     assert sequence.frame_size[0] > 0 and sequence.frame_size[1] > 0
     assert sequence.duration is not None
-    assert sequence.duration.frame_num == 30
+    assert sequence.frame_count == 30
+    assert sequence.duration == Fraction(6, 5)
     assert sequence.read() is not False
-    sequence.seek(100)
-    assert sequence.position == 29
+    sequence.seek(29)
+    assert sequence.read(decode=False) is not False
+    assert sequence.frame_number == 0
+    assert isinstance(sequence.position, FramePosition)
+    assert sequence.position.timecode.seconds == Fraction(29, 25)
+    with pytest.raises(SeekError):
+        sequence.seek(100)
 
 
 @pytest.mark.skipif(os.name != "nt", reason="Workaround only applies on Windows.")
@@ -71,10 +80,10 @@ def test_capture_adapter(test_movie_clip: str):
 
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
-    assert scene_manager.detect_scenes(video=adapter, duration=adapter.base_timecode + 10.0)
+    assert scene_manager.detect_scenes(video=adapter, duration=10.0)
     scenes = scene_manager.get_scene_list()
     assert len(scenes) == len(GROUND_TRUTH_CAPTURE_ADAPTER_TEST)
-    assert [start.frame_num for (start, _) in scenes] == GROUND_TRUTH_CAPTURE_ADAPTER_TEST
+    assert [start.frame_number for (start, _) in scenes] == GROUND_TRUTH_CAPTURE_ADAPTER_TEST
 
 
 def test_close_releases_capture(test_movie_clip: str):

@@ -2,6 +2,144 @@
 .. _scenedetect-migration-guide:
 
 ----------------------
+Migration Guide (v0.8)
+----------------------
+
+Version 0.8 separates frame ordinals from presentation timestamps. This avoids deriving VFR
+frame numbers from an approximate frame rate. The guide below covers migration from v0.7;
+the earlier v0.6-to-v0.7 guide follows for reference.
+
+Positions, timestamps, and durations
+------------------------------------
+
+``FrameTimecode`` has been removed. Use these types from ``scenedetect`` or
+``scenedetect.common``:
+
+- :class:`~scenedetect.common.FramePosition` identifies a frame with ``frame_number`` and
+  ``timecode``. Scene lists, detector results, callbacks, and ``VideoStream.position`` use this type.
+- :class:`~scenedetect.common.Timecode` stores ``pts`` and ``time_base``. Its ``seconds`` property
+  returns their exact product as a :class:`fractions.Fraction`. The timestamp's accuracy still
+  depends on the backend and source.
+- :class:`~scenedetect.common.FrameDuration` stores a difference as ``frames`` and ``elapsed``
+  seconds. Subtract two positions from the same stream and numbering sequence to obtain one.
+
+A position does not contain a frame rate. Do not calculate its frame number from its timestamp:
+VFR frames can have different presentation intervals.
+
+.. code:: python
+
+    from scenedetect import ContentDetector, detect
+
+    scenes = detect("video.mp4", ContentDetector())
+    for start, end in scenes:
+        duration = end - start
+        print(start.frame_number, start.timecode.get_timecode())
+        print(duration.frames, float(duration.elapsed))
+
+Update accesses as follows:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 45 55
+
+   * - Previous access
+     - Current access
+   * - ``position.frame_num``
+     - ``position.frame_number``
+   * - ``position.seconds``
+     - ``position.timecode.seconds`` for exact seconds
+   * - ``position.get_timecode()``
+     - Still supported; forwards to ``position.timecode.get_timecode()``
+   * - ``position.get_frames()``
+     - Still supported; returns ``position.frame_number``
+   * - ``position.get_seconds()``
+     - Still supported; returns seconds as ``float``
+
+``FramePosition.seconds`` also remains a ``float`` convenience property. ``pts`` and
+``time_base`` forward to its ``Timecode``, and ``str(position)`` formats that timestamp.
+``frame_num`` is a deprecated alias and emits ``DeprecationWarning``. Position ordering uses
+``frame_number`` within one numbering sequence; equality compares both fields. The old
+``FrameTimecode(value, fps)`` constructor and its frame-rate-based arithmetic have no replacement
+on ``FramePosition``.
+
+Frame numbering and seeks
+-------------------------
+
+``detect()``, ``open_video()``, and backend constructors accept ``frame_numbering``:
+
+- ``FrameNumbering.RELATIVE`` is the default. After a successful seek, the next frame read has
+  ordinal 0. Its timestamp remains on the source timeline.
+- ``FrameNumbering.SOURCE`` counts ordinals from the source beginning. Reaching a seek target can
+  require decoding the preceding frames.
+
+Integer ``VideoStream.seek()`` targets are zero-based **source** ordinals in both modes.
+For example, ``seek(200)`` makes the next read return source frame 200, labelled 0 in RELATIVE
+mode or 200 in SOURCE mode. Seconds and timecode targets select the first frame encountered at
+or after the requested time. Position ordering does not establish an order across separate
+RELATIVE seek sequences.
+
+Before a frame is recorded, ``video.position`` is ``None`` and ``video.frame_number`` is -1.
+SOURCE seeks can record preceding frames while seeking. ``peek_timecode()`` returns the next
+frame's timestamp without advancing the recorded position.
+
+The high-level ``detect(start_time=..., end_time=...)`` uses source coordinates for both limits.
+A timestamp start with an integer end requires SOURCE numbering. When using ``SceneManager``
+directly after a seek, integer ``end_time`` values use the stream's current numbering sequence.
+The CLI exposes the numbering choice as ``--frame-numbering relative`` or
+``--frame-numbering source``.
+
+Frame-or-time inputs
+--------------------
+
+``TimecodeLike`` now accepts ``int``, ``float``, ``str``, or ``Timecode``.
+:func:`~scenedetect.common.parse_frame_or_time` preserves the input unit instead of converting
+through a frame rate:
+
+- Integers and digit-only strings, such as ``15`` and ``"15"``, denote frames.
+- Floats, decimal strings, strings ending in ``s``, and clock strings denote seconds.
+- ``Timecode`` inputs use their exact ``pts * time_base`` value.
+
+The parser returns ``int`` for frames or ``Fraction`` for seconds. A bare ``Fraction`` is not a
+``TimecodeLike`` input; wrap exact seconds in ``Timecode`` when passing them to these APIs.
+
+Stream metadata and custom integrations
+---------------------------------------
+
+``VideoStream.duration`` now returns source duration in seconds as ``Fraction | None``.
+Use ``VideoStream.frame_count`` for the reported total frame count, as ``int | None``.
+Both describe the source independently of the numbering origin. Metadata may be inaccurate
+and may be revised during decoding. ``VideoStream.base_timecode`` has been removed.
+
+Custom detectors now receive ``position: FramePosition`` in ``process_frame()`` and
+``post_process()``, and return ``list[FramePosition]``. ``post_process()`` receives the exclusive
+end position of the range read, including skipped frames. Do not add another frame when
+calculating final durations from this endpoint. Update callback annotations and any code that
+constructs cuts to use positions with both an ordinal and timestamp. ``TimecodePair`` has been
+replaced by ``PositionPair``.
+
+Construct ``StatsManager()`` without a base timecode. ``get_metrics()``, ``set_metrics()``, and
+``metrics_exist()`` accept an integer frame number or ``FramePosition``. Use a position with
+``set_metrics()`` to retain its timestamp for CSV export; integer-only entries have a blank
+timecode column.
+
+The deprecated ``scenedetect.frame_timecode``, ``scenedetect.scene_detector``, and
+``scenedetect.video_splitter`` modules have been removed. Import detector classes from
+``scenedetect.detector`` and output functions from ``scenedetect.output``, or use their
+existing top-level ``scenedetect`` exports.
+
+Loading scene CSV files
+-----------------------
+
+``load-scenes`` now requires paired frame numbers and timestamps for both scene boundaries.
+The default columns are ``Start Frame``, ``Start Time (seconds)``, ``End Frame``, and
+``End Time (seconds)``, matching the scene-list CSV writer. For custom headers, use
+``--start-frame-col-name``, ``--start-time-col-name``, ``--end-frame-col-name``, and
+``--end-time-col-name``. The old single ``--start-col-name`` option has been removed.
+The loader reads the saved pairs without scanning the video or inferring ordinals from FPS.
+Requested time limits must retain complete saved scenes; a limit inside a saved scene is rejected.
+
+
+----------------------
 Migration Guide (v0.7)
 ----------------------
 

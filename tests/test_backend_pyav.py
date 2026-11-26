@@ -21,6 +21,7 @@ import gc
 import itertools
 from fractions import Fraction
 from types import SimpleNamespace
+from typing import cast
 
 import av
 import pytest
@@ -32,8 +33,9 @@ from scenedetect.backends.pyav import (
     VideoStreamAv,
     _to_fraction,
 )
+from scenedetect.common import FramePosition, Timecode
 from scenedetect.detectors import ContentDetector
-from scenedetect.video_stream import SeekError
+from scenedetect.video_stream import FrameNumbering, SeekError
 
 
 def test_video_stream_pyav_bytesio(test_video_file: str):
@@ -71,13 +73,13 @@ def test_close_leaves_caller_file_open(test_video_file: str, auto_close):
         stream = auto_close(VideoStreamAv(path_or_io=video_file, threading_mode=None))
         assert stream.read(decode=False) is not False
         assert stream.read(decode=False) is not False
-        assert stream.frame_number == 2
-        assert stream.position > stream.base_timecode
+        assert stream.frame_number == 1
+        assert isinstance(stream.position, FramePosition)
         assert stream.position_ms > 0.0
         stream.close()
         assert not video_file.closed
-        assert stream.frame_number == 0
-        assert stream.position == stream.base_timecode
+        assert stream.frame_number == -1
+        assert stream.position is None
         assert stream.position_ms == 0.0
 
 
@@ -171,9 +173,10 @@ def test_rationals_are_fractions(test_video_file: str, auto_close):
     assert stream.frame_rate == Fraction(30000, 1001)
     assert isinstance(stream.rate, Fraction)
     assert isinstance(stream.time_base, Fraction)
-    assert isinstance(stream.position.time_base, Fraction)
+    assert isinstance(stream.position, FramePosition)
+    assert isinstance(stream.position.timecode.time_base, Fraction)
     assert stream.position_ms == 0.0
-    assert stream.frame_number == 1
+    assert stream.frame_number == 0
 
 
 class _StubRational:
@@ -207,8 +210,7 @@ class _AttrOverridingProxy:
 def test_duration_fallback_from_stream_duration(
     test_video_file: str, monkeypatch: pytest.MonkeyPatch, auto_close
 ):
-    """When neither the stream frame count nor the container duration is available, the duration
-    must be derived from `stream.duration * stream.time_base` (duration is in time_base units)."""
+    """Stream duration ticks are converted to seconds using the stream time base."""
     stream = auto_close(VideoStreamAv(test_video_file))
     real_stream = stream._video_stream
     assert real_stream.frames == 720
@@ -216,9 +218,41 @@ def test_duration_fallback_from_stream_duration(
         real_stream,
         frames=0,
         container=SimpleNamespace(duration=None),
+        duration=123,
+        time_base=Fraction(1, 100),
     )
     monkeypatch.setattr(VideoStreamAv, "_video_stream", property(lambda self: fake_stream))
-    assert stream._get_duration() == 720
+    assert stream._get_duration() == Fraction(123, 100)
+
+
+@pytest.mark.parametrize(
+    ("frame", "expected"),
+    [
+        pytest.param(
+            SimpleNamespace(duration=3, time_base=Fraction(1, 100)),
+            Fraction(3, 100),
+            id="native-duration",
+        ),
+        pytest.param(SimpleNamespace(time_base=Fraction(1, 100)), None, id="older-pyav"),
+        pytest.param(
+            SimpleNamespace(duration=None, time_base=Fraction(1, 100)), None, id="unknown-duration"
+        ),
+        pytest.param(
+            SimpleNamespace(duration=0, time_base=Fraction(1, 100)), None, id="zero-duration"
+        ),
+        pytest.param(SimpleNamespace(duration=3, time_base=None), None, id="missing-time-base"),
+        pytest.param(SimpleNamespace(duration=3, time_base=Fraction(0)), None, id="zero-time-base"),
+    ],
+)
+def test_final_frame_duration_compatibility(
+    test_video_file, monkeypatch: pytest.MonkeyPatch, auto_close, frame, expected
+):
+    """Use native duration ticks when available, including older PyAV frames without the field."""
+    stream = auto_close(VideoStreamAv(test_video_file))
+    assert stream.final_frame_duration is None
+    monkeypatch.setattr(stream, "_frame", frame)
+
+    assert stream.final_frame_duration == expected
 
 
 @pytest.mark.parametrize("unset_dar", [None, Fraction(0, 1)], ids=["none", "zero"])
@@ -256,7 +290,8 @@ def test_duration_fallback_unset_time_base(
     test_video_file: str, time_base, monkeypatch: pytest.MonkeyPatch, caplog, auto_close
 ):
     """With no frame count, no container duration, and an unset stream time base (None on
-    PyAV < 19, AVRational(0, 1) on PyAV 19+), the duration must be reported as 0 with a warning."""
+    PyAV < 19, AVRational(0, 1) on PyAV 19+), duration is reported as None with a warning.
+    Native timestamp seeking in RELATIVE mode also requires a valid stream time base."""
     stream = auto_close(VideoStreamAv(test_video_file))
     fake_stream = _AttrOverridingProxy(
         stream._video_stream,
@@ -265,11 +300,12 @@ def test_duration_fallback_unset_time_base(
         time_base=time_base,
     )
     monkeypatch.setattr(VideoStreamAv, "_video_stream", property(lambda self: fake_stream))
-    assert stream._get_duration() == 0
-    assert any("time_base" in record.message for record in caplog.records)
-    with pytest.raises(SeekError):
-        stream.seek(10)
-    assert stream.frame_number == 0
+    assert stream._get_duration() is None
+    assert any("duration unavailable" in record.message for record in caplog.records)
+    with pytest.raises(SeekError, match="time base"):
+        stream.seek(10.0)
+    assert stream.frame_number == -1
+    assert stream.position is None
 
 
 #
@@ -290,8 +326,7 @@ def _detect_cuts(path: str, num_frames: int | None = None) -> list:
     scene_manager = SceneManager()
     scene_manager.add_detector(ContentDetector())
     with VideoStreamAv(path) as video:
-        end_time = None if num_frames is None else video.base_timecode + num_frames
-        scene_manager.detect_scenes(video, end_time=end_time)
+        scene_manager.detect_scenes(video, end_time=num_frames)
     return [scene[0] for scene in scene_manager.get_scene_list()[1:]]
 
 
@@ -300,13 +335,15 @@ def test_no_pts_avi_positions_monotonic(test_no_pts_avi: str, auto_close):
     one frame per read instead of following the decoder's reordering."""
     stream = auto_close(VideoStreamAv(test_no_pts_avi))
     assert stream.read() is not False
-    assert stream.position == stream.base_timecode
-    assert stream.position_ms == pytest.approx(0.0)
-    assert stream.frame_number == 1
+    assert isinstance(stream.position, FramePosition)
+    assert stream.position.timecode.seconds == 0.0
+    assert stream.position_ms == 0.0
+    assert stream.frame_number == 0
     previous = stream.position
-    for i in range(2, 100):
+    for i in range(1, 99):
         assert stream.read() is not False
-        assert stream.position > previous
+        assert isinstance(stream.position, FramePosition)
+        assert stream.position.timecode.seconds > previous.timecode.seconds
         assert stream.frame_number == i
         previous = stream.position
 
@@ -317,28 +354,30 @@ def test_no_pts_avi_matches_mp4(test_no_pts_avi: str, test_movie_clip: str):
     expected = _detect_cuts(test_movie_clip, _BFRAMES_NUM_FRAMES)
     actual = _detect_cuts(test_no_pts_avi)
     assert len(expected) > 0
-    assert [cut.frame_num for cut in actual] == [cut.frame_num for cut in expected]
+    assert [cut.frame_number for cut in actual] == [cut.frame_number for cut in expected]
     for cut, oracle in zip(actual, expected, strict=True):
         # The AVI time base (1/600) cannot represent 24000/1001 exactly, so allow a few ms.
-        assert cut.seconds == pytest.approx(oracle.seconds, abs=0.005)
+        assert cut.timecode.seconds == pytest.approx(oracle.timecode.seconds, abs=0.005)
 
 
 def test_no_pts_avi_seek(test_no_pts_avi: str, auto_close):
     """Seeking must give the same positions whether or not a frame was read first, since the DTS
     offset has to be probed separately when `seek()` is the first call."""
-    read_first = auto_close(VideoStreamAv(test_no_pts_avi))
+    read_first = auto_close(VideoStreamAv(test_no_pts_avi, frame_numbering=FrameNumbering.RELATIVE))
     assert read_first.read() is not False
-    read_first.seek(50)
-    seek_first = auto_close(VideoStreamAv(test_no_pts_avi))
-    seek_first.seek(50)
+    target = Timecode(pts=50, time_base=1 / read_first.frame_rate)
+    read_first.seek(target)
+    seek_first = auto_close(VideoStreamAv(test_no_pts_avi, frame_numbering=FrameNumbering.RELATIVE))
+    seek_first.seek(target)
     for stream in (read_first, seek_first):
-        assert stream.frame_number == 50
-        assert stream._frames_decoded == 50
-        frame_ms = 1000.0 / float(stream.frame_rate)
-        assert stream.position_ms == pytest.approx(49 * frame_ms, abs=frame_ms / 2)
+        assert stream.frame_number == -1
+        assert stream.position is None
+        assert stream.position_ms == 0.0
         assert stream.read() is not False
-        assert stream.frame_number == 51
-        assert stream._frames_decoded == 51
+        assert stream.frame_number == 0
+        assert isinstance(stream.position, FramePosition)
+        elapsed = stream.position.timecode.seconds - target.seconds
+        assert 0 <= elapsed <= (1 / stream.frame_rate + stream.position.timecode.time_base)
     assert read_first.position == seek_first.position
 
 
@@ -349,20 +388,22 @@ def test_no_pts_avi_reopen(test_no_pts_avi: str, auto_close):
     for _ in range(10):
         assert stream.read() is not False
     stream.reset()
-    assert stream.frame_number == 0
+    assert stream.frame_number == -1
     for _ in range(10):
         assert stream.read() is not False
-    assert stream.frame_number == 10
-    previous, frames = stream.position, stream.frame_number
+    assert stream.frame_number == 9
+    assert isinstance(stream.position, FramePosition)
+    previous, frames = stream.position, stream.frame_number + 1
     assert stream._handle_eof() is True
-    assert stream.frame_number == 10
+    assert stream.frame_number == 9
     assert stream.position == previous
     while stream.read() is not False:
         frames += 1
-        assert stream.position > previous
+        assert isinstance(stream.position, FramePosition)
+        assert stream.position.timecode.seconds > previous.timecode.seconds
         previous = stream.position
-    # Not compared to `stream.duration`: this AVI declares a 600 Hz stream rate, so ffmpeg (and
-    # OpenCV) report its frame count in ticks. See the TODO in `VideoStreamAv._get_duration`.
+    # Not compared to `stream.frame_count`: this AVI declares a 600 Hz stream rate, so ffmpeg (and
+    # OpenCV) report its frame count in ticks.
     assert frames == _BFRAMES_NUM_FRAMES
 
 
@@ -370,23 +411,33 @@ def test_raw_stream_without_timestamps_counts_frames(
     test_raw_h264: str, test_movie_clip: str, auto_close
 ):
     """A raw elementary stream has neither PTS nor DTS. Positions are then derived from the number
-    of decoded frames (like the OpenCV backend) instead of every frame reporting time 0. Seeking
-    raises `SeekError`, except to the start, which re-opens the stream."""
+    of decoded frames (like the OpenCV backend) instead of every frame reporting time 0. Native
+    timestamp seeking in RELATIVE mode raises `SeekError`; integer seeks count frames. Seeking
+    to the start re-opens the stream."""
     stream = auto_close(VideoStreamAv(test_raw_h264))
-    for i in range(1, 11):
+    for i in range(10):
         assert stream.read() is not False
         assert stream.frame_number == i
-        assert stream.position == stream.base_timecode + (i - 1)
+        assert isinstance(stream.position, FramePosition)
+        assert stream.position.timecode == Timecode(i, 1 / stream.frame_rate)
     assert stream._offset is None
-    with pytest.raises(SeekError):
-        stream.seek(50)
-    stream.seek(0)
-    assert stream.frame_number == 0
+    stream.seek(50)
+    assert stream.frame_number == -1
+    assert stream.position is None
     assert stream.read() is not False
-    assert stream.frame_number == 1
+    assert stream.frame_number == 0
+    assert isinstance(stream.position, FramePosition)
+    assert stream.position.timecode == Timecode(50, 1 / stream.frame_rate)
+
+    with pytest.raises(SeekError, match="without timestamps"):
+        stream.seek(2.0)
+    stream.seek(0)
+    assert stream.frame_number == -1
+    assert stream.read() is not False
+    assert stream.frame_number == 0
     expected = _detect_cuts(test_movie_clip, _BFRAMES_NUM_FRAMES)
     actual = _detect_cuts(test_raw_h264)
-    assert [cut.frame_num for cut in actual] == [cut.frame_num for cut in expected]
+    assert [cut.frame_number for cut in actual] == [cut.frame_number for cut in expected]
 
 
 #
@@ -404,9 +455,8 @@ def _positions(stream: VideoStreamAv, frames) -> list[int]:
     positions = []
     for pts, dts in frames:
         frame = SimpleNamespace(pts=pts, dts=dts, time_base=1 / stream.frame_rate)
-        stream._frame = frame  # type: ignore[assignment]
         stream._frames_decoded += 1
-        stream._update_timecode()
+        stream._update_timecode(cast(av.VideoFrame, frame))
         assert stream._timecode is not None
         positions.append(stream._timecode.pts)
     return positions
@@ -443,10 +493,11 @@ def test_missing_timestamps_policy(
     stream._offset = None
     stream._timecode = None
     stream._frames_decoded = 1
-    stream._frame = SimpleNamespace(pts=None, dts=2, time_base=None)
-    stream._update_timecode()
+    frame = SimpleNamespace(pts=None, dts=2, time_base=None)
+    stream._update_timecode(frame)
     assert stream._offset is None
-    assert stream.frame_number == 1
+    assert stream._timecode == Timecode(0, 1 / stream.frame_rate)
+    assert stream.position is None
 
 
 def test_timestamp_behind_estimate_warns(
@@ -474,12 +525,15 @@ def test_missing_pts_ts_follows_timestamps(
     oracle = auto_close(VideoStreamAv(test_vfr_drop3_video))
     expected = []
     while oracle.read(decode=False) is not False:
-        expected.append(oracle.position.seconds)
+        assert isinstance(oracle.position, FramePosition)
+        expected.append(oracle.position.timecode.seconds)
     stream = auto_close(VideoStreamAv(test_missing_pts_ts))
     frame_period = 1.0 / float(stream.frame_rate)
     actual, has_timestamp = [], []
     while stream.read(decode=False) is not False:
-        actual.append(stream.position.seconds)
+        assert isinstance(stream.position, FramePosition)
+        actual.append(stream.position.timecode.seconds)
+        assert stream._frame is not None
         has_timestamp.append(stream._frame.pts is not None or stream._frame.dts is not None)
     assert len(actual) == len(expected) == 160
     assert has_timestamp[:4] == [False] * 4 and not all(has_timestamp[4:])
@@ -499,23 +553,23 @@ def test_missing_pts_ts_follows_timestamps(
 
 
 def test_seek_probe_without_timestamps(test_raw_h264: str, auto_close):
-    """A stream without timestamps cannot be seeked: the probe gives up after
+    """Native timestamp seeking fails without timestamps: the probe gives up after
     `MAX_SEEK_PROBE_FRAMES` frames, and later seeks fail immediately without probing again or
     re-opening the stream. The stream can still be read from the start after `reset()`."""
     stream = auto_close(VideoStreamAv(test_raw_h264))
     for _ in range(3):
         assert stream.read(decode=False) is not False
-    with pytest.raises(SeekError):
-        stream.seek(100)
-    assert stream.frame_number == MAX_SEEK_PROBE_FRAMES
+    with pytest.raises(SeekError, match="without timestamps"):
+        stream.seek(1.0)
+    assert stream._frames_decoded == MAX_SEEK_PROBE_FRAMES
     container = stream._container
-    with pytest.raises(SeekError):
-        stream.seek(100)
+    with pytest.raises(SeekError, match="without timestamps"):
+        stream.seek(1.0)
     assert stream._container is container
-    assert stream.frame_number == MAX_SEEK_PROBE_FRAMES
+    assert stream._frames_decoded == MAX_SEEK_PROBE_FRAMES
     stream.reset()
     assert stream.read(decode=False) is not False
-    assert stream.frame_number == 1
+    assert stream.frame_number == 0
 
 
 def test_seek_to_start_reopens_stream(test_missing_pts_ts: str, auto_close):
@@ -535,7 +589,8 @@ def test_seek_to_start_reopens_stream(test_missing_pts_ts: str, auto_close):
         for _ in range(first_reads):
             assert stream.read(decode=False) is not False
         stream.seek(0)
-        assert stream.frame_number == 0
+        assert stream.frame_number == -1
+        assert stream.position is None
         actual = []
         for _ in range(10):
             assert stream.read(decode=False) is not False
@@ -549,8 +604,9 @@ def test_seek_walks_past_frames_without_timestamps(
 ):
     """If the keyframe a seek lands on carries no timestamp, its position is unknown, so the
     seek must keep reading until a frame with a timestamp is found before deciding it has reached
-    the target. Otherwise the next `read()` after `seek(200)` would return frame 152."""
-    stream = auto_close(VideoStreamAv(test_video_file))
+    the target. Otherwise the next `read()` after `seek(Timecode(200, 1 / stream.frame_rate))`
+    would return frame 152."""
+    stream = auto_close(VideoStreamAv(test_video_file, frame_numbering=FrameNumbering.RELATIVE))
     assert stream.read(decode=False) is not False
     real_container = stream._container
     strip_next = False
@@ -572,17 +628,21 @@ def test_seek_walks_past_frames_without_timestamps(
     stream._container = _AttrOverridingProxy(
         real_container, decode=stripping_decode, seek=stripping_seek
     )
-    stream.seek(200)
-    assert stream.frame_number == 200
+    target = Timecode(pts=200, time_base=1 / stream.frame_rate)
+    stream.seek(target)
+    assert stream.frame_number == -1
+    assert stream.position is None
     assert stream.read(decode=False) is not False
-    assert stream.frame_number == 201
+    assert stream.frame_number == 0
+    assert isinstance(stream.position, FramePosition)
+    assert stream.position.timecode.seconds == target.seconds
 
 
 def _true_frame_number(stream: VideoStreamAv, pts: int) -> int:
-    """1-based number of the frame with presentation timestamp `pts` in a CFR stream."""
+    """Zero-based number of the frame with presentation timestamp `pts` in a CFR stream."""
     video_stream = stream._video_stream
     elapsed = (pts - (video_stream.start_time or 0)) * _to_fraction(video_stream.time_base)
-    return round(elapsed * stream.frame_rate) + 1
+    return round(elapsed * stream.frame_rate)
 
 
 def test_seek_reads_from_start_if_probe_passes_target(
@@ -590,16 +650,16 @@ def test_seek_reads_from_start_if_probe_passes_target(
 ):
     """Frames read while looking for a timestamp after a seek cannot be given back, so if the
     first timestamp found is already past the target, the seek must read forward from the start
-    instead. Otherwise `seek(2)` on a stream whose frames 1-4 have no timestamps would leave the
-    next `read()` on frame 6 (raised in PR #592)."""
-    stream = auto_close(VideoStreamAv(test_video_file))
+    instead. Otherwise `seek(Timecode(2, 1 / stream.frame_rate))` on a stream whose frames 1-4
+    have no timestamps would leave the next `read()` on frame 6 (raised in PR #592)."""
+    stream = auto_close(VideoStreamAv(test_video_file, frame_numbering=FrameNumbering.RELATIVE))
     true_frame = None
 
     def stripping_decode(container, *args, **kwargs):
         nonlocal true_frame
         for frame in container.decode(*args, **kwargs):
             true_frame = _true_frame_number(stream, frame.pts)
-            if true_frame <= 4:
+            if true_frame < 4:
                 frame.pts = None
                 frame.dts = None
             yield frame
@@ -612,19 +672,23 @@ def test_seek_reads_from_start_if_probe_passes_target(
         lambda rewind=False: _FaultInjectingContainer(open_container(rewind), stripping_decode),
     )
     stream._container = _FaultInjectingContainer(stream._container, stripping_decode)
-    stream.seek(2)
-    assert stream.frame_number == 2
+    target = Timecode(pts=2, time_base=1 / stream.frame_rate)
+    stream.seek(target)
+    assert stream.frame_number == -1
+    assert stream.position is None
     assert stream.read(decode=False) is not False
-    assert true_frame == 3
-    assert stream.frame_number == 3
+    assert true_frame == 2
+    assert stream.frame_number == 0
+    assert isinstance(stream.position, FramePosition)
+    assert stream.position.timecode.seconds == target.seconds
     assert not [record for record in caplog.records if "backwards" in record.message]
 
 
 def test_seek_reads_from_start_if_probe_finds_no_timestamp(test_video_file: str, auto_close):
     """If no frame carries a timestamp within `MAX_SEEK_PROBE_FRAMES` frames after a seek, where
     the demuxer landed is unknown, so the seek must read forward from the start instead. Otherwise
-    the frames would be estimated forward from the target and `seek(265)` would leave the next
-    `read()` on frame 292 (raised in PR #592)."""
+    the frames would be estimated forward from the target and `seek(Timecode(265, 1 / stream.frame_rate))`
+    would leave the next `read()` on frame 292 (raised in PR #592)."""
     stream = auto_close(VideoStreamAv(test_video_file))
     assert stream.read(decode=False) is not False
     real_container = stream._container
@@ -647,34 +711,37 @@ def test_seek_reads_from_start_if_probe_finds_no_timestamp(test_video_file: str,
     stream._container = _AttrOverridingProxy(
         real_container, decode=stripping_decode, seek=stripping_seek
     )
-    stream.seek(265)
-    assert stream.frame_number == 265
+    target = Timecode(pts=265, time_base=1 / stream.frame_rate)
+    stream.seek(target)
+    assert stream.frame_number == -1
+    assert stream.position is None
     assert stream.read(decode=False) is not False
     assert stream._frame is not None and stream._frame.pts is not None
-    assert _true_frame_number(stream, stream._frame.pts) == 266
-    assert stream.frame_number == 266
+    assert _true_frame_number(stream, stream._frame.pts) == 265
+    assert stream.frame_number == 0
+    assert isinstance(stream.position, FramePosition)
+    assert stream.position.timecode.seconds == target.seconds
 
 
 def test_missing_pts_ts_seek_matches_sequential(test_missing_pts_ts: str, caplog, auto_close):
     """Seeking must land where a sequential read would. The first keyframe of this file has no
     timestamps, so the demuxer lands on the next one (frame 61) for any target before it, which
     used to leave the stream there. The file is VFR, so the expected frame is found by time:
-    `seek(t)` followed by `read()` must return the frame after the first one at or after `(t - 1)`
-    nominal frame periods. `seek(1)` is included since it re-opens the stream and must then read
-    the first frame before the walk forward can compare positions (raised in PR #592)."""
+    targets are timestamps observed during sequential decoding; the next read must return
+    the selected timestamp. Targets near the start also cover the missing-timestamp prefix
+    (raised in PR #592)."""
     stream = auto_close(VideoStreamAv(test_missing_pts_ts))
     sequential = []
     while stream.read(decode=False) is not False:
-        sequential.append(stream.position.seconds)
-    frame_period = 1.0 / float(stream.frame_rate)
-    # Positions are in 90 kHz ticks, so allow one tick when comparing against frame boundaries.
-    tick = 1.0 / 90000
-    for target in (1, 2, 10, 50, 100, 150):
+        assert isinstance(stream.position, FramePosition)
+        sequential.append(stream.position.timecode)
+    for index in (1, 2, 10, 50, 100, 150):
+        target = sequential[index]
         stream.seek(target)
         assert stream.read(decode=False) is not False
-        target_seconds = (target - 1) * frame_period
-        landed = next(i for i, seconds in enumerate(sequential) if seconds >= target_seconds - tick)
-        assert stream.position.seconds == sequential[landed + 1], target
+        assert isinstance(stream.position, FramePosition)
+        assert stream.frame_number == 0
+        assert stream.position.timecode.seconds == target.seconds, index
     assert not [record for record in caplog.records if "backwards" in record.message]
 
 
@@ -688,11 +755,11 @@ def test_non_monotonic_timestamps_warn_once(
     monkeypatch.setattr(VideoStreamAv, "_video_stream", property(lambda self: fake_stream))
     time_base = Fraction(1, 1000)
     for pts in (0, 40, 40, 0, 80, 20):
-        stream._frame = SimpleNamespace(pts=pts, dts=None, time_base=time_base)
+        frame = SimpleNamespace(pts=pts, dts=None, time_base=time_base)
         stream._frames_decoded += 1
-        stream._update_timecode()
+        stream._update_timecode(frame)
     warnings = [record for record in caplog.records if "backwards" in record.message]
     assert len(warnings) == 1
     assert "frame 4" in warnings[0].message
     # Positions keep following the input; the warning does not alter them.
-    assert stream.position_ms == pytest.approx(20.0)
+    assert stream._timecode == Timecode(pts=20, time_base=time_base)

@@ -50,4 +50,4 @@ def test_synthetic_matrix(synthetic_matrix_generator, codec, container, extra_ar
     assert video.frame_number > 0
     # Plausible duration
     assert video.duration is not None
-    assert abs(video.duration.seconds - 2.0) < 0.2
+    assert abs(video.duration - 2.0) < 0.2

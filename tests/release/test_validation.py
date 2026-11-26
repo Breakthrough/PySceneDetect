@@ -62,7 +62,7 @@ def test_output_csv_roundtrip(test_video_file, tmp_path):
         rows = list(csv.DictReader(f))
     assert len(rows) == len(scene_list)
     # write_scene_list emits 1-based start frames; reverse the offset.
-    assert int(rows[0]["Start Frame"]) - 1 == scene_list[0][0].frame_num
+    assert int(rows[0]["Start Frame"]) - 1 == scene_list[0][0].frame_number
 
 
 @pytest.mark.release

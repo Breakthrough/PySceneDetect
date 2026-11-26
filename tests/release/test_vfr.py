@@ -25,7 +25,8 @@ from scenedetect import ContentDetector, SceneManager, open_video
 def test_vfr_swing_accuracy(vfr_swing_video, backend):
     video = open_video(vfr_swing_video, backend=backend)
     scene_manager = SceneManager()
-    scene_manager.add_detector(ContentDetector())
+    # The opening scene contains only five frames; do not filter its boundary.
+    scene_manager.add_detector(ContentDetector(min_scene_len=0))
     scene_manager.detect_scenes(video)
     scene_list = scene_manager.get_scene_list()
 
@@ -55,7 +56,7 @@ def test_vfr_pts_gap_accuracy(vfr_pts_gap_video, backend):
     # Some backends might report duration differently if there's a gap.
     # For now, just ensure it runs.
     assert video.duration is not None
-    assert video.duration.seconds > 0
+    assert video.duration > 0
 
 
 @pytest.mark.release
@@ -68,7 +69,7 @@ def test_vfr_bframes_accuracy(vfr_bframes_video, backend):
     scene_manager.detect_scenes(video)
 
     assert video.duration is not None
-    assert video.duration.seconds > 0
+    assert video.duration > 0
 
 
 @pytest.mark.release
@@ -82,7 +83,7 @@ def test_vfr_swing_cross_backend_parity(vfr_swing_video):
     for backend in ("opencv", "pyav"):
         video = open_video(vfr_swing_video, backend=backend)
         sm = SceneManager()
-        sm.add_detector(ContentDetector())
+        sm.add_detector(ContentDetector(min_scene_len=0))
         sm.detect_scenes(video)
         results[backend] = [s[0].seconds for s in sm.get_scene_list()]
 

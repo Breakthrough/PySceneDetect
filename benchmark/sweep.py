@@ -166,7 +166,7 @@ def _run_chunk(
             t0 = time.time()
             sm.detect_scenes(video=stream)
             elapsed = time.time() - t0
-            cuts = [scene[1].frame_num for scene in sm.get_scene_list()]
+            cuts = [scene[1].frame_number for scene in sm.get_scene_list()]
             results[i] = (cuts, elapsed)
         except BaseException as exc:
             errors[i] = exc

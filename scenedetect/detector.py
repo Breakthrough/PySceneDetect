@@ -20,17 +20,23 @@ in order to be compatible with PySceneDetect.
 .. warning::
 
     This API is still unstable, and changes and design improvements are planned for the v1.0
-    release. Instead of just timecodes, detection algorithms will also provide a specific type of
-    event (in, out, cut, etc...).
+    release. Instead of just frame positions, detection algorithms will also provide a specific
+    type of event (in, out, cut, etc...).
 """
 
 import math
 from abc import ABC, abstractmethod
 from enum import Enum
+from fractions import Fraction
 
 import numpy
 
-from scenedetect.common import FrameTimecode, Timecode, TimecodeLike
+from scenedetect.common import (
+    FrameDuration,
+    FramePosition,
+    TimecodeLike,
+    parse_frame_or_time,
+)
 from scenedetect.stats_manager import StatsManager
 
 
@@ -47,28 +53,28 @@ class SceneDetector(ABC):
 
     @abstractmethod
     def process_frame(
-        self, timecode: FrameTimecode, frame_img: numpy.ndarray
-    ) -> list[FrameTimecode]:
-        """Process the next frame. `timecode` is assumed to be sequential.
+        self, position: FramePosition, frame_img: numpy.ndarray
+    ) -> list[FramePosition]:
+        """Process the next frame. `position.frame_number` is assumed to increase.
 
         Arguments:
-            timecode: Timecode corresponding to the frame being processed.
+            position: Frame position corresponding to the frame being processed.
             frame_img: Video frame as a 24-bit BGR image.
 
         Returns:
-           List of timecodes where scene cuts have been detected, if any.
+           List of frame positions where scene cuts have been detected, if any.
         """
 
     # Optional Methods
 
-    def post_process(self, timecode: FrameTimecode) -> list[FrameTimecode]:
+    def post_process(self, position: FramePosition) -> list[FramePosition]:
         """Called after there are no more frames to process.
 
         Arguments:
-            timecode: The last position in the video which was read.
+            position: Exclusive end position of the range read, including skipped frames.
 
         Returns:
-           List of timecodes where scene cuts have been detected, if any.
+           List of frame positions where scene cuts have been detected, if any.
         """
         return []
 
@@ -102,6 +108,13 @@ class SceneDetector(ABC):
         """
         return []
 
+    def meets_minimum(self, duration: FrameDuration, minimum: int | Fraction) -> bool:
+
+        if isinstance(minimum, (int)):
+            return duration.frames >= minimum
+
+        return duration.elapsed >= minimum
+
 
 class FlashFilter:
     """Filters fast-cuts to enforce minimum scene length."""
@@ -118,99 +131,81 @@ class FlashFilter:
         """
         Arguments:
             mode: The mode to use when enforcing `length`.
-            length: Minimum scene length. Accepts any :data:`~scenedetect.common.TimecodeLike` value
-                (e.g. ``int`` frames, ``float`` seconds, ``str`` such as ``"0.6s"`` /
-                ``"00:00:00.600"``, or a :class:`~scenedetect.common.FrameTimecode` /
-                :class:`~scenedetect.common.Timecode`).
+            length: Minimum scene length. Accepts any :data:`TimecodeLike` value (e.g.
+                ``int`` frames, ``float`` seconds, ``str`` such as ``"0.6s"`` /
+                ``"00:00:00.600"``, or a :class:`~scenedetect.common.Timecode`).
         """
         self._mode = mode
-        # Frame count (int) and seconds (float) representations of `length`. Exactly one is
-        # populated. Temporal inputs (float/non-digit str / Timecode / FrameTimecode) populate
-        # `_filter_secs`; integer inputs (int/digit str) populate `_filter_length`, which is
-        # compared as a frame count so no conversion to seconds is needed (#577).
-        self._filter_length: int = 0
-        self._filter_secs: float | None = None
-        if isinstance(length, float):
-            self._filter_secs = length
-        elif isinstance(length, str) and not length.strip().isdigit():
-            self._filter_secs = FrameTimecode(timecode=length, fps=100.0).seconds
-        elif isinstance(length, (Timecode, FrameTimecode)):
-            self._filter_secs = length.seconds
-        else:
-            self._filter_length = int(length)
-        self._last_above: FrameTimecode | None = None  # Last frame above threshold.
+        self._filter_length: int | Fraction = parse_frame_or_time(length)
+        self._last_above: FramePosition | None = None  # Reference for minimum-length checks.
         self._merge_enabled = False  # Used to disable merging until at least one cut was found.
         self._merge_triggered = False  # True when the merge filter is active.
-        self._merge_start: FrameTimecode | None = None  # Frame where we started merging.
+        self._merge_start: FramePosition | None = None  # Frame where we started merging.
 
     @property
     def max_behind(self) -> int:
+        """Image-buffer budget for delayed cuts, in frames.
+
+        Time-based MERGE lengths use a 240 FPS estimate. This estimate does not affect
+        the minimum-length checks.
+        """
         if self._mode == FlashFilter.Mode.SUPPRESS:
             return 0
-        if self._filter_secs is not None:
-            # Estimate using 240fps so the event buffer is large enough for any reasonable input.
-            return math.ceil(self._filter_secs * 240.0)
+        if isinstance(self._filter_length, Fraction):
+            # TODO: Replace the fixed FPS estimate with duration-aware event buffering.
+            return math.ceil(self._filter_length * 240)
         return self._filter_length
 
     @property
     def _is_disabled(self) -> bool:
-        if self._filter_secs is not None:
-            return self._filter_secs <= 0.0
         return self._filter_length <= 0
 
-    def filter(self, timecode: FrameTimecode, above_threshold: bool) -> list[FrameTimecode]:
+    def _meets_minimum(self, duration: FrameDuration) -> bool:
+        if isinstance(self._filter_length, int):
+            return duration.frames >= self._filter_length
+        return duration.elapsed >= self._filter_length
+
+    def filter(self, position: FramePosition, above_threshold: bool) -> list[FramePosition]:
+        """Process one frame's cut-candidate flag and return accepted cut positions.
+
+        Call for every processed frame, including frames below the threshold.
+        MERGE can return a position saved from an earlier call.
+        """
         if self._is_disabled:
-            return [timecode] if above_threshold else []
+            return [position] if above_threshold else []
         if self._last_above is None:
-            self._last_above = timecode
+            self._last_above = position
         if self._mode == FlashFilter.Mode.MERGE:
-            return self._filter_merge(timecode=timecode, above_threshold=above_threshold)
+            return self._filter_merge(position=position, above_threshold=above_threshold)
         elif self._mode == FlashFilter.Mode.SUPPRESS:
-            return self._filter_suppress(timecode=timecode, above_threshold=above_threshold)
+            return self._filter_suppress(position=position, above_threshold=above_threshold)
         raise RuntimeError("Unhandled FlashFilter mode.")
 
-    def _min_length_met(self, from_tc: FrameTimecode, to_tc: FrameTimecode) -> bool:
-        """Whether `to_tc` is at least the minimum scene length past `from_tc`.
-
-        When the length was given in frames, compare frame counts directly so an
-        exact N-frame gap is not lost to float conversion at NTSC rates (#577).
-        `FrameTimecode.__ge__` compares an int against `frame_num` exactly, so
-        this avoids the one-ulp error of `length / float(frame_rate)`.
-        """
-        if self._filter_length > 0:
-            return (to_tc - from_tc) >= self._filter_length
-        assert self._filter_secs is not None
-        return (to_tc - from_tc) >= self._filter_secs
-
     def _filter_suppress(
-        self, timecode: FrameTimecode, above_threshold: bool
-    ) -> list[FrameTimecode]:
-        frame_rate = timecode.frame_rate
-        assert frame_rate is not None and frame_rate >= 0
+        self, position: FramePosition, above_threshold: bool
+    ) -> list[FramePosition]:
         assert self._last_above is not None
-        min_length_met: bool = self._min_length_met(self._last_above, timecode)
+        min_length_met: bool = self._meets_minimum(position - self._last_above)
         if not (above_threshold and min_length_met):
             return []
         # Both length and threshold requirements were satisfied. Emit the cut, and wait until both
         # requirements are met again.
-        self._last_above = timecode
-        return [timecode]
+        self._last_above = position
+        return [position]
 
-    def _filter_merge(self, timecode: FrameTimecode, above_threshold: bool) -> list[FrameTimecode]:
-        frame_rate = timecode.frame_rate
-        assert frame_rate is not None and frame_rate >= 0
+    def _filter_merge(self, position: FramePosition, above_threshold: bool) -> list[FramePosition]:
         assert self._last_above is not None
-        min_length_met: bool = self._min_length_met(self._last_above, timecode)
+        min_length_met: bool = self._meets_minimum(position - self._last_above)
         # Ensure last frame is always advanced to the most recent one that was above the threshold.
         if above_threshold:
-            self._last_above = timecode
+            self._last_above = position
         if self._merge_triggered:
-            # This frame was under the threshold, see if enough frames passed to disable the filter.
+            # Finish merging when both the quiet gap and merged span meet the minimum.
             assert self._merge_start is not None
             if (
                 min_length_met
                 and not above_threshold
-                and self._min_length_met(self._merge_start, self._last_above)
+                and self._meets_minimum(self._last_above - self._merge_start)
             ):
                 self._merge_triggered = False
                 return [self._last_above]
@@ -223,9 +218,9 @@ class FlashFilter:
         if min_length_met:
             # Only allow the merge filter once the first cut is emitted.
             self._merge_enabled = True
-            return [timecode]
+            return [position]
         # Start merging cuts until the length requirement is met.
         if self._merge_enabled:
             self._merge_triggered = True
-            self._merge_start = timecode
+            self._merge_start = position
         return []

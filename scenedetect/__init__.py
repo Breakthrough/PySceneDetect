@@ -33,17 +33,19 @@ except ModuleNotFoundError as ex:
 # Note that order of importants is important!
 from scenedetect.platform import init_logger as init_logger  # noqa: I001
 from scenedetect.common import (
-    FrameTimecode as FrameTimecode,
+    FramePosition as FramePosition,
+    FrameDuration as FrameDuration,
+    Timecode as Timecode,
     FrameRate as FrameRate,
     SceneList as SceneList,
     CutList as CutList,
     CropRegion as CropRegion,
-    TimecodePair as TimecodePair,
+    PositionPair as PositionPair,
     TimecodeLike as TimecodeLike,
     Interpolation as Interpolation,
 )
 from scenedetect.platform import StrPath as StrPath
-from scenedetect.video_stream import VideoStream as VideoStream
+from scenedetect.video_stream import VideoStream as VideoStream, FrameNumbering as FrameNumbering
 from scenedetect.video_stream import VideoOpenFailure as VideoOpenFailure
 from scenedetect.output import (
     save_images as save_images,
@@ -77,10 +79,11 @@ from scenedetect.backends import (
 from scenedetect.stats_manager import StatsManager as StatsManager
 from scenedetect.stats_manager import StatsFileCorrupt as StatsFileCorrupt
 from scenedetect.scene_manager import SceneManager as SceneManager
+from scenedetect.scene_manager import _resolve_end_time
 
 # Used for module identification and when printing version & about info
 # (e.g. calling `scenedetect version` or `scenedetect about`).
-__version__ = "0.7.4-dev0"
+__version__ = "0.8-dev0"
 
 init_logger()
 logger = getLogger("pyscenedetect")
@@ -147,7 +150,11 @@ def open_video(
     backend_type = VideoStreamCv2
     logger.warning("Trying another backend: %s", backend_type.BACKEND_NAME)
     try:
-        return backend_type(path, frame_rate)
+        return backend_type(
+            path,
+            frame_rate,
+            frame_numbering=kwargs.get("frame_numbering", FrameNumbering.RELATIVE),
+        )
     except VideoOpenFailure as ex:
         logger.debug("Failed to open video: %s", str(ex))
         if last_error is None:
@@ -166,6 +173,8 @@ def detect(
     end_time: TimecodeLike | None = None,
     start_in_scene: bool = False,
     backend: str = "opencv",
+    *,
+    frame_numbering: FrameNumbering = FrameNumbering.RELATIVE,
 ) -> SceneList:
     """Perform scene detection on a given video `path` using the specified `detector`.
 
@@ -179,32 +188,37 @@ def detect(
             determine a better threshold value.
         show_progress: Show a progress bar with estimated time remaining. Default is False.
         start_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
-            number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
-        end_time: Starting point in video, in the form of a timecode ``HH:MM:SS[.nnn]`` (`str`),
-            number of seconds ``123.45`` (`float`), or number of frames ``200`` (`int`).
+            number of seconds ``123.45`` (`float`), a zero-based source frame ordinal ``200``
+            (`int`), or a :class:`~scenedetect.common.Timecode`.
+        end_time: Exclusive ending point on the source timeline, in the same formats as
+            `start_time`. Integer inputs are zero-based source frame ordinals.
         start_in_scene: Assume the video begins in a scene. This means that when detecting
             fast cuts with `ContentDetector`, if no cuts are found, the resulting scene list
-            will contain a single scene spanning the entire video (instead of no scenes).
+            will contain a single scene spanning the processed range (instead of no scenes).
             When detecting fades with `ThresholdDetector`, the beginning portion of the video
             will always be included until the first fade-out event is detected.
         backend: Name of the backend to use for video decoding. See
             :data:`scenedetect.backends.AVAILABLE_BACKENDS` for backends available on the
             current system. Defaults to OpenCV; falls back to OpenCV if the requested backend
             is unavailable or fails to open the video.
+        frame_numbering: Origin for returned frame ordinals. RELATIVE
+            (default) restarts ordinals at 0 after the start seek. SOURCE counts ordinals from
+            the beginning and may require decoding the prefix to reach the requested start.
 
     Returns:
-        List of scenes as pairs of (start, end) :class:`~scenedetect.common.FrameTimecode` objects.
+        List of scenes as pairs of (start, end) :class:`~scenedetect.common.FramePosition` objects.
 
     Raises:
         :class:`VideoOpenFailure`: `video_path` could not be opened.
         :class:`StatsFileCorrupt`: `stats_file_path` is an invalid stats file
-        ValueError: `start_time` or `end_time` are incorrectly formatted.
+        ValueError: An input is invalid, or a timestamp start and integer end are combined
+            with RELATIVE frame numbering.
         TypeError: `start_time` or `end_time` are invalid types.
     """
-    video = open_video(video_path, backend=backend)
+    video = open_video(video_path, backend=backend, frame_numbering=frame_numbering)
+    end_time = _resolve_end_time(start_time, end_time, video.frame_numbering)
     if start_time is not None:
-        video.seek(FrameTimecode(start_time, video.frame_rate))
-    end_timecode = FrameTimecode(end_time, video.frame_rate) if end_time is not None else None
+        video.seek(start_time)
     # To reduce memory consumption when not required, we only add a StatsManager if we
     # need to save frame metrics to disk.
     scene_manager = SceneManager(StatsManager() if stats_file_path else None)
@@ -212,7 +226,7 @@ def detect(
     scene_manager.detect_scenes(
         video=video,
         show_progress=show_progress,
-        end_time=end_timecode,
+        end_time=end_time,
     )
     if scene_manager.stats_manager is not None and stats_file_path is not None:
         scene_manager.stats_manager.save_to_csv(csv_file=stats_file_path)

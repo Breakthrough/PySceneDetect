@@ -20,7 +20,7 @@ import numpy as np
 import pytest
 
 from scenedetect import SceneManager, open_video
-from scenedetect.common import FrameTimecode, Timecode
+from scenedetect.common import FramePosition, Timecode
 from scenedetect.detectors import ContentDetector
 from scenedetect.output import save_images, write_scene_list
 from scenedetect.stats_manager import StatsManager
@@ -53,10 +53,11 @@ def _tc_to_secs(tc: str) -> float:
 
 
 def test_vfr_position_is_timecode(test_vfr_video: str, auto_close):
-    """Position should be a Timecode-backed FrameTimecode."""
+    """Position should be a FramePosition containing a Timecode."""
     video = auto_close(open_video(test_vfr_video, backend="pyav"))
     assert video.read() is not False
-    assert isinstance(video.position._time, Timecode)
+    assert isinstance(video.position, FramePosition)
+    assert isinstance(video.position.timecode, Timecode)
 
 
 def test_vfr_position_monotonic_pyav(test_vfr_video: str, auto_close):
@@ -68,7 +69,9 @@ def test_vfr_position_monotonic_pyav(test_vfr_video: str, auto_close):
         frame = video.read()
         if frame is False:
             break
-        current = video.position.seconds
+        assert isinstance(video.position, FramePosition)
+        assert video.frame_number == frame_count
+        current = video.position.timecode.seconds
         assert current >= last_seconds, (
             f"Position decreased at frame {frame_count}: {current} < {last_seconds}"
         )
@@ -86,7 +89,9 @@ def test_vfr_position_monotonic_opencv(test_vfr_video: str, auto_close):
         frame = video.read()
         if frame is False:
             break
-        current = video.position.seconds
+        assert isinstance(video.position, FramePosition)
+        assert video.frame_number == frame_count
+        current = video.position.timecode.seconds
         assert current >= last_seconds, (
             f"Position decreased at frame {frame_count}: {current} < {last_seconds}"
         )
@@ -209,7 +214,9 @@ def test_vfr_drop3_position_monotonic(test_vfr_drop3_video: str, backend: str, a
     while True:
         if video.read() is False:
             break
-        current = video.position.seconds
+        assert isinstance(video.position, FramePosition)
+        assert video.frame_number == frame_count
+        current = video.position.timecode.seconds
         assert current >= last_seconds, (
             f"[{backend}] Position decreased at frame {frame_count}: {current} < {last_seconds}"
         )
@@ -222,15 +229,16 @@ def test_cfr_position_is_timecode(test_movie_clip: str, auto_close):
     """CFR video positions should also be Timecode-backed with PTS support."""
     video = auto_close(open_video(test_movie_clip, backend="pyav"))
     assert video.read() is not False
-    assert isinstance(video.position._time, Timecode)
+    assert isinstance(video.position, FramePosition)
+    assert isinstance(video.position.timecode, Timecode)
 
 
-def test_cfr_frame_num_exact(test_movie_clip: str, auto_close):
-    """For CFR video, frame_num should be exact (not approximate)."""
+def test_cfr_frame_number_exact(test_movie_clip: str, auto_close):
+    """For CFR video, frame_number should be exact (not approximate)."""
     video = auto_close(open_video(test_movie_clip, backend="pyav"))
     for expected_frame in range(1, 11):
         assert video.read() is not False
-        assert video.position.frame_num == expected_frame - 1
+        assert video.frame_number == expected_frame - 1
 
 
 def test_vfr_save_images_opencv_matches_pyav(test_vfr_video: str, tmp_path, auto_close):
@@ -250,18 +258,12 @@ def test_vfr_save_images_opencv_matches_pyav(test_vfr_video: str, tmp_path, auto
     scene_list = sm.get_scene_list()
     assert len(scene_list) > 0
 
-    # Run save-images for both backends with 1 image per scene for simplicity. The backends
-    # report different nominal frame rates for VFR video, so rebase the scene list onto each
-    # video's rate; the underlying PTS values are preserved (FrameTimecode copy constructor).
+    # Run save-images for both backends with 1 image per scene for simplicity.
     for backend in ("pyav", "opencv"):
         out_dir = tmp_path / backend
         out_dir.mkdir()
         video = auto_close(open_video(test_vfr_video, backend=backend))
-        rebased = [
-            (FrameTimecode(start, fps=video.frame_rate), FrameTimecode(end, fps=video.frame_rate))
-            for start, end in scene_list
-        ]
-        save_images(rebased, video, num_images=1, output_dir=str(out_dir))
+        save_images(scene_list, video, num_images=1, output_dir=str(out_dir))
 
     pyav_imgs = sorted((tmp_path / "pyav").glob("*.jpg"))
     opencv_imgs = sorted((tmp_path / "opencv").glob("*.jpg"))

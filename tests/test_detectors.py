@@ -18,11 +18,12 @@ test case material.
 
 import os
 from dataclasses import dataclass
+from fractions import Fraction
 
 import numpy as np
 import pytest
 
-from scenedetect import FrameTimecode, SceneDetector, SceneManager, StatsManager, detect
+from scenedetect import FramePosition, SceneDetector, SceneManager, StatsManager, Timecode, detect
 from scenedetect.backends.opencv import VideoStreamCv2
 from scenedetect.detectors import (
     AdaptiveDetector,
@@ -197,20 +198,24 @@ def get_fade_in_out_test_cases():
 @pytest.mark.parametrize("test_case", get_fast_cut_test_cases())
 def test_detect_fast_cuts(test_case: TestCase):
     scene_list = test_case.detect()
-    start_frames = [timecode.frame_num for timecode, _ in scene_list]
+    start_frames = [timecode.frame_number for timecode, _ in scene_list]
 
-    assert start_frames == test_case.scene_boundaries
-    assert scene_list[0][0] == test_case.start_time
-    assert scene_list[-1][1] == test_case.end_time
+    assert start_frames == [
+        boundary - test_case.start_time for boundary in test_case.scene_boundaries
+    ]
+    assert scene_list[0][0].frame_number == 0
+    assert scene_list[-1][1].frame_number == test_case.end_time - test_case.start_time
 
 
 @pytest.mark.parametrize("test_case", get_fade_in_out_test_cases())
 def test_detect_fades(test_case: TestCase):
     scene_list = test_case.detect()
-    start_frames = [timecode.frame_num for timecode, _ in scene_list]
-    assert start_frames == test_case.scene_boundaries
-    assert scene_list[0][0] == test_case.start_time
-    assert scene_list[-1][1] == test_case.end_time
+    start_frames = [timecode.frame_number for timecode, _ in scene_list]
+    assert start_frames == [
+        boundary - test_case.start_time for boundary in test_case.scene_boundaries
+    ]
+    assert scene_list[0][0].frame_number == 0
+    assert scene_list[-1][1].frame_number == test_case.end_time - test_case.start_time
 
 
 def test_detectors_with_stats(test_video_file):
@@ -222,7 +227,7 @@ def test_detectors_with_stats(test_video_file):
         scene_manager = SceneManager(stats_manager=stats)
         scene_manager.add_detector(detector())
         scene_manager.auto_downscale = True
-        end_time = FrameTimecode("00:00:05", video.frame_rate)
+        end_time = "00:00:05"
         scene_manager.detect_scenes(video=video, end_time=end_time)
         initial_scene_len = len(scene_manager.get_scene_list())
         assert initial_scene_len > 0, "Test case must have at least one scene."
@@ -260,8 +265,10 @@ def test_min_scene_len_accepts_time_values(detector_type, min_scene_len):
         ),
     )
     scene_list = test_case.detect()
-    start_frames = [timecode.frame_num for timecode, _ in scene_list]
-    assert start_frames == test_case.scene_boundaries
+    start_frames = [position.frame_number for position, _ in scene_list]
+    assert start_frames == [
+        boundary - test_case.start_time for boundary in test_case.scene_boundaries
+    ]
 
 
 def test_adaptive_detector_min_scene_len_uses_target_frame():
@@ -280,17 +287,24 @@ def test_adaptive_detector_min_scene_len_uses_target_frame():
         min_content_val=15.0,
         luma_only=True,
     )
-    fps = 30.0
+    time_base = Fraction(1, 30)
     n_frames = 180
-    cuts: list[FrameTimecode] = []
+    cuts: list[FramePosition] = []
     for frame_num in range(n_frames):
         # Hard cuts at 100 and 104 (4 frames apart) plus a later valid cut at 140.
         # The 4-frame pair matches the report: min_scene_len - window_width.
         value = 255 if 100 <= frame_num <= 103 or 140 <= frame_num <= 143 else 0
         frame = np.full((16, 16, 3), value, dtype=np.uint8)
-        cuts.extend(detector.process_frame(FrameTimecode(frame_num, fps), frame))
+        position = FramePosition(
+            timecode=Timecode(
+                pts=frame_num,
+                time_base=time_base,
+            ),
+            frame_number=frame_num,
+        )
+        cuts.extend(detector.process_frame(position, frame))
 
-    cut_frames = [cut.frame_num for cut in cuts]
+    cut_frames = [cut.frame_number for cut in cuts]
     assert cut_frames == [100, 140]
 
 
