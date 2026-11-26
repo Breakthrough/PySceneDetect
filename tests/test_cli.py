@@ -453,6 +453,54 @@ def test_cli_kernel_size_accepts_valid(command: str, kernel_size: str):
     assert exit_code == 0
 
 
+def _write_fade_video(path: Path) -> None:
+    """25 FPS video: 30 bright frames, a 10 frame fade out, 20 black frames, a 10 frame fade in,
+    then 30 bright frames. The fade out starts at frame 30 and the fade in ends at frame 69."""
+    writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"MJPG"), 25.0, (64, 48))
+    levels = [200] * 30
+    levels += [int(200 * (1 - (i + 1) / 10)) for i in range(10)]
+    levels += [0] * 20
+    levels += [int(200 * (i + 1) / 10) for i in range(10)]
+    levels += [200] * 30
+    for level in levels:
+        writer.write(np.full((48, 64, 3), level, dtype=np.uint8))
+    writer.release()
+
+
+@pytest.mark.parametrize("fade_bias", ["-100", "-50", "0", "50", "100"])
+def test_cli_detect_threshold_fade_bias_is_a_percent(tmp_path: Path, fade_bias: str):
+    """--fade-bias is a percent from -100 to 100, so the cut stays between the fade out and the
+    fade in, and a bias of 0 is the middle of both."""
+    video = tmp_path / "fade.avi"
+    _write_fade_video(video)
+    scenes = tmp_path / "scenes.csv"
+    exit_code, output = invoke_cli(
+        [
+            "-i",
+            str(video),
+            "detect-threshold",
+            "--threshold",
+            "12",
+            "--fade-bias",
+            fade_bias,
+            "list-scenes",
+            "-o",
+            str(tmp_path),
+            "-f",
+            scenes.name,
+            "-q",
+        ]
+    )
+    assert exit_code == 0, output
+    rows = scenes.read_text().splitlines()[2:]
+    assert len(rows) == 2
+    cut_frame = int(rows[1].split(",")[1]) - 1
+    # The fade out is detected at frame 39 and the fade in at frame 60 (0-based), and the cut
+    # lands at (1 + bias) / 2 of the way between them.
+    expected = 39 + round(21 * (1.0 + int(fade_bias) / 100.0) / 2.0)
+    assert abs(cut_frame - expected) <= 1
+
+
 @pytest.mark.parametrize("command", ["detect-content", "detect-adaptive"])
 def test_cli_kernel_size_config_file_rejects_one(tmp_path: Path, command: str):
     """A config file kernel-size of 1 must be rejected when loading, like other invalid sizes."""

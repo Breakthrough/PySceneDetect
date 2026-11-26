@@ -460,7 +460,8 @@ class CliContext:
         return {
             "add_final_scene": add_last_scene
             or self.config.get_value("detect-threshold", "add-last-scene"),
-            "fade_bias": self.config.get_value("detect-threshold", "fade-bias", fade_bias),
+            # The option and config value are a percent (-100 to 100), the detector wants -1.0 to 1.0.
+            "fade_bias": self.config.get_value("detect-threshold", "fade-bias", fade_bias) / 100.0,
             "min_scene_len": min_scene_len_frames,
             "min_out_length": self.parse_timecode(
                 self.config.get_value("detect-threshold", "min-out-length", min_out_length)
