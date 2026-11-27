@@ -18,7 +18,7 @@ from tests.helpers import invoke_cli
 @pytest.fixture
 def solid_video(tmp_path: Path) -> Path:
     path = tmp_path / "solid.avi"
-    writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"MJPG"), 10.0, (32, 32))
+    writer = cv2.VideoWriter(str(path), cv2.VideoWriter.fourcc(*"MJPG"), 10.0, (32, 32))
     assert writer.isOpened()
     texture = np.zeros((32, 32, 3), dtype=np.uint8)
     texture[:, 16:] = 255
