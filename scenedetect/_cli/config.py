@@ -427,6 +427,12 @@ CONFIG_MAP: ConfigDict = {
     "load-scenes": {
         "start-col-name": "Start Frame",
     },
+    "list-solid": {
+        "filename": "$VIDEO_NAME-Solid.csv",
+        "output": None,
+        "threshold": RangeValue(2.0, min_val=0.0, max_val=127.5),
+        "min-frames": RangeValue(2, min_val=1, max_val=None),
+    },
     "list-scenes": {
         "cut-format": TimecodeFormat.TIMECODE,
         "col-separator": EscapedChar(","),

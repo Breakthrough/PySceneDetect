@@ -19,6 +19,8 @@ The ``scenedetect`` API integrates into Python applications and supports custom 
 
         * :class:`HistogramDetector <scenedetect.detectors.histogram_detector.HistogramDetector>`: finds fast cuts using Y-channel (brightness) histogram changes in YUV
 
+        * :class:`SolidColorDetector <scenedetect.detectors.solid_color_detector.SolidColorDetector>`: reports the start and end of solid-color intervals
+
         * :class:`ThresholdDetector <scenedetect.detectors.threshold_detector.ThresholdDetector>`: finds fades in and out using average RGB pixel brightness
 
     * :doc:`api/output`: output helpers:

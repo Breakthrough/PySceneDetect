@@ -424,7 +424,7 @@ class SceneManager:
         for detector in self._detector_list:
             cuts = detector.process_frame(position, frame_im)
             self._cutting_list += cuts
-            new_cuts = bool(cuts)
+            new_cuts |= bool(cuts)
             if callback:
                 for cut in cuts:
                     for position, frame in self._frame_buffer:

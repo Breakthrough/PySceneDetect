@@ -7,7 +7,7 @@ Detectors
 
 .. automodule:: scenedetect.detectors
 
-.. seealso:: Each detector is also available as a ``detect-*`` command; see the ``detect-*`` commands in the :ref:`CLI reference <cli-detectors>`. The :option:`-m/--min-scene-len <scenedetect -m>` option sets ``min_scene_len`` for every detector.
+.. seealso:: Scene cut detectors are available as ``detect-*`` commands in the :ref:`CLI reference <cli-detectors>`. The :option:`-m/--min-scene-len <scenedetect -m>` option sets their minimum scene length. Use :ref:`list-solid <command-list-solid>` to locate runs of solid-color frames.
 
 .. note::
 
@@ -70,6 +70,37 @@ HistogramDetector
 .. include:: detector_options/detect-hist.inc
 
 .. autoclass:: scenedetect.detectors.histogram_detector.HistogramDetector
+   :members:
+
+SolidColorDetector
+------------------
+
+.. seealso:: **Command Line:** :ref:`list-solid <command-list-solid>` | **Config File:** :ref:`[list-solid] <config-list-solid>`
+
+For example, to find solid-color sections lasting at least five frames:
+
+.. code-block:: python
+
+    from scenedetect import SceneManager, open_video
+    from scenedetect.detectors import SolidColorDetector
+
+    detector = SolidColorDetector(min_frames=5)
+    manager = SceneManager()
+    manager.add_detector(detector)
+    with open_video("recording.mp4") as video:
+        manager.detect_scenes(video=video)
+    for start, end in detector.get_intervals():
+        print(start.get_timecode(), end.get_timecode(), (end - start).seconds)
+
+The end time is exclusive. Adjacent solid frames belong to the same interval even
+if their colors differ. Use a lower threshold to distinguish low-contrast detail
+from a blank screen. To preserve fine detail during analysis, set
+``manager.auto_downscale = False`` and ``manager.downscale = 1`` before detection.
+On variable-frame-rate input, use timecodes for boundaries. The scene CSV's frame
+numbers use the nominal frame rate. A run ending at the last observed frame uses
+one nominal frame duration to estimate its exclusive end.
+
+.. autoclass:: scenedetect.detectors.solid_color_detector.SolidColorDetector
    :members:
 
 ThresholdDetector

@@ -439,6 +439,47 @@ Options of :ref:`list-scenes <command-list-scenes>` (Python API: :func:`~scenede
     # Overrides `display-scenes` and `display-cuts`.
     #quiet = no
 
+.. _config-list-solid:
+
+[list-solid]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Options of :ref:`list-solid <command-list-solid>` (Python API: :class:`~scenedetect.detectors.solid_color_detector.SolidColorDetector`).
+
+.. list-table::
+   :class: config-keys
+   :header-rows: 1
+   :widths: 28 32 40
+
+   * - Key
+     - Default
+     - CLI option
+   * - ``threshold``
+     - ``2.0``
+     - :option:`--threshold <scenedetect list-solid --threshold>`
+   * - ``min-frames``
+     - ``2``
+     - :option:`--min-frames <scenedetect list-solid --min-frames>`
+   * - ``filename``
+     - ``$VIDEO_NAME-Solid.csv``
+     - :option:`-f/--filename <scenedetect list-solid -f>`
+   * - ``output``
+     - *none*
+     - :option:`-o/--output <scenedetect list-solid -o>`
+
+.. code-block:: ini
+
+    [list-solid]
+    # Maximum standard deviation in each color channel, in 8-bit pixel values.
+    #threshold = 2.0
+
+    # Ignore runs shorter than this many consecutive frames.
+    #min-frames = 2
+
+    # CSV filename and folder. The folder defaults to the global output directory.
+    #filename = $VIDEO_NAME-Solid.csv
+    #output = /usr/tmp/reports
+
 .. _config-load-scenes:
 
 [load-scenes]

@@ -66,7 +66,11 @@ def run_scenedetect(context: CliContext) -> bool:
         scenes = _postprocess_scene_list(context, scenes)
         # Handle -s/--stats option.
         _save_stats(context)
-        if scenes:
+        if context.solid_detector is not None and context.scene_manager.get_num_detectors() == 1:
+            logger.info(
+                "Solid-color intervals found: %d", len(context.solid_detector.get_intervals())
+            )
+        elif scenes:
             logger.info(
                 "Detected %d scenes, average shot length %.1f seconds.",
                 len(scenes),

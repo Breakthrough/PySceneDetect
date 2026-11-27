@@ -126,6 +126,30 @@ def save_keyframes(
     logger.info(f"Keyframes written to: {keyframes_path}")
 
 
+def list_solid(
+    context: CliContext,
+    scenes: SceneList,
+    cuts: CutList,
+    filename: str,
+    output: str | None,
+):
+    """Write solid-color intervals using the standard scene CSV columns."""
+    del scenes, cuts
+    assert context.video_stream is not None
+    assert context.solid_detector is not None
+    filename = Template(filename).safe_substitute(VIDEO_NAME=context.video_stream.name)
+    if not filename.lower().endswith(".csv"):
+        filename += ".csv"
+    path = get_and_create_path(filename, output)
+    logger.info("Writing solid-color intervals to CSV file:\n  %s", path)
+    with open(path, "w", newline="") as report:
+        write_scene_list(
+            output_csv_file=report,
+            scene_list=context.solid_detector.get_intervals(),
+            include_cut_list=False,
+        )
+
+
 def list_scenes(
     context: CliContext,
     scenes: SceneList,
