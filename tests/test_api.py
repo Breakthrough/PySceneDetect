@@ -25,21 +25,38 @@ def test_api_detect(test_video_file: str):
         print(f"Scene {i + 1}: {scene[0].get_timecode()} - {scene[1].get_timecode()}")
 
 
-def test_api_detect_closes_stream_on_return_and_error(test_video_file: str, tmp_path):
+def test_api_detect_closes_stream_on_return_and_error(test_video_file: str, tmp_path, monkeypatch):
     """Ensure `detect()` closes the opened video stream on normal return and on error."""
     import shutil
+    from unittest.mock import MagicMock
 
+    import scenedetect
     from scenedetect import ContentDetector, detect
+
+    real_open_video = scenedetect.open_video
+    opened_streams = []
+
+    def tracking_open_video(*args, **kwargs):
+        stream = real_open_video(*args, **kwargs)
+        stream.close = MagicMock(wraps=stream.close)
+        opened_streams.append(stream)
+        return stream
+
+    monkeypatch.setattr(scenedetect, "open_video", tracking_open_video)
 
     normal_copy = tmp_path / "normal.mp4"
     shutil.copyfile(test_video_file, normal_copy)
     detect(normal_copy, ContentDetector(), end_time=10)
+    assert len(opened_streams) == 1
+    opened_streams[0].close.assert_called_once()
     normal_copy.unlink()
 
     error_copy = tmp_path / "error.mp4"
     shutil.copyfile(test_video_file, error_copy)
     with pytest.raises(ValueError):
         detect(error_copy, ContentDetector(), start_time="invalid_timecode")
+    assert len(opened_streams) == 2
+    opened_streams[1].close.assert_called_once()
     error_copy.unlink()
 
 
