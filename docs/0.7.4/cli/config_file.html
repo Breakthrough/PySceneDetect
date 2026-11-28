@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Configuration File &#8212; PySceneDetect 0.7.4 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Video Backends (CLI)" href="backends.html" />
+    <link rel="prev" title="scenedetect Command" href="../cli.html" />
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <!-- Google tag (gtag.js) -->
+  <script>
+    if (
+      location.protocol.startsWith("http") &&
+      location.hostname !== "localhost" &&
+      location.hostname !== "127.0.0.1" &&
+      location.hostname !== "[::1]" &&
+      !navigator.webdriver
+    ) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", "G-EWBNLVRWW0");
+      const ga = document.createElement("script");
+      ga.async = true;
+      ga.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(ga);
+    }
+  </script>
+  <script type="module">
+    (() => {
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (meta) {
+        document.addEventListener("click", (e) => {
+          if (!(e.target instanceof Element) || !e.target.closest(".psd-theme-toggle")) return;
+          let stored = null;
+          try {
+            const v = localStorage.getItem("color-scheme");
+            stored = v === "light" || v === "dark" ? v : null;
+          } catch (err) {}
+          const sys = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          const cur = meta.content === "light" || meta.content === "dark" ? meta.content : (stored ?? sys);
+          const next = cur === "dark" ? "light" : "dark";
+          if (next === sys) {
+            try { localStorage.removeItem("color-scheme"); } catch (err) {}
+            meta.content = "light dark";
+          } else {
+            try { localStorage.setItem("color-scheme", next); } catch (err) {}
+            meta.content = next;
+          }
+        });
+        window.addEventListener("storage", (e) => {
+          if (e.key === "color-scheme" || e.key === null) {
+            const v = e.newValue;
+            meta.content = v === "light" || v === "dark" ? v : "light dark";
+          }
+        });
+      }
+
+      const initVersionSwitcher = () => {
+        const switcher = document.querySelector(".psd-version-switcher");
+        const trigger = switcher?.querySelector(".psd-version-btn");
+        const labelEl = switcher?.querySelector(".psd-version-label");
+        const menu = document.getElementById("psd-version-menu");
+        const listEl = menu?.querySelector(".psd-version-list");
+        if (!switcher || !trigger || !menu || !listEl) return;
+
+        const release = switcher.getAttribute("data-release") || "";
+        const pageRel = switcher.getAttribute("data-page-rel") || "";
+        let latestVersion = switcher.getAttribute("data-latest-version") || "";
+        const pathMatch = window.location.pathname.match(/\/docs\/([^/]+)(?:\/|$)/);
+        const activeSlug = pathMatch ? pathMatch[1] : (release.includes("dev") ? "head" : release);
+
+        const isMenuOpen = () => {
+          try {
+            return menu.matches(":popover-open, .\\:popover-open");
+          } catch {
+            return menu.classList.contains(":popover-open");
+          }
+        };
+
+        const syncActiveLink = () => {
+          let matchedLabel = "";
+          const hasExactMatch = Boolean(
+            listEl.querySelector(`a[data-version-slug="${CSS.escape(activeSlug)}"]`)
+          );
+          for (const link of listEl.querySelectorAll("a[data-version-slug]")) {
+            const slug = link.getAttribute("data-version-slug");
+            const isCurrent =
+              slug === activeSlug ||
+              (!hasExactMatch && slug === "latest" && Boolean(latestVersion) && activeSlug === latestVersion);
+            if (isCurrent) {
+              link.setAttribute("aria-current", "true");
+              matchedLabel = link.querySelector(".psd-version-item-label")?.textContent?.trim() || "";
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          }
+          if (pathMatch && matchedLabel && labelEl) {
+            labelEl.textContent = matchedLabel;
+          }
+        };
+        syncActiveLink();
+
+        const supportsAnchorArea =
+          typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("position-area: block-end");
+
+        const positionFallback = () => {
+          if (supportsAnchorArea) return;
+          const rect = trigger.getBoundingClientRect();
+          const menuWidth = menu.offsetWidth || 210;
+          const menuHeight = menu.offsetHeight || 260;
+          const pad = 8;
+          let left = rect.right - menuWidth;
+          left = Math.max(pad, Math.min(left, window.innerWidth - menuWidth - pad));
+          let top = rect.bottom + 6;
+          if (top + menuHeight > window.innerHeight - pad && rect.top - menuHeight - 6 >= pad) {
+            top = rect.top - menuHeight - 6;
+          }
+          menu.style.left = `${Math.round(left)}px`;
+          menu.style.top = `${Math.round(top)}px`;
+        };
+
+        let fetchedVersions = false;
+        const maybeLoadRemoteVersions = async () => {
+          if (fetchedVersions) return;
+          fetchedVersions = true;
+          try {
+            const resp = await fetch("/versions.json", { headers: { Accept: "application/json" } });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (!data || !Array.isArray(data.versions) || data.versions.length === 0) return;
+
+            const frag = document.createDocumentFragment();
+            const seen = new Set();
+            let prevGroup = "";
+            let added = 0;
+
+            for (const entry of data.versions) {
+              if (!entry || typeof entry.slug !== "string" || !entry.slug || seen.has(entry.slug)) {
+                continue;
+              }
+              seen.add(entry.slug);
+              const group = typeof entry.group === "string" ? entry.group : "";
+              if (prevGroup && group && prevGroup !== group) {
+                const divLi = document.createElement("li");
+                divLi.className = "psd-version-divider";
+                divLi.setAttribute("role", "presentation");
+                frag.appendChild(divLi);
+              }
+              if (group) prevGroup = group;
+
+              const li = document.createElement("li");
+              const a = document.createElement("a");
+              const hasPage =
+                Boolean(entry.same_layout) &&
+                !(pageRel === "examples.html" && ["0.7", "0.7.1", "0.7.2"].includes(entry.slug));
+              const suffix = hasPage ? pageRel : "";
+              a.href = `https://www.scenedetect.com/docs/${encodeURIComponent(entry.slug)}/${suffix}`;
+              a.setAttribute("data-version-slug", entry.slug);
+              const span = document.createElement("span");
+              span.className = "psd-version-item-label";
+              span.textContent = typeof entry.label === "string" && entry.label ? entry.label : `v${entry.slug}`;
+              a.appendChild(span);
+              a.insertAdjacentHTML(
+                "beforeend",
+                '<svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+              );
+              li.appendChild(a);
+              frag.appendChild(li);
+              added += 1;
+            }
+
+            if (added === 0) return;
+
+            const tailDivider = document.createElement("li");
+            tailDivider.className = "psd-version-divider";
+            tailDivider.setAttribute("role", "presentation");
+            frag.appendChild(tailDivider);
+
+            const allLi = document.createElement("li");
+            const allLink = document.createElement("a");
+            allLink.className = "psd-version-all";
+            allLink.href = "https://www.scenedetect.com/docs/";
+            allLink.innerHTML = '<span>All versions</span><span aria-hidden="true">&rarr;</span>';
+            allLi.appendChild(allLink);
+            frag.appendChild(allLi);
+
+            listEl.replaceChildren(frag);
+            if (typeof data.latest === "string" && data.latest) {
+              latestVersion = data.latest;
+            }
+            syncActiveLink();
+          } catch (err) {
+            // Local builds without /versions.json safely keep the static build-time version list.
+          }
+        };
+
+        menu.addEventListener("toggle", () => {
+          const isOpen = isMenuOpen();
+          trigger.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) {
+            positionFallback();
+            maybeLoadRemoteVersions();
+          }
+        });
+
+        window.addEventListener("resize", () => {
+          if (isMenuOpen()) {
+            positionFallback();
+          }
+        });
+
+        switcher.addEventListener("focusout", (e) => {
+          if (!(e.relatedTarget instanceof Node) || switcher.contains(e.relatedTarget)) return;
+          if (isMenuOpen()) {
+            menu.hidePopover?.();
+          }
+        });
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initVersionSwitcher, { once: true });
+      } else {
+        initVersionSwitcher();
+      }
+    })();
+  </script>
+  
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+<header class="psd-topbar">
+  <div class="psd-topbar-inner">
+    <nav class="psd-topbar-nav" aria-label="Documentation navigation">
+      <a class="psd-backlink" href="https://www.scenedetect.com/">&larr; scenedetect.com</a>
+      <span class="psd-sep" aria-hidden="true">/</span>
+      <a href="../cli.html" class="current">CLI Reference</a>
+      <a href="../api.html">Python API</a>
+      <a href="../examples.html">Examples</a>
+    </nav>
+    <div class="psd-topbar-meta">
+      <div class="psd-version-switcher" data-release="0.7.4" data-page-rel="cli/config_file.html" data-latest-version="0.7.4">
+        <button
+          type="button"
+          class="psd-version-btn"
+          popovertarget="psd-version-menu"
+          aria-controls="psd-version-menu"
+          aria-expanded="false"
+        >
+          <span class="psd-sr-only">Documentation version: </span>
+          <span class="psd-version-label">v0.7.4</span>
+          <svg class="psd-version-chevron" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="psd-version-menu" class="psd-version-menu" popover="auto">
+          <nav aria-label="Documentation versions">
+            <ul class="psd-version-list">
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/latest/cli/config_file.html"
+                  data-version-slug="latest" aria-current="true"
+                >
+                  <span class="psd-version-item-label">v0.7.4 (latest)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/head/cli/config_file.html"
+                  data-version-slug="head"
+                >
+                  <span class="psd-version-item-label">dev (head)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.3/cli/config_file.html"
+                  data-version-slug="0.7.3"
+                >
+                  <span class="psd-version-item-label">v0.7.3</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.2/cli/config_file.html"
+                  data-version-slug="0.7.2"
+                >
+                  <span class="psd-version-item-label">v0.7.2</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.1/cli/config_file.html"
+                  data-version-slug="0.7.1"
+                >
+                  <span class="psd-version-item-label">v0.7.1</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7/cli/config_file.html"
+                  data-version-slug="0.7"
+                >
+                  <span class="psd-version-item-label">v0.7</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.6.7/"
+                  data-version-slug="0.6.7"
+                >
+                  <span class="psd-version-item-label">v0.6.7 (legacy)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a class="psd-version-all" href="https://www.scenedetect.com/docs/">
+                  <span>All versions</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <button type="button" class="psd-theme-toggle">
+        <svg class="psd-icon-sun" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="psd-icon-moon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span class="psd-sr-only psd-label-dark">Switch to dark theme</span>
+        <span class="psd-sr-only psd-label-light">Switch to light theme</span>
+      </button>
+      <a class="psd-gh-link" href="https://github.com/Breakthrough/PySceneDetect">
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="configuration-file">
+<span id="scenedetect-cli-config-file"></span><h1>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this heading">¶</a></h1>
+<p>Specify a config file with <code class="docutils literal notranslate"><span class="pre">-c</span></code> / <code class="docutils literal notranslate"><span class="pre">--config</span></code>. If you do not pass <code class="docutils literal notranslate"><span class="pre">-c</span></code>, PySceneDetect looks for <code class="docutils literal notranslate"><span class="pre">scenedetect.cfg</span></code> in one of these locations:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>Windows:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">C:/Users/%USERNAME%/AppData/Local/PySceneDetect/scenedetect.cfg</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Linux:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">~/.config/PySceneDetect/scenedetect.cfg</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">$XDG_CONFIG_HOME/PySceneDetect/scenedetect.cfg</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>macOS:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">~/Library/Application</span> <span class="pre">Support/PySceneDetect/scenedetect.cfg</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Run <code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">--help</span></code> to see the exact path on your system. Command-line options override values in the config file. Most CLI options can be set in a config file, and some options are config-file only. The <a class="reference internal" href="#config-file-sections"><span class="std std-ref">Sections</span></a> reference below lists every key, its default value, and its matching CLI option. Lines starting with <code class="docutils literal notranslate"><span class="pre">#</span></code> are comments and are ignored.</p>
+<p>The syntax of a config file is:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[command]</span>
+<span class="na">option_a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">value</span>
+<span class="c1"># comment</span>
+<span class="na">option_b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">1</span>
+</pre></div>
+</div>
+<section id="sample-file">
+<h2>Sample File<a class="headerlink" href="#sample-file" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[global]</span>
+<span class="na">default-detector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">detect-content</span>
+<span class="na">min-scene-len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">0.8s</span>
+
+<span class="k">[detect-content]</span>
+<span class="na">threshold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">26</span>
+
+<span class="k">[split-video]</span>
+<span class="c1"># Use higher quality encoding</span>
+<span class="na">preset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">slow</span>
+<span class="na">rate-factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">17</span>
+<span class="na">filename</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">$VIDEO_NAME-Clip-$SCENE_NUMBER</span>
+
+<span class="k">[save-images]</span>
+<span class="na">format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">jpeg</span>
+<span class="na">quality</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">80</span>
+<span class="na">num-images</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3</span>
+</pre></div>
+</div>
+</section>
+<section id="sections">
+<span id="config-file-sections"></span><h2>Sections<a class="headerlink" href="#sections" title="Permalink to this heading">¶</a></h2>
+<p>Every section of the config file, its keys and defaults, and the matching part of the <code class="docutils literal notranslate"><span class="pre">scenedetect.cfg</span></code> template. You can <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/blob/latest/scenedetect.cfg">download the complete template from GitHub</a> and use it directly (every key is commented out). Values shown in the template are defaults, or examples where the default is unset.</p>
+<section id="global">
+<span id="config-global"></span><h3>[global]<a class="headerlink" href="#global" title="Permalink to this heading">¶</a></h3>
+<p>Options of the <a class="reference internal" href="../cli.html#command-scenedetect"><span class="std std-ref">scenedetect</span></a> command; detectors and commands inherit <code class="docutils literal notranslate"><span class="pre">min-scene-len</span></code> and <code class="docutils literal notranslate"><span class="pre">output</span></code> from here.</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">default-detector</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code></p></td>
+<td><p>Used if no <code class="docutils literal notranslate"><span class="pre">detect-*</span></code> command is given</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verbosity</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">info</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-v"><code class="xref std std-option docutils literal notranslate"><span class="pre">-v/--verbosity</span></code></a>, <a class="reference internal" href="../cli.html#cmdoption-scenedetect-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quiet</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">crop</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-crop"><code class="xref std std-option docutils literal notranslate"><span class="pre">--crop</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">backend</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">opencv</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-b"><code class="xref std std-option docutils literal notranslate"><span class="pre">-b/--backend</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min-scene-len</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.6s</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">merge-last-scene</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-merge-last-scene"><code class="xref std std-option docutils literal notranslate"><span class="pre">--merge-last-scene</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">drop-short-scenes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-drop-short-scenes"><code class="xref std std-option docutils literal notranslate"><span class="pre">--drop-short-scenes</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">downscale</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code> (auto)</p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-d"><code class="xref std std-option docutils literal notranslate"><span class="pre">-d/--downscale</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">downscale-method</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">linear</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">frame-skip</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-fs"><code class="xref std std-option docutils literal notranslate"><span class="pre">-fs/--frame-skip</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[global]</span>
+<span class="c1"># Default detector to use.</span>
+<span class="c1"># Must be one of: detect-adaptive, detect-content, detect-hash, detect-hist,</span>
+<span class="c1"># detect-threshold</span>
+<span class="c1">#default-detector = detect-adaptive</span>
+
+<span class="c1"># Output directory for written files. Defaults to working directory.</span>
+<span class="c1">#output = /usr/tmp/scenedetect/</span>
+
+<span class="c1"># Verbosity of console output (debug, info, warning, error, or none).</span>
+<span class="c1"># Set to none for the same behavior as specifying -q/--quiet.</span>
+<span class="c1">#verbosity = info</span>
+
+<span class="c1"># Crop input video to area. Specified as two points in the form X0 Y0 X1 Y1 or</span>
+<span class="c1"># as (X0 Y0), (X1 Y1). Coordinate (0, 0) is the top-left corner.</span>
+<span class="c1">#crop = 100 100 200 250</span>
+
+<span class="c1"># Video backend interface, must be one of: opencv, pyav, moviepy.</span>
+<span class="c1">#backend = opencv</span>
+
+<span class="c1"># Minimum length of a given scene.</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+
+<span class="c1"># Merge last scene if it is shorter than min-scene-len (yes/no). This can occur</span>
+<span class="c1"># when a cut is detected just before the video ends.</span>
+<span class="c1">#merge-last-scene = no</span>
+
+<span class="c1"># Drop scenes shorter than min-scene-len instead of merging (yes/no).</span>
+<span class="c1">#drop-short-scenes = no</span>
+
+<span class="c1"># Downscale frame before processing. Set to 1 for no downscaling, or 0 to</span>
+<span class="c1"># calculate the downscale factor automatically from the video resolution.</span>
+<span class="c1">#downscale = 0</span>
+
+<span class="c1"># Method to use for downscaling (nearest, linear, cubic, area, lanczos4).</span>
+<span class="c1">#downscale-method = linear</span>
+
+<span class="c1"># Amount of frames to skip between performing scene detection. Not recommended.</span>
+<span class="c1">#frame-skip = 0</span>
+</pre></div>
+</div>
+</section>
+<section id="detect-adaptive">
+<span id="config-detect-adaptive"></span><h3>[detect-adaptive]<a class="headerlink" href="#detect-adaptive" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-detect-adaptive"><span class="std std-ref">detect-adaptive</span></a> (Python API: <a class="reference internal" href="../api/detectors.html#scenedetect.detectors.adaptive_detector.AdaptiveDetector" title="scenedetect.detectors.adaptive_detector.AdaptiveDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdaptiveDetector</span></code></a>, <a class="reference internal" href="../api/detectors.html#options-detect-adaptive"><span class="std std-ref">option table</span></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-adaptive-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--threshold</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min-content-val</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">15.0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-adaptive-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--min-content-val</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">frame-window</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-adaptive-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--frame-window</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min-scene-len</span></code></p></td>
+<td><p><a class="reference internal" href="#config-global"><span class="std std-ref">[global] min-scene-len</span></a></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-adaptive-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">weights</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.0</span> <span class="pre">1.0</span> <span class="pre">1.0</span> <span class="pre">0.0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-adaptive-w"><code class="xref std std-option docutils literal notranslate"><span class="pre">-w/--weights</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">luma-only</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-adaptive-l"><code class="xref std std-option docutils literal notranslate"><span class="pre">-l/--luma-only</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kernel-size</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-1</span></code> (auto)</p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-adaptive-k"><code class="xref std std-option docutils literal notranslate"><span class="pre">-k/--kernel-size</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[detect-adaptive]</span>
+<span class="c1"># Frame score threshold, refers to the `adaptive_ratio` metric in stats file.</span>
+<span class="c1">#threshold = 3</span>
+
+<span class="c1"># Minimum threshold that `content_val` metric from detect-content must exceed.</span>
+<span class="c1">#min-content-val = 15</span>
+
+<span class="c1"># Window size (number of frames) before and after each frame to average together.</span>
+<span class="c1">#frame-window = 2</span>
+
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+
+<span class="c1"># The following parameters are the those used to calculate `content_val`.</span>
+<span class="c1"># See [detect-content] for detailed descriptions of these parameters.</span>
+<span class="c1">#weights = 1.0 1.0 1.0 0.0</span>
+<span class="c1">#luma-only = no</span>
+<span class="c1">#kernel-size = -1</span>
+</pre></div>
+</div>
+</section>
+<section id="detect-content">
+<span id="config-detect-content"></span><h3>[detect-content]<a class="headerlink" href="#detect-content" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-detect-content"><span class="std std-ref">detect-content</span></a> (Python API: <a class="reference internal" href="../api/detectors.html#scenedetect.detectors.content_detector.ContentDetector" title="scenedetect.detectors.content_detector.ContentDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContentDetector</span></code></a>, <a class="reference internal" href="../api/detectors.html#options-detect-content"><span class="std std-ref">option table</span></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">27.0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-content-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--threshold</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min-scene-len</span></code></p></td>
+<td><p><a class="reference internal" href="#config-global"><span class="std std-ref">[global] min-scene-len</span></a></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-content-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filter-mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">merge</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-content-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filter-mode</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">weights</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.0</span> <span class="pre">1.0</span> <span class="pre">1.0</span> <span class="pre">0.0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-content-w"><code class="xref std std-option docutils literal notranslate"><span class="pre">-w/--weights</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">luma-only</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-content-l"><code class="xref std std-option docutils literal notranslate"><span class="pre">-l/--luma-only</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kernel-size</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-1</span></code> (auto)</p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-content-k"><code class="xref std std-option docutils literal notranslate"><span class="pre">-k/--kernel-size</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[detect-content]</span>
+<span class="c1"># Sensitivity threshold from 0 to 255. Lower values are more sensitive.</span>
+<span class="c1">#threshold = 27</span>
+
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+
+<span class="c1"># Mode to use when filtering scenes to comply with min-scene-len:</span>
+<span class="c1">#   merge: Consecutive scenes shorter than min-scene-len are combined.</span>
+<span class="c1">#   suppress: No new scenes can be generated until min-scene-len passes.</span>
+<span class="c1">#filter-mode = merge</span>
+
+<span class="c1"># Weight to place on each component when calculating frame score (the value</span>
+<span class="c1"># `threshold` is compared against). The components are in the order</span>
+<span class="c1"># (delta_hue, delta_sat, delta_lum, delta_edges). Description of components:</span>
+<span class="c1">#  - delta_hue:    Difference between hue values of adjacent frames</span>
+<span class="c1">#  - delta_sat:    Difference between saturation values of adjacent frames</span>
+<span class="c1">#  - delta_lum:    Difference between luma/brightness values of adjacent frames</span>
+<span class="c1">#  - delta_edges:  Difference between calculated edges of adjacent frames</span>
+<span class="c1"># The score of each frame ('content_val' in the statsfile) is calculated as</span>
+<span class="c1"># the weighted sum of all components.</span>
+<span class="c1">#weights = 1.0 1.0 1.0 0.0</span>
+
+<span class="c1"># Discard colour information and only use luminance (yes/no).</span>
+<span class="c1"># If yes, overrides weights with (0.0, 0.0, 1.0, 0.0).</span>
+<span class="c1">#luma-only = no</span>
+
+<span class="c1"># Size of kernel for expanding detected edges. Must be odd integer greater</span>
+<span class="c1"># than or equal to 3. If None, automatically set using video resolution.</span>
+<span class="c1">#kernel-size = -1</span>
+</pre></div>
+</div>
+</section>
+<section id="detect-hash">
+<span id="config-detect-hash"></span><h3>[detect-hash]<a class="headerlink" href="#detect-hash" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-detect-hash"><span class="std std-ref">detect-hash</span></a> (Python API: <a class="reference internal" href="../api/detectors.html#scenedetect.detectors.hash_detector.HashDetector" title="scenedetect.detectors.hash_detector.HashDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashDetector</span></code></a>, <a class="reference internal" href="../api/detectors.html#options-detect-hash"><span class="std std-ref">option table</span></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.35</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-hash-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--threshold</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lowpass</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-hash-l"><code class="xref std std-option docutils literal notranslate"><span class="pre">-l/--lowpass</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">size</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">8</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-hash-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">-s/--size</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min-scene-len</span></code></p></td>
+<td><p><a class="reference internal" href="#config-global"><span class="std std-ref">[global] min-scene-len</span></a></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-hash-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[detect-hash]</span>
+<span class="c1"># Threshold between 0.0 and 1.0 to set the relative difference between</span>
+<span class="c1"># hashes required to trigger a shot change. Lower values are more sensitive.</span>
+<span class="c1">#threshold = 0.35</span>
+
+<span class="c1"># The ratio between 1 and 256 of how much low frequency information to keep.</span>
+<span class="c1"># Represents highest frequency which will pass the filter. 1 means keep all,</span>
+<span class="c1"># 2 means keep lower 1/2 of frequency data, 4 means keep lower 1/4, etc...</span>
+<span class="c1">#lowpass = 2</span>
+
+<span class="c1"># Size between 1 and 256 representing size of square of low frequency data to</span>
+<span class="c1"># use for the direct cosine transform (DCT).</span>
+<span class="c1">#size = 8</span>
+
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+</pre></div>
+</div>
+</section>
+<section id="detect-hist">
+<span id="config-detect-hist"></span><h3>[detect-hist]<a class="headerlink" href="#detect-hist" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-detect-hist"><span class="std std-ref">detect-hist</span></a> (Python API: <a class="reference internal" href="../api/detectors.html#scenedetect.detectors.histogram_detector.HistogramDetector" title="scenedetect.detectors.histogram_detector.HistogramDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">HistogramDetector</span></code></a>, <a class="reference internal" href="../api/detectors.html#options-detect-hist"><span class="std std-ref">option table</span></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.2</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-hist-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--threshold</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bins</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">128</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-hist-b"><code class="xref std std-option docutils literal notranslate"><span class="pre">-b/--bins</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">min-scene-len</span></code></p></td>
+<td><p><a class="reference internal" href="#config-global"><span class="std std-ref">[global] min-scene-len</span></a></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-hist-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[detect-hist]</span>
+<span class="c1"># Threshold between 0.0 to 1.0 to set the relative difference between Y</span>
+<span class="c1"># channel histograms (YUV) required to trigger a shot change. Lower values</span>
+<span class="c1"># are more sensitive.</span>
+<span class="c1">#threshold = 0.20</span>
+
+<span class="c1"># Number of bins between 1 and 256 to use for the histogram.</span>
+<span class="c1">#bins = 128</span>
+
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+</pre></div>
+</div>
+</section>
+<section id="detect-threshold">
+<span id="config-detect-threshold"></span><h3>[detect-threshold]<a class="headerlink" href="#detect-threshold" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-detect-threshold"><span class="std std-ref">detect-threshold</span></a> (Python API: <a class="reference internal" href="../api/detectors.html#scenedetect.detectors.threshold_detector.ThresholdDetector" title="scenedetect.detectors.threshold_detector.ThresholdDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdDetector</span></code></a>, <a class="reference internal" href="../api/detectors.html#options-detect-threshold"><span class="std std-ref">option table</span></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">12.0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-threshold-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--threshold</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fade-bias</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-threshold-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--fade-bias</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">add-last-scene</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yes</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-threshold-l"><code class="xref std std-option docutils literal notranslate"><span class="pre">-l/--add-last-scene</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min-out-length</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.1s</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-threshold-min-out-length"><code class="xref std std-option docutils literal notranslate"><span class="pre">--min-out-length</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">min-scene-len</span></code></p></td>
+<td><p><a class="reference internal" href="#config-global"><span class="std std-ref">[global] min-scene-len</span></a></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-detect-threshold-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--min-scene-len</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[detect-threshold]</span>
+<span class="c1"># Average pixel intensity from 0-255 at which a fade event is triggered.</span>
+<span class="c1">#threshold = 12</span>
+
+<span class="c1"># Percent from -100.0 to 100.0 of timecode skew for where cuts should be placed.</span>
+<span class="c1"># -100 indicates start frame, +100 indicates end frame, and 0 is the center.</span>
+<span class="c1">#fade-bias = 0</span>
+
+<span class="c1"># Generate a scene from the end of the last fade out to the end of the video.</span>
+<span class="c1">#add-last-scene = yes</span>
+
+<span class="c1"># Minimum time faded out before a cut is allowed, including a final fade-out.</span>
+<span class="c1"># Accepts frames, seconds (e.g. 0.4s), or timecode (e.g. 00:00:00.400).</span>
+<span class="c1"># The Python API default remains 0.</span>
+<span class="c1">#min-out-length = 0.1s</span>
+
+<span class="c1"># Minimum length of a given scene (overrides [global] option).</span>
+<span class="c1">#min-scene-len = 0.6s</span>
+</pre></div>
+</div>
+</section>
+<section id="list-scenes">
+<span id="config-list-scenes"></span><h3>[list-scenes]<a class="headerlink" href="#list-scenes" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-list-scenes"><span class="std std-ref">list-scenes</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.write_scene_list" title="scenedetect.output.write_scene_list"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list()</span></code></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">no-output-file</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-list-scenes-n"><code class="xref std std-option docutils literal notranslate"><span class="pre">-n/--no-output-file</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-list-scenes-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Scenes.csv</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-list-scenes-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">display-scenes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yes</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">display-cuts</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yes</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">col-separator</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">,</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">row-separator</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">\n</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cut-format</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">timecode</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">skip-cuts</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-list-scenes-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">-s/--skip-cuts</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">quiet</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-list-scenes-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quiet</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[list-scenes]</span>
+<span class="c1"># By default, list-scenes will create a CSV file. Enable this option</span>
+<span class="c1"># to suppress creating the CSV file.</span>
+<span class="c1">#no-output-file = no</span>
+
+<span class="c1"># Folder to output scene list. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/images</span>
+
+<span class="c1"># Filename format to use when saving scene list. $VIDEO_NAME can be used to</span>
+<span class="c1"># represent the name of the video being processed.</span>
+<span class="c1">#filename = $VIDEO_NAME-Scenes.csv</span>
+
+<span class="c1"># Display a table with the start/end boundaries for each scene (yes/no).</span>
+<span class="c1">#display-scenes = yes</span>
+
+<span class="c1"># Display list of cut points generated from scene boundaries (yes/no).</span>
+<span class="c1">#display-cuts = yes</span>
+
+<span class="c1"># Separator to use between columns in output file. Must be single (escaped)</span>
+<span class="c1"># ASCII character.</span>
+<span class="c1">#col-separator = ,</span>
+
+<span class="c1"># Separator to use between rows in output file. Must be (escaped) ASCII</span>
+<span class="c1"># characters.</span>
+<span class="c1">#row-separator = \n</span>
+
+<span class="c1"># Format to use for list of cut points (frames, seconds, timecode).</span>
+<span class="c1">#cut-format = timecode</span>
+
+<span class="c1"># Skip writing cut points as the first row in the CSV file (yes/no).</span>
+<span class="c1"># Set for RFC 4180 compliance.</span>
+<span class="c1">#skip-cuts = no</span>
+
+<span class="c1"># Suppress all display output of list-scenes command.</span>
+<span class="c1"># Overrides `display-scenes` and `display-cuts`.</span>
+<span class="c1">#quiet = no</span>
+</pre></div>
+</div>
+</section>
+<section id="load-scenes">
+<span id="config-load-scenes"></span><h3>[load-scenes]<a class="headerlink" href="#load-scenes" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-load-scenes"><span class="std std-ref">load-scenes</span></a>.</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start-col-name</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Start</span> <span class="pre">Frame</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-load-scenes-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--start-col-name</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[load-scenes]</span>
+<span class="c1"># Name of column used to mark scene cut points.</span>
+<span class="c1">#start-col-name = Start Frame</span>
+</pre></div>
+</div>
+</section>
+<section id="save-chapters">
+<span id="config-save-chapters"></span><h3>[save-chapters]<a class="headerlink" href="#save-chapters" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-save-chapters"><span class="std std-ref">save-chapters</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.write_scene_list_ffmetadata" title="scenedetect.output.write_scene_list_ffmetadata"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_ffmetadata()</span></code></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Chapters.txt</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-chapters-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-chapters-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">title</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Scene</span> <span class="pre">$SCENE_NUMBER</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-chapters-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--title</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[save-chapters]</span>
+<span class="c1"># Filename format of chapters file. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#filename = $VIDEO_NAME-Chapters.txt</span>
+
+<span class="c1"># Folder to output chapters file to. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/chapters</span>
+
+<span class="c1"># Title format to use for each chapter. Can use $VIDEO_NAME and $SCENE_NUMBER macros.</span>
+<span class="c1">#title = Scene $SCENE_NUMBER</span>
+</pre></div>
+</div>
+</section>
+<section id="save-edl">
+<span id="config-save-edl"></span><h3>[save-edl]<a class="headerlink" href="#save-edl" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-save-edl"><span class="std std-ref">save-edl</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.write_scene_list_edl" title="scenedetect.output.write_scene_list_edl"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_edl()</span></code></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME.edl</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-edl-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-edl-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">reel</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AX</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-edl-r"><code class="xref std std-option docutils literal notranslate"><span class="pre">-r/--reel</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">title</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-edl-t"><code class="xref std std-option docutils literal notranslate"><span class="pre">-t/--title</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start-timecode</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-edl-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">-s/--start-timecode</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[save-edl]</span>
+<span class="c1"># Filename format of EDL file. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#filename = $VIDEO_NAME.edl</span>
+
+<span class="c1"># Folder to output EDL file to. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/images</span>
+
+<span class="c1"># Reel/tape name to use.</span>
+<span class="c1">#reel = AX</span>
+
+<span class="c1"># Title to use for the EDL information. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#title = $VIDEO_NAME</span>
+
+<span class="c1"># Start timecode added to every event so the EDL aligns with the source</span>
+<span class="c1"># media's on-screen timecode. Non-drop-frame SMPTE HH:MM:SS:FF or 8 digits</span>
+<span class="c1"># (HHMMSSFF).</span>
+<span class="c1">#start-timecode = 01:00:00:00</span>
+</pre></div>
+</div>
+</section>
+<section id="save-fcp">
+<span id="config-save-fcp"></span><h3>[save-fcp]<a class="headerlink" href="#save-fcp" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-save-fcp"><span class="std std-ref">save-fcp</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.write_scene_list_fcpx" title="scenedetect.output.write_scene_list_fcpx"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_fcpx()</span></code></a>, <a class="reference internal" href="../api/output.html#scenedetect.output.write_scene_list_fcp7" title="scenedetect.output.write_scene_list_fcp7"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_fcp7()</span></code></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME.xml</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-fcp-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">format</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fcpx</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-fcp-format"><code class="xref std std-option docutils literal notranslate"><span class="pre">--format</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-fcp-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[save-fcp]</span>
+<span class="c1"># Filename format of XML file. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#filename = $VIDEO_NAME.xml</span>
+
+<span class="c1"># Format of the XML file. Must be one of:</span>
+<span class="c1">#  - fcpx:  Final Cut Pro X (FCPXML, default)</span>
+<span class="c1">#  - fcp7:  Final Cut Pro 7 (xmeml)</span>
+<span class="c1">#format = fcpx</span>
+
+<span class="c1"># Folder to output XML file to. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/images</span>
+</pre></div>
+</div>
+</section>
+<section id="save-html">
+<span id="config-save-html"></span><h3>[save-html]<a class="headerlink" href="#save-html" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-save-html"><span class="std std-ref">save-html</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.write_scene_list_html" title="scenedetect.output.write_scene_list_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_html()</span></code></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Scenes.html</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-html-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">show</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-html-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">-s/--show</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">image-height</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-html-h"><code class="xref std std-option docutils literal notranslate"><span class="pre">-h/--image-height</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">image-width</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-html-w"><code class="xref std std-option docutils literal notranslate"><span class="pre">-w/--image-width</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">no-images</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-html-n"><code class="xref std std-option docutils literal notranslate"><span class="pre">-n/--no-images</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[save-html]</span>
+<span class="c1"># Filename format of created HTML file. Can use $VIDEO_NAME in the name.</span>
+<span class="c1">#filename = $VIDEO_NAME-Scenes.html</span>
+
+<span class="c1"># Automatically open resulting HTML when processing is complete.</span>
+<span class="c1">#show = no</span>
+
+<span class="c1"># Override &lt;img&gt; element width/height.</span>
+<span class="c1">#image-height = 0</span>
+<span class="c1">#image-width = 0</span>
+
+<span class="c1"># Do not generate &lt;img&gt; elements in resulting table (yes/no).</span>
+<span class="c1">#no-images = no</span>
+</pre></div>
+</div>
+</section>
+<section id="save-images">
+<span id="config-save-images"></span><h3>[save-images]<a class="headerlink" href="#save-images" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-save-images"><span class="std std-ref">save-images</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.save_images" title="scenedetect.output.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_images()</span></code></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">format</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">jpeg</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-j"><code class="xref std std-option docutils literal notranslate"><span class="pre">-j/--jpeg</span></code></a>, <a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-p"><code class="xref std std-option docutils literal notranslate"><span class="pre">-p/--png</span></code></a>, <a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-w"><code class="xref std std-option docutils literal notranslate"><span class="pre">-w/--webp</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">num-images</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-n"><code class="xref std std-option docutils literal notranslate"><span class="pre">-n/--num-images</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interval</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-i"><code class="xref std std-option docutils literal notranslate"><span class="pre">-i/--interval</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">min-images</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-min-images"><code class="xref std std-option docutils literal notranslate"><span class="pre">--min-images</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max-images</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-max-images"><code class="xref std std-option docutils literal notranslate"><span class="pre">--max-images</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">quality</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">95</span></code> (jpeg), <code class="docutils literal notranslate"><span class="pre">100</span></code> (webp)</p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quality</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">compression</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--compression</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">frame-margin</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--frame-margin</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scale</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-s"><code class="xref std std-option docutils literal notranslate"><span class="pre">-s/--scale</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">height</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-H"><code class="xref std std-option docutils literal notranslate"><span class="pre">-H/--height</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">width</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-images-W"><code class="xref std std-option docutils literal notranslate"><span class="pre">-W/--width</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scale-method</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">linear</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">threading</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yes</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[save-images]</span>
+<span class="c1"># Folder to output videos. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/images</span>
+
+<span class="c1"># Filename format of created images. Can use $VIDEO_NAME, $SCENE_NUMBER, $IMAGE_NUMBER,</span>
+<span class="c1"># $TIMECODE, $FRAME_NUMBER, and $TIMESTAMP_MS. Should not include extension.</span>
+<span class="c1">#filename = $VIDEO_NAME-Scene-$SCENE_NUMBER-$IMAGE_NUMBER</span>
+
+<span class="c1"># Image format (jpeg, png, webp).</span>
+<span class="c1">#format = jpeg</span>
+
+<span class="c1"># Number of images to generate for each scene. Cannot be used with interval.</span>
+<span class="c1">#num-images = 3</span>
+
+<span class="c1"># Generate one image per DURATION of each scene instead of num-images, so longer</span>
+<span class="c1"># scenes get more images: floor(length / DURATION) + 1 per scene. DURATION accepts</span>
+<span class="c1"># frames (24), seconds with `s` suffix (1.5s), or timecode (00:00:01.500).</span>
+<span class="c1"># Cannot be used with num-images.</span>
+<span class="c1">#interval = 2s</span>
+
+<span class="c1"># Minimum and maximum number of images per scene with interval (ignored without</span>
+<span class="c1"># interval). Set max-images to 0 for no limit.</span>
+<span class="c1">#min-images = 1</span>
+<span class="c1">#max-images = 0</span>
+
+<span class="c1"># Image quality (jpeg/webp). Default is 95 for jpeg, 100 for webp</span>
+<span class="c1">#quality = 95</span>
+
+<span class="c1"># Compression amount for png images (0 to 9). Only affects size, not quality.</span>
+<span class="c1">#compression = 3</span>
+
+<span class="c1"># Padding around each scene cut when selecting frames. Accepts a number of frames (1),</span>
+<span class="c1"># seconds with `s` suffix (0.1s), or timecode (00:00:00.100).</span>
+<span class="c1">#frame-margin = 1</span>
+
+<span class="c1"># Resize by scale factor (0.5 = half, 1.0 = same, 2.0 = double).</span>
+<span class="c1">#scale = 1.0</span>
+
+<span class="c1"># Resize to specified height, width, or both. Mutually exclusive with scale.</span>
+<span class="c1">#height = 0</span>
+<span class="c1">#width = 0</span>
+
+<span class="c1"># Method to use for scaling (nearest, linear, cubic, area, lanczos4).</span>
+<span class="c1">#scale-method = linear</span>
+
+<span class="c1"># Use separate threads for encoding and disk IO. Can improve performance.</span>
+<span class="c1">#threading = yes</span>
+</pre></div>
+</div>
+</section>
+<section id="save-keyframes">
+<span id="config-save-keyframes"></span><h3>[save-keyframes]<a class="headerlink" href="#save-keyframes" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-save-keyframes"><span class="std std-ref">save-keyframes</span></a>.</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-keyframes.txt</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-keyframes-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-keyframes-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[save-keyframes]</span>
+<span class="c1"># Filename format of keyframe file. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#filename = $VIDEO_NAME-keyframes.txt</span>
+
+<span class="c1"># Folder to output keyframe file to. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/keyframes</span>
+</pre></div>
+</div>
+</section>
+<section id="save-otio">
+<span id="config-save-otio"></span><h3>[save-otio]<a class="headerlink" href="#save-otio" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-save-otio"><span class="std std-ref">save-otio</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.write_scene_list_otio" title="scenedetect.output.write_scene_list_otio"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_scene_list_otio()</span></code></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME.otio</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-otio-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-otio-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME</span> <span class="pre">(PySceneDetect)</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-otio-n"><code class="xref std std-option docutils literal notranslate"><span class="pre">-n/--name</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">audio</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">yes</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-otio-audio"><code class="xref std std-option docutils literal notranslate"><span class="pre">--audio</span></code></a>, <a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-otio-no-audio"><code class="xref std std-option docutils literal notranslate"><span class="pre">--no-audio</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[save-otio]</span>
+<span class="c1"># Filename format of OTIO file. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#filename = $VIDEO_NAME.otio</span>
+
+<span class="c1"># Folder to output OTIO file to. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/images</span>
+
+<span class="c1"># Name to use for the OTIO timeline. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#name = $VIDEO_NAME (PySceneDetect)</span>
+
+<span class="c1"># Include audio track (yes/no).</span>
+<span class="c1">#audio = yes</span>
+</pre></div>
+</div>
+</section>
+<section id="save-qp">
+<span id="config-save-qp"></span><h3>[save-qp]<a class="headerlink" href="#save-qp" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-save-qp"><span class="std std-ref">save-qp</span></a>.</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME.qp</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-qp-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-qp-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">disable-shift</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-save-qp-d"><code class="xref std std-option docutils literal notranslate"><span class="pre">-d/--disable-shift</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[save-qp]</span>
+<span class="c1"># Filename format of QP file. Can use $VIDEO_NAME macro.</span>
+<span class="c1">#filename = $VIDEO_NAME.qp</span>
+
+<span class="c1"># Folder to output QP file to. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/images</span>
+
+<span class="c1"># Disable shifting frame numbers by start time (yes/no).</span>
+<span class="c1">#disable-shift = no</span>
+</pre></div>
+</div>
+</section>
+<section id="split-video">
+<span id="config-split-video"></span><h3>[split-video]<a class="headerlink" href="#split-video" title="Permalink to this heading">¶</a></h3>
+<p>Options of <a class="reference internal" href="../cli.html#command-split-video"><span class="std std-ref">split-video</span></a> (Python API: <a class="reference internal" href="../api/output.html#scenedetect.output.split_video_ffmpeg" title="scenedetect.output.split_video_ffmpeg"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_ffmpeg()</span></code></a>, <a class="reference internal" href="../api/output.html#scenedetect.output.split_video_mkvmerge" title="scenedetect.output.split_video_mkvmerge"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_video_mkvmerge()</span></code></a>).</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p><em>none</em></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-o"><code class="xref std std-option docutils literal notranslate"><span class="pre">-o/--output</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">filename</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$VIDEO_NAME-Scene-$SCENE_NUMBER</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-f"><code class="xref std std-option docutils literal notranslate"><span class="pre">-f/--filename</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">quiet</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quiet</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">high-quality</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-hq"><code class="xref std std-option docutils literal notranslate"><span class="pre">-hq/--high-quality</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">copy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-c"><code class="xref std std-option docutils literal notranslate"><span class="pre">-c/--copy</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mkvmerge</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-m"><code class="xref std std-option docutils literal notranslate"><span class="pre">-m/--mkvmerge</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rate-factor</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">22</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-crf"><code class="xref std std-option docutils literal notranslate"><span class="pre">-crf/--rate-factor</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">preset</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">veryfast</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-p"><code class="xref std std-option docutils literal notranslate"><span class="pre">-p/--preset</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">args</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-map</span> <span class="pre">0:v:0</span> <span class="pre">-map</span> <span class="pre">0:a?</span> <span class="pre">-map</span> <span class="pre">0:s?</span> <span class="pre">-c:v</span> <span class="pre">libx264</span> <span class="pre">-preset</span> <span class="pre">veryfast</span> <span class="pre">-crf</span> <span class="pre">22</span> <span class="pre">-c:a</span> <span class="pre">aac</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-a"><code class="xref std std-option docutils literal notranslate"><span class="pre">-a/--args</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">expand</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><a class="reference internal" href="../cli.html#cmdoption-scenedetect-split-video-expand"><code class="xref std std-option docutils literal notranslate"><span class="pre">--expand</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[split-video]</span>
+<span class="c1"># Folder to output videos. Overrides [global] output option.</span>
+<span class="c1">#output = /usr/tmp/encoded</span>
+
+<span class="c1"># Filename template to use as output.</span>
+<span class="c1">#filename = $VIDEO_NAME-Scene-$SCENE_NUMBER</span>
+
+<span class="c1"># Suppress output from split tool.</span>
+<span class="c1">#quiet = no</span>
+
+<span class="c1"># Use higher bitrate for better output quality (y/n), equivalent to setting</span>
+<span class="c1"># rate-factor = 17 and preset = slow.</span>
+<span class="c1">#high-quality = no</span>
+
+<span class="c1"># Use codec copying instead of encoding. Significantly faster, but can result</span>
+<span class="c1"># in inaccurate splits due to keyframe positioning.</span>
+<span class="c1">#copy = no</span>
+
+<span class="c1"># Use mkvmerge for copying instead of encoding. Has the same drawbacks as copy = yes.</span>
+<span class="c1">#mkvmerge = no</span>
+
+<span class="c1"># x264 rate-factor, higher indicates lower quality / smaller filesize.</span>
+<span class="c1"># 0 = lossless, 17 = visually identical, 22 = default.</span>
+<span class="c1">#rate-factor = 22</span>
+
+<span class="c1"># One of the ffmpeg x264 presets (e.g. veryfast, fast, medium, slow, slower).</span>
+<span class="c1">#preset = veryfast</span>
+
+<span class="c1"># Arguments to specify to ffmpeg for encoding. Quotes are not required.</span>
+<span class="c1">#args = -map 0:v:0 -map 0:a? -map 0:s? -c:v libx264 -preset veryfast -crf 22 -c:a aac</span>
+
+<span class="c1"># Extend the first/last output clips to cover the full input video, even if</span>
+<span class="c1"># `time -s/-e` limited the analysis window. Useful for keeping content outside</span>
+<span class="c1"># the analyzed region attached to the adjacent split.</span>
+<span class="c1">#expand = no</span>
+</pre></div>
+</div>
+</section>
+<section id="backend-opencv">
+<span id="config-backend-opencv"></span><h3>[backend-opencv]<a class="headerlink" href="#backend-opencv" title="Permalink to this heading">¶</a></h3>
+<p>Settings of the <a class="reference internal" href="backends.html#cli-backend-opencv"><span class="std std-ref">-b opencv</span></a> backend (Python API: <a class="reference internal" href="../api/backends.html#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a>). These keys have no command-line option.</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max-decode-attempts</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[backend-opencv]</span>
+<span class="c1"># Number of times to keep reading frames after one fails to decode.</span>
+<span class="c1"># If set to 0, processing will stop on the first decode failure.</span>
+<span class="c1">#max-decode-attempts = 5</span>
+</pre></div>
+</div>
+</section>
+<section id="backend-pyav">
+<span id="config-backend-pyav"></span><h3>[backend-pyav]<a class="headerlink" href="#backend-pyav" title="Permalink to this heading">¶</a></h3>
+<p>Settings of the <a class="reference internal" href="backends.html#cli-backend-pyav"><span class="std std-ref">-b pyav</span></a> backend (Python API: <a class="reference internal" href="../api/backends.html#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a>). These keys have no command-line option.</p>
+<table class="config-keys docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 32.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>CLI option</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">threading-mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">auto</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">suppress-output</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">no</span></code></p></td>
+<td><p><em>config file only</em></p></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[backend-pyav]</span>
+<span class="c1"># Threading mode to use (none, slice, frame, auto). Slice mode is the</span>
+<span class="c1"># PyAV default, and auto/frame are the fastest.</span>
+<span class="c1">#threading-mode = auto</span>
+
+<span class="c1"># Suppress ffmpeg log output. Default is `no`.</span>
+<span class="c1">#</span>
+<span class="c1"># WARNING: When threading-mode is set to auto/frame, setting</span>
+<span class="c1"># `suppress-output = yes` can cause the the program to not exit properly</span>
+<span class="c1"># on Linux/OSX (press Ctrl+C to quit if this occurs).</span>
+<span class="c1">#suppress-output = no</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="../cli.html" title="Previous document"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Command</a>
+        </li>
+        <li>
+          <a href="backends.html" title="Next document">Video Backends (CLI)</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo">
+  <a href="../index.html">
+    <img class="logo psd-logo-light" src="../_static/pyscenedetect_logo_small.png" alt="PySceneDetect" width="300" height="141" />
+    <img class="logo psd-logo-dark" src="../_static/pyscenedetect_logo_small_darkmode.png" alt="PySceneDetect" width="462" height="217" />
+  </a>
+</p>
+<p class="psd-sidebar-subtitle">0.7.4</p>
+<search class="psd-searchbox">
+  <form class="search" action="../search.html" method="get">
+    <input type="search" name="q" aria-label="Search documentation" placeholder="Search docs..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+  </form>
+</search>
+<nav class="psd-sidebar-toc" aria-label="Section navigation">
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../cli.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Command</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../cli.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cli.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cli.html#detectors">Detectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cli.html#commands">Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration File</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sample-file">Sample File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sections">Sections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#global">[global]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#detect-adaptive">[detect-adaptive]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#detect-content">[detect-content]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#detect-hash">[detect-hash]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#detect-hist">[detect-hist]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#detect-threshold">[detect-threshold]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#list-scenes">[list-scenes]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load-scenes">[load-scenes]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-chapters">[save-chapters]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-edl">[save-edl]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-fcp">[save-fcp]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-html">[save-html]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-images">[save-images]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-keyframes">[save-keyframes]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-otio">[save-otio]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#save-qp">[save-qp]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#split-video">[split-video]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#backend-opencv">[backend-opencv]</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#backend-pyav">[backend-pyav]</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends (CLI)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#opencv">OpenCV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#pyav">PyAV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#moviepy">MoviePy</a></li>
+</ul>
+</li>
+</ul>
+
+</nav>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      <div class="psd-footer-inner">
+        <span class="psd-footer-meta">&#169;2014, Brandon Castellano. | 
+          Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+          &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a> | 
+          <a href="../_sources/cli/config_file.rst.txt" rel="nofollow">Page source</a>
+        </span>
+        <ul class="psd-footer-links" role="list">
+          <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+          <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+          <li><a href="https://www.scenedetect.com/changelog/">Changelog</a></li>
+          <li><a href="https://www.scenedetect.com/copyright/">License</a></li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

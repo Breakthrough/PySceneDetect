@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Common &#8212; PySceneDetect 0.7.4 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Scene Manager" href="scene_manager.html" />
+    <link rel="prev" title="Video Backends" href="backends.html" />
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <!-- Google tag (gtag.js) -->
+  <script>
+    if (
+      location.protocol.startsWith("http") &&
+      location.hostname !== "localhost" &&
+      location.hostname !== "127.0.0.1" &&
+      location.hostname !== "[::1]" &&
+      !navigator.webdriver
+    ) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", "G-EWBNLVRWW0");
+      const ga = document.createElement("script");
+      ga.async = true;
+      ga.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(ga);
+    }
+  </script>
+  <script type="module">
+    (() => {
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (meta) {
+        document.addEventListener("click", (e) => {
+          if (!(e.target instanceof Element) || !e.target.closest(".psd-theme-toggle")) return;
+          let stored = null;
+          try {
+            const v = localStorage.getItem("color-scheme");
+            stored = v === "light" || v === "dark" ? v : null;
+          } catch (err) {}
+          const sys = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          const cur = meta.content === "light" || meta.content === "dark" ? meta.content : (stored ?? sys);
+          const next = cur === "dark" ? "light" : "dark";
+          if (next === sys) {
+            try { localStorage.removeItem("color-scheme"); } catch (err) {}
+            meta.content = "light dark";
+          } else {
+            try { localStorage.setItem("color-scheme", next); } catch (err) {}
+            meta.content = next;
+          }
+        });
+        window.addEventListener("storage", (e) => {
+          if (e.key === "color-scheme" || e.key === null) {
+            const v = e.newValue;
+            meta.content = v === "light" || v === "dark" ? v : "light dark";
+          }
+        });
+      }
+
+      const initVersionSwitcher = () => {
+        const switcher = document.querySelector(".psd-version-switcher");
+        const trigger = switcher?.querySelector(".psd-version-btn");
+        const labelEl = switcher?.querySelector(".psd-version-label");
+        const menu = document.getElementById("psd-version-menu");
+        const listEl = menu?.querySelector(".psd-version-list");
+        if (!switcher || !trigger || !menu || !listEl) return;
+
+        const release = switcher.getAttribute("data-release") || "";
+        const pageRel = switcher.getAttribute("data-page-rel") || "";
+        let latestVersion = switcher.getAttribute("data-latest-version") || "";
+        const pathMatch = window.location.pathname.match(/\/docs\/([^/]+)(?:\/|$)/);
+        const activeSlug = pathMatch ? pathMatch[1] : (release.includes("dev") ? "head" : release);
+
+        const isMenuOpen = () => {
+          try {
+            return menu.matches(":popover-open, .\\:popover-open");
+          } catch {
+            return menu.classList.contains(":popover-open");
+          }
+        };
+
+        const syncActiveLink = () => {
+          let matchedLabel = "";
+          const hasExactMatch = Boolean(
+            listEl.querySelector(`a[data-version-slug="${CSS.escape(activeSlug)}"]`)
+          );
+          for (const link of listEl.querySelectorAll("a[data-version-slug]")) {
+            const slug = link.getAttribute("data-version-slug");
+            const isCurrent =
+              slug === activeSlug ||
+              (!hasExactMatch && slug === "latest" && Boolean(latestVersion) && activeSlug === latestVersion);
+            if (isCurrent) {
+              link.setAttribute("aria-current", "true");
+              matchedLabel = link.querySelector(".psd-version-item-label")?.textContent?.trim() || "";
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          }
+          if (pathMatch && matchedLabel && labelEl) {
+            labelEl.textContent = matchedLabel;
+          }
+        };
+        syncActiveLink();
+
+        const supportsAnchorArea =
+          typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("position-area: block-end");
+
+        const positionFallback = () => {
+          if (supportsAnchorArea) return;
+          const rect = trigger.getBoundingClientRect();
+          const menuWidth = menu.offsetWidth || 210;
+          const menuHeight = menu.offsetHeight || 260;
+          const pad = 8;
+          let left = rect.right - menuWidth;
+          left = Math.max(pad, Math.min(left, window.innerWidth - menuWidth - pad));
+          let top = rect.bottom + 6;
+          if (top + menuHeight > window.innerHeight - pad && rect.top - menuHeight - 6 >= pad) {
+            top = rect.top - menuHeight - 6;
+          }
+          menu.style.left = `${Math.round(left)}px`;
+          menu.style.top = `${Math.round(top)}px`;
+        };
+
+        let fetchedVersions = false;
+        const maybeLoadRemoteVersions = async () => {
+          if (fetchedVersions) return;
+          fetchedVersions = true;
+          try {
+            const resp = await fetch("/versions.json", { headers: { Accept: "application/json" } });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (!data || !Array.isArray(data.versions) || data.versions.length === 0) return;
+
+            const frag = document.createDocumentFragment();
+            const seen = new Set();
+            let prevGroup = "";
+            let added = 0;
+
+            for (const entry of data.versions) {
+              if (!entry || typeof entry.slug !== "string" || !entry.slug || seen.has(entry.slug)) {
+                continue;
+              }
+              seen.add(entry.slug);
+              const group = typeof entry.group === "string" ? entry.group : "";
+              if (prevGroup && group && prevGroup !== group) {
+                const divLi = document.createElement("li");
+                divLi.className = "psd-version-divider";
+                divLi.setAttribute("role", "presentation");
+                frag.appendChild(divLi);
+              }
+              if (group) prevGroup = group;
+
+              const li = document.createElement("li");
+              const a = document.createElement("a");
+              const hasPage =
+                Boolean(entry.same_layout) &&
+                !(pageRel === "examples.html" && ["0.7", "0.7.1", "0.7.2"].includes(entry.slug));
+              const suffix = hasPage ? pageRel : "";
+              a.href = `https://www.scenedetect.com/docs/${encodeURIComponent(entry.slug)}/${suffix}`;
+              a.setAttribute("data-version-slug", entry.slug);
+              const span = document.createElement("span");
+              span.className = "psd-version-item-label";
+              span.textContent = typeof entry.label === "string" && entry.label ? entry.label : `v${entry.slug}`;
+              a.appendChild(span);
+              a.insertAdjacentHTML(
+                "beforeend",
+                '<svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+              );
+              li.appendChild(a);
+              frag.appendChild(li);
+              added += 1;
+            }
+
+            if (added === 0) return;
+
+            const tailDivider = document.createElement("li");
+            tailDivider.className = "psd-version-divider";
+            tailDivider.setAttribute("role", "presentation");
+            frag.appendChild(tailDivider);
+
+            const allLi = document.createElement("li");
+            const allLink = document.createElement("a");
+            allLink.className = "psd-version-all";
+            allLink.href = "https://www.scenedetect.com/docs/";
+            allLink.innerHTML = '<span>All versions</span><span aria-hidden="true">&rarr;</span>';
+            allLi.appendChild(allLink);
+            frag.appendChild(allLi);
+
+            listEl.replaceChildren(frag);
+            if (typeof data.latest === "string" && data.latest) {
+              latestVersion = data.latest;
+            }
+            syncActiveLink();
+          } catch (err) {
+            // Local builds without /versions.json safely keep the static build-time version list.
+          }
+        };
+
+        menu.addEventListener("toggle", () => {
+          const isOpen = isMenuOpen();
+          trigger.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) {
+            positionFallback();
+            maybeLoadRemoteVersions();
+          }
+        });
+
+        window.addEventListener("resize", () => {
+          if (isMenuOpen()) {
+            positionFallback();
+          }
+        });
+
+        switcher.addEventListener("focusout", (e) => {
+          if (!(e.relatedTarget instanceof Node) || switcher.contains(e.relatedTarget)) return;
+          if (isMenuOpen()) {
+            menu.hidePopover?.();
+          }
+        });
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initVersionSwitcher, { once: true });
+      } else {
+        initVersionSwitcher();
+      }
+    })();
+  </script>
+  
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+<header class="psd-topbar">
+  <div class="psd-topbar-inner">
+    <nav class="psd-topbar-nav" aria-label="Documentation navigation">
+      <a class="psd-backlink" href="https://www.scenedetect.com/">&larr; scenedetect.com</a>
+      <span class="psd-sep" aria-hidden="true">/</span>
+      <a href="../cli.html">CLI Reference</a>
+      <a href="../api.html" class="current">Python API</a>
+      <a href="../examples.html">Examples</a>
+    </nav>
+    <div class="psd-topbar-meta">
+      <div class="psd-version-switcher" data-release="0.7.4" data-page-rel="api/common.html" data-latest-version="0.7.4">
+        <button
+          type="button"
+          class="psd-version-btn"
+          popovertarget="psd-version-menu"
+          aria-controls="psd-version-menu"
+          aria-expanded="false"
+        >
+          <span class="psd-sr-only">Documentation version: </span>
+          <span class="psd-version-label">v0.7.4</span>
+          <svg class="psd-version-chevron" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="psd-version-menu" class="psd-version-menu" popover="auto">
+          <nav aria-label="Documentation versions">
+            <ul class="psd-version-list">
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/latest/api/common.html"
+                  data-version-slug="latest" aria-current="true"
+                >
+                  <span class="psd-version-item-label">v0.7.4 (latest)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/head/api/common.html"
+                  data-version-slug="head"
+                >
+                  <span class="psd-version-item-label">dev (head)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.3/api/common.html"
+                  data-version-slug="0.7.3"
+                >
+                  <span class="psd-version-item-label">v0.7.3</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.2/api/common.html"
+                  data-version-slug="0.7.2"
+                >
+                  <span class="psd-version-item-label">v0.7.2</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.1/api/common.html"
+                  data-version-slug="0.7.1"
+                >
+                  <span class="psd-version-item-label">v0.7.1</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7/api/common.html"
+                  data-version-slug="0.7"
+                >
+                  <span class="psd-version-item-label">v0.7</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.6.7/"
+                  data-version-slug="0.6.7"
+                >
+                  <span class="psd-version-item-label">v0.6.7 (legacy)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a class="psd-version-all" href="https://www.scenedetect.com/docs/">
+                  <span>All versions</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <button type="button" class="psd-theme-toggle">
+        <svg class="psd-icon-sun" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="psd-icon-moon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span class="psd-sr-only psd-label-dark">Switch to dark theme</span>
+        <span class="psd-sr-only psd-label-light">Switch to light theme</span>
+      </button>
+      <a class="psd-gh-link" href="https://github.com/Breakthrough/PySceneDetect">
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-scenedetect.common">
+<span id="common"></span><span id="scenedetect-common"></span><h1>Common<a class="headerlink" href="#module-scenedetect.common" title="Permalink to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect.common</span></code> Module</p>
+<p>This module contains common types and functions used throughout PySceneDetect.</p>
+<p>This includes <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> which is used as a way for PySceneDetect to store
+frame-accurate timestamps of each cut. This is done by also specifying the video framerate with the
+timecode, allowing a frame number to be converted to/from a floating-point number of seconds, or
+string in the form <code class="docutils literal notranslate"><span class="pre">&quot;HH:MM:SS[.nnn]&quot;</span></code> where the <code class="docutils literal notranslate"><span class="pre">[.nnn]</span></code> part is optional.</p>
+<p>A <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> can be created by specifying a timecode (<code class="docutils literal notranslate"><span class="pre">int</span></code> for number of frames,
+<code class="docutils literal notranslate"><span class="pre">float</span></code> for number of seconds, or <code class="docutils literal notranslate"><span class="pre">str</span></code> in the form “HH:MM:SS” or “HH:MM:SS.nnn”) with a framerate:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">frames</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="mi">29</span><span class="p">,</span> <span class="mf">29.97</span><span class="p">)</span>
+<span class="n">seconds_float</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+<span class="n">timecode_str</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="s2">"00:00:10.000"</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Arithmetic/comparison operations with <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> objects is also possible, and the
+other operand can also be of the above types:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="s2">"00:01:00.000"</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+<span class="c1"># Can add int (frames), float (seconds), or str (timecode).</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mf">10.0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="s2">"00:10:00"</span><span class="p">)</span>
+<span class="c1"># Same for all comparison operators.</span>
+<span class="nb">print</span><span class="p">((</span><span class="n">x</span> <span class="o">+</span> <span class="mf">10.0</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"00:01:10.000"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> objects can be added and subtracted, however the current implementation
+disallows negative values, and will clamp negative results to 0.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Be careful when subtracting <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> objects or adding negative
+amounts of frames/seconds. In the example below, <code class="docutils literal notranslate"><span class="pre">c</span></code> will be at frame 0 since
+<code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">&gt;</span> <span class="pre">a</span></code>, but <code class="docutils literal notranslate"><span class="pre">d</span></code> will be at frame 5:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span>   <span class="c1"># b &gt; a, so c == 0</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span>
+<span class="k">assert</span><span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="k">assert</span><span class="p">(</span><span class="n">d</span> <span class="o">==</span> <span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="timecodes">
+<h2>Timecodes<a class="headerlink" href="#timecodes" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameTimecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object for frame-based timecodes, using the video framerate to compute back and
+forth between frame number and seconds/timecode.</p>
+<dl class="simple">
+<dt>A timecode is valid only if it complies with one of the following three types/formats:</dt><dd><ol class="arabic simple">
+<li><p>Timecode as <code class="docutils literal notranslate"><span class="pre">str</span></code> in the form “HH:MM:SS[.nnn]” (<code class="docutils literal notranslate"><span class="pre">&quot;01:23:45&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;01:23:45.678&quot;</span></code>)</p></li>
+<li><p>Number of seconds as <code class="docutils literal notranslate"><span class="pre">float</span></code>, or <code class="docutils literal notranslate"><span class="pre">str</span></code> in form  “SSSS.nnnn” (<code class="docutils literal notranslate"><span class="pre">&quot;45.678&quot;</span></code>)</p></li>
+<li><p>Exact number of frames as <code class="docutils literal notranslate"><span class="pre">int</span></code>, or <code class="docutils literal notranslate"><span class="pre">str</span></code> in form NNNNN (<code class="docutils literal notranslate"><span class="pre">456</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;456&quot;</span></code>)</p></li>
+</ol>
+</dd>
+<dt>Rate-related properties:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="#scenedetect.common.FrameTimecode.framerate" title="scenedetect.common.FrameTimecode.framerate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">framerate</span></code></a> is a <code class="docutils literal notranslate"><span class="pre">float</span></code> (legacy / deprecated alias).</p></li>
+<li><p><a class="reference internal" href="#scenedetect.common.FrameTimecode.frame_rate" title="scenedetect.common.FrameTimecode.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a> is a <code class="docutils literal notranslate"><span class="pre">Fraction</span></code> and is the canonical form. Both represent
+the same rate.</p></li>
+<li><p><a class="reference internal" href="#scenedetect.common.FrameTimecode.time_base" title="scenedetect.common.FrameTimecode.time_base"><code class="xref py py-attr docutils literal notranslate"><span class="pre">time_base</span></code></a> equals <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">frame_rate</span></code> for CFR sources. For VFR
+(<a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a>-backed) instances, <code class="docutils literal notranslate"><span class="pre">time_base</span></code> is authoritative and
+<code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> is an approximation.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Comparisons between two <a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a>-backed instances with the same rate are performed
+exactly using <code class="docutils literal notranslate"><span class="pre">pts</span> <span class="pre">*</span> <span class="pre">time_base</span></code> as rational numbers. All other comparisons between two
+rated instances use frame numbers, which for VFR sources are approximations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timecode</strong> (<em>TimecodeLike</em>) – A frame number (<code class="docutils literal notranslate"><span class="pre">int</span></code>), number of seconds (<code class="docutils literal notranslate"><span class="pre">float</span></code>), timecode string in
+the form <code class="docutils literal notranslate"><span class="pre">'HH:MM:SS'</span></code> or <code class="docutils literal notranslate"><span class="pre">'HH:MM:SS.nnn'</span></code>, or a <code class="docutils literal notranslate"><span class="pre">Timecode</span></code>.</p></li>
+<li><p><strong>fps</strong> (<em>float</em><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a><em> | </em><em>Fraction</em><em> | </em><em>None</em>) – The framerate to use for distance between frames and to calculate frame numbers.
+For a VFR video, this may just be the average framerate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – Thrown if either <code class="docutils literal notranslate"><span class="pre">timecode</span></code> or <code class="docutils literal notranslate"><span class="pre">fps</span></code> are unsupported types.</p></li>
+<li><p><strong>ValueError</strong> – Thrown when specifying a negative timecode or framerate.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.equal_frame_rate">
+<span class="sig-name descname"><span class="pre">equal_frame_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.equal_frame_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine whether the passed frame rate equals this object’s frame rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Frame rate to compare against within the precision constant defined in this
+module (see <a class="reference internal" href="#scenedetect.common.MAX_FPS_DELTA" title="scenedetect.common.MAX_FPS_DELTA"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a>). May be a <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">Fraction</span></code>, or another
+<a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if <code class="docutils literal notranslate"><span class="pre">other</span></code> matches this <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>’s frame rate within
+tolerance, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>bool</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.equal_framerate">
+<span class="sig-name descname"><span class="pre">equal_framerate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.equal_framerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED] Use <a class="reference internal" href="#scenedetect.common.FrameTimecode.equal_frame_rate" title="scenedetect.common.FrameTimecode.equal_frame_rate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">equal_frame_rate()</span></code></a> instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>bool</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.get_timecode">
+<span class="sig-name descname"><span class="pre">get_timecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_rounding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nearest_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.FrameTimecode.get_timecode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a formatted timecode string of the form HH:MM:SS[.nnn].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>precision</strong> (<em>int</em>) – The number of decimal places to include in the output <code class="docutils literal notranslate"><span class="pre">[.nnn]</span></code>.</p></li>
+<li><p><strong>use_rounding</strong> (<em>bool</em>) – Rounds the output to the desired precision. If False, the value
+will be truncated to the specified precision.</p></li>
+<li><p><strong>nearest_frame</strong> (<em>bool</em>) – Ensures that the timecode is moved to the nearest frame boundary if this
+object has a defined framerate, otherwise has no effect.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The current time in the form <code class="docutils literal notranslate"><span class="pre">&quot;HH:MM:SS[.nnn]&quot;</span></code>. A negative time (e.g. from a
+negative PTS) is shown as zero.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – <code class="docutils literal notranslate"><span class="pre">precision</span></code> is negative.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.frame_num">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.frame_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>The frame number. For VFR video or Timecode-backed objects, this is an approximation
+based on the average framerate. Prefer using <code class="docutils literal notranslate"><span class="pre">pts</span></code> and <code class="docutils literal notranslate"><span class="pre">time_base</span></code> for precise timing.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.frame_rate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.frame_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>The frame rate as an exact rational <code class="xref py py-class docutils literal notranslate"><span class="pre">fractions.Fraction</span></code>.</p>
+<p>For CFR sources this equals <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">time_base</span></code>. For VFR sources the rate may be an
+approximation (e.g. the average framerate); prefer <a class="reference internal" href="#scenedetect.common.FrameTimecode.time_base" title="scenedetect.common.FrameTimecode.time_base"><code class="xref py py-attr docutils literal notranslate"><span class="pre">time_base</span></code></a> for exact PTS
+arithmetic. Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> for timecodes constructed without an associated rate
+(i.e. pure <a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a> representations).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.framerate">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">framerate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.framerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>[DEPRECATED] Use <a class="reference internal" href="#scenedetect.common.FrameTimecode.frame_rate" title="scenedetect.common.FrameTimecode.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a> instead.</p>
+<p>Returns the rate as a <code class="docutils literal notranslate"><span class="pre">float</span></code> for legacy compatibility. The new <a class="reference internal" href="#scenedetect.common.FrameTimecode.frame_rate" title="scenedetect.common.FrameTimecode.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a>
+property returns an exact <code class="xref py py-class docutils literal notranslate"><span class="pre">fractions.Fraction</span></code> and matches the naming used by
+<a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream.frame_rate" title="scenedetect.video_stream.VideoStream.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">scenedetect.video_stream.VideoStream.frame_rate</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.pts">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.pts" title="Permalink to this definition">¶</a></dt>
+<dd><p>The presentation timestamp of the frame in units of <code class="docutils literal notranslate"><span class="pre">time_base</span></code>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.seconds">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">seconds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.seconds" title="Permalink to this definition">¶</a></dt>
+<dd><p>The frame’s position in number of seconds.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.common.FrameTimecode.time_base">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_base</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span></em><a class="headerlink" href="#scenedetect.common.FrameTimecode.time_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time base in which presentation time is calculated.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.common.Timecode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Timecode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_base</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Timecode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timing information associated with a given frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pts</strong> (<em>int</em>) – </p></li>
+<li><p><strong>time_base</strong> (<em>Fraction</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Timecode.pts">
+<span class="sig-name descname"><span class="pre">pts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.common.Timecode.pts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Presentation timestamp of the frame in units of <code class="docutils literal notranslate"><span class="pre">time_base</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Timecode.time_base">
+<span class="sig-name descname"><span class="pre">time_base</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Fraction</span></em><a class="headerlink" href="#scenedetect.common.Timecode.time_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base unit in which <code class="docutils literal notranslate"><span class="pre">pts</span></code> is measured.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.common.framerate_to_fraction">
+<span class="sig-name descname"><span class="pre">framerate_to_fraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.framerate_to_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a framerate value to an exact rational Fraction.</p>
+<p>Detects NTSC-derived framerates of the form <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">*</span> <span class="pre">1000/1001</span></code> (e.g. 23.976 -&gt; 24000/1001,
+29.97 -&gt; 30000/1001, 47.952 -&gt; 48000/1001) for any positive integer <code class="docutils literal notranslate"><span class="pre">N</span></code> and returns
+their exact rational representation. Whole-number framerates are returned as
+<code class="docutils literal notranslate"><span class="pre">Fraction(N,</span> <span class="pre">1)</span></code>. Other values fall back to <code class="docutils literal notranslate"><span class="pre">limit_denominator(10000)</span></code> for a clean
+rational approximation. <code class="docutils literal notranslate"><span class="pre">Fraction</span></code> inputs are returned directly without conversion.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">numbers.Rational</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">av.AVRational</span></code> from PyAV) is converted using numerator and
+denominator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fps</strong> (<em>float</em><em> | </em><em>Fraction</em><em> | </em><em>Rational</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Fraction</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="type-aliases">
+<h2>Type Aliases<a class="headerlink" href="#type-aliases" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.SceneList">
+<span class="sig-name descname"><span class="pre">SceneList</span></span><a class="headerlink" href="#scenedetect.common.SceneList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for a list of scenes in the form (start time, end time).</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.CutList">
+<span class="sig-name descname"><span class="pre">CutList</span></span><a class="headerlink" href="#scenedetect.common.CutList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for a list of cuts, where each timecode represents the first frame of a new shot.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[FrameTimecode]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.TimecodePair">
+<span class="sig-name descname"><span class="pre">TimecodePair</span></span><a class="headerlink" href="#scenedetect.common.TimecodePair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for timecode pairs, typically representing the start/end of a scene.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[FrameTimecode, FrameTimecode]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.TimecodeLike">
+<span class="sig-name descname"><span class="pre">TimecodeLike</span></span><a class="headerlink" href="#scenedetect.common.TimecodeLike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for values that can be converted to a <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>. Accepts a frame number
+(<code class="docutils literal notranslate"><span class="pre">int</span></code>), number of seconds (<code class="docutils literal notranslate"><span class="pre">float</span></code>), timecode string (<code class="docutils literal notranslate"><span class="pre">str</span></code> of the form <code class="docutils literal notranslate"><span class="pre">HH:MM:SS[.nnn]</span></code>), a
+<a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a>, or an existing <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>.</p>
+<p>alias of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a>, <a class="reference internal" href="#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.FrameRate">
+<span class="sig-name descname"><span class="pre">FrameRate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">fractions.Fraction</span></em><a class="headerlink" href="#scenedetect.common.FrameRate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for a video frame rate. <code class="docutils literal notranslate"><span class="pre">Fraction</span></code> is the canonical exact form and should be
+preferred (e.g. <code class="docutils literal notranslate"><span class="pre">Fraction(30000,</span> <span class="pre">1001)</span></code>), while <code class="docutils literal notranslate"><span class="pre">float</span></code> is accepted for convenience. Floats
+will be converted to rationals at runtime via <a class="reference internal" href="#scenedetect.common.framerate_to_fraction" title="scenedetect.common.framerate_to_fraction"><code class="xref py py-func docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.CropRegion">
+<span class="sig-name descname"><span class="pre">CropRegion</span></span><a class="headerlink" href="#scenedetect.common.CropRegion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for rectangle of the form X0 Y0 X1 Y1 for cropping frames. Coordinates are relative
+to source frame without downscaling.</p>
+<p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+</dd></dl>
+
+</section>
+<section id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Interpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.common.Interpolation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolation method used for image resizing. Based on constants defined in OpenCV.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.AREA">
+<span class="sig-name descname"><span class="pre">AREA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.AREA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pixel area relation resampling. Provides moire’-free downscaling.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.CUBIC">
+<span class="sig-name descname"><span class="pre">CUBIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.CUBIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bicubic interpolation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.LANCZOS4">
+<span class="sig-name descname"><span class="pre">LANCZOS4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.LANCZOS4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lanczos interpolation over 8x8 neighborhood.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.LINEAR">
+<span class="sig-name descname"><span class="pre">LINEAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.LINEAR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bilinear interpolation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.common.Interpolation.NEAREST">
+<span class="sig-name descname"><span class="pre">NEAREST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#scenedetect.common.Interpolation.NEAREST" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nearest neighbor interpolation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.common.MAX_FPS_DELTA">
+<span class="sig-name descname"><span class="pre">MAX_FPS_DELTA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-09</span></em><a class="headerlink" href="#scenedetect.common.MAX_FPS_DELTA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum amount two framerates can differ by for equality testing. Currently 1 frame/nanosec.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="backends.html" title="Previous document">Video Backends</a>
+        </li>
+        <li>
+          <a href="scene_manager.html" title="Next document">Scene Manager</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo">
+  <a href="../index.html">
+    <img class="logo psd-logo-light" src="../_static/pyscenedetect_logo_small.png" alt="PySceneDetect" width="300" height="141" />
+    <img class="logo psd-logo-dark" src="../_static/pyscenedetect_logo_small_darkmode.png" alt="PySceneDetect" width="462" height="217" />
+  </a>
+</p>
+<p class="psd-sidebar-subtitle">0.7.4</p>
+<search class="psd-searchbox">
+  <form class="search" action="../search.html" method="get">
+    <input type="search" name="q" aria-label="Search documentation" placeholder="Search docs..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+  </form>
+</search>
+<nav class="psd-sidebar-toc" aria-label="Section navigation">
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-scenedetect">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#adaptivedetector">AdaptiveDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#contentdetector">ContentDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#hashdetector">HashDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#histogramdetector">HistogramDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#thresholddetector">ThresholdDetector</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output.html#splitting-video">Splitting Video</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#saving-images">Saving Images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#scene-lists">Scene Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#filename-formatting">Filename Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#opencv">OpenCV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#pyav">PyAV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#moviepy">MoviePy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#module-scenedetect.backends.concat">Multiple Videos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.concat.VideoStreamConcat"><code class="docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Common</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#timecodes">Timecodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.equal_frame_rate"><code class="docutils literal notranslate"><span class="pre">equal_frame_rate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.equal_framerate"><code class="docutils literal notranslate"><span class="pre">equal_framerate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.get_timecode"><code class="docutils literal notranslate"><span class="pre">get_timecode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.frame_num"><code class="docutils literal notranslate"><span class="pre">frame_num</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.frame_rate"><code class="docutils literal notranslate"><span class="pre">frame_rate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.framerate"><code class="docutils literal notranslate"><span class="pre">framerate</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.pts"><code class="docutils literal notranslate"><span class="pre">pts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.seconds"><code class="docutils literal notranslate"><span class="pre">seconds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.FrameTimecode.time_base"><code class="docutils literal notranslate"><span class="pre">time_base</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.Timecode"><code class="docutils literal notranslate"><span class="pre">Timecode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Timecode.pts"><code class="docutils literal notranslate"><span class="pre">pts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Timecode.time_base"><code class="docutils literal notranslate"><span class="pre">time_base</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.framerate_to_fraction"><code class="docutils literal notranslate"><span class="pre">framerate_to_fraction()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#type-aliases">Type Aliases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.TimecodePair"><code class="docutils literal notranslate"><span class="pre">TimecodePair</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.TimecodeLike"><code class="docutils literal notranslate"><span class="pre">TimecodeLike</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.FrameRate"><code class="docutils literal notranslate"><span class="pre">FrameRate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.CropRegion"><code class="docutils literal notranslate"><span class="pre">CropRegion</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.Interpolation"><code class="docutils literal notranslate"><span class="pre">Interpolation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.AREA"><code class="docutils literal notranslate"><span class="pre">AREA</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.CUBIC"><code class="docutils literal notranslate"><span class="pre">CUBIC</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.LANCZOS4"><code class="docutils literal notranslate"><span class="pre">LANCZOS4</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.LINEAR"><code class="docutils literal notranslate"><span class="pre">LINEAR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.common.Interpolation.NEAREST"><code class="docutils literal notranslate"><span class="pre">NEAREST</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.common.MAX_FPS_DELTA"><code class="docutils literal notranslate"><span class="pre">MAX_FPS_DELTA</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detector.html#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
+</ul>
+
+</nav>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      <div class="psd-footer-inner">
+        <span class="psd-footer-meta">&#169;2014, Brandon Castellano. | 
+          Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+          &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a> | 
+          <a href="../_sources/api/common.rst.txt" rel="nofollow">Page source</a>
+        </span>
+        <ul class="psd-footer-links" role="list">
+          <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+          <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+          <li><a href="https://www.scenedetect.com/changelog/">Changelog</a></li>
+          <li><a href="https://www.scenedetect.com/copyright/">License</a></li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

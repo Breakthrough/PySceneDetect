@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Platform &amp; Logging &#8212; PySceneDetect 0.7.4 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Migration Guide (v0.7)" href="migration_guide.html" />
+    <link rel="prev" title="Stats Manager" href="stats_manager.html" />
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <!-- Google tag (gtag.js) -->
+  <script>
+    if (
+      location.protocol.startsWith("http") &&
+      location.hostname !== "localhost" &&
+      location.hostname !== "127.0.0.1" &&
+      location.hostname !== "[::1]" &&
+      !navigator.webdriver
+    ) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", "G-EWBNLVRWW0");
+      const ga = document.createElement("script");
+      ga.async = true;
+      ga.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(ga);
+    }
+  </script>
+  <script type="module">
+    (() => {
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (meta) {
+        document.addEventListener("click", (e) => {
+          if (!(e.target instanceof Element) || !e.target.closest(".psd-theme-toggle")) return;
+          let stored = null;
+          try {
+            const v = localStorage.getItem("color-scheme");
+            stored = v === "light" || v === "dark" ? v : null;
+          } catch (err) {}
+          const sys = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          const cur = meta.content === "light" || meta.content === "dark" ? meta.content : (stored ?? sys);
+          const next = cur === "dark" ? "light" : "dark";
+          if (next === sys) {
+            try { localStorage.removeItem("color-scheme"); } catch (err) {}
+            meta.content = "light dark";
+          } else {
+            try { localStorage.setItem("color-scheme", next); } catch (err) {}
+            meta.content = next;
+          }
+        });
+        window.addEventListener("storage", (e) => {
+          if (e.key === "color-scheme" || e.key === null) {
+            const v = e.newValue;
+            meta.content = v === "light" || v === "dark" ? v : "light dark";
+          }
+        });
+      }
+
+      const initVersionSwitcher = () => {
+        const switcher = document.querySelector(".psd-version-switcher");
+        const trigger = switcher?.querySelector(".psd-version-btn");
+        const labelEl = switcher?.querySelector(".psd-version-label");
+        const menu = document.getElementById("psd-version-menu");
+        const listEl = menu?.querySelector(".psd-version-list");
+        if (!switcher || !trigger || !menu || !listEl) return;
+
+        const release = switcher.getAttribute("data-release") || "";
+        const pageRel = switcher.getAttribute("data-page-rel") || "";
+        let latestVersion = switcher.getAttribute("data-latest-version") || "";
+        const pathMatch = window.location.pathname.match(/\/docs\/([^/]+)(?:\/|$)/);
+        const activeSlug = pathMatch ? pathMatch[1] : (release.includes("dev") ? "head" : release);
+
+        const isMenuOpen = () => {
+          try {
+            return menu.matches(":popover-open, .\\:popover-open");
+          } catch {
+            return menu.classList.contains(":popover-open");
+          }
+        };
+
+        const syncActiveLink = () => {
+          let matchedLabel = "";
+          const hasExactMatch = Boolean(
+            listEl.querySelector(`a[data-version-slug="${CSS.escape(activeSlug)}"]`)
+          );
+          for (const link of listEl.querySelectorAll("a[data-version-slug]")) {
+            const slug = link.getAttribute("data-version-slug");
+            const isCurrent =
+              slug === activeSlug ||
+              (!hasExactMatch && slug === "latest" && Boolean(latestVersion) && activeSlug === latestVersion);
+            if (isCurrent) {
+              link.setAttribute("aria-current", "true");
+              matchedLabel = link.querySelector(".psd-version-item-label")?.textContent?.trim() || "";
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          }
+          if (pathMatch && matchedLabel && labelEl) {
+            labelEl.textContent = matchedLabel;
+          }
+        };
+        syncActiveLink();
+
+        const supportsAnchorArea =
+          typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("position-area: block-end");
+
+        const positionFallback = () => {
+          if (supportsAnchorArea) return;
+          const rect = trigger.getBoundingClientRect();
+          const menuWidth = menu.offsetWidth || 210;
+          const menuHeight = menu.offsetHeight || 260;
+          const pad = 8;
+          let left = rect.right - menuWidth;
+          left = Math.max(pad, Math.min(left, window.innerWidth - menuWidth - pad));
+          let top = rect.bottom + 6;
+          if (top + menuHeight > window.innerHeight - pad && rect.top - menuHeight - 6 >= pad) {
+            top = rect.top - menuHeight - 6;
+          }
+          menu.style.left = `${Math.round(left)}px`;
+          menu.style.top = `${Math.round(top)}px`;
+        };
+
+        let fetchedVersions = false;
+        const maybeLoadRemoteVersions = async () => {
+          if (fetchedVersions) return;
+          fetchedVersions = true;
+          try {
+            const resp = await fetch("/versions.json", { headers: { Accept: "application/json" } });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (!data || !Array.isArray(data.versions) || data.versions.length === 0) return;
+
+            const frag = document.createDocumentFragment();
+            const seen = new Set();
+            let prevGroup = "";
+            let added = 0;
+
+            for (const entry of data.versions) {
+              if (!entry || typeof entry.slug !== "string" || !entry.slug || seen.has(entry.slug)) {
+                continue;
+              }
+              seen.add(entry.slug);
+              const group = typeof entry.group === "string" ? entry.group : "";
+              if (prevGroup && group && prevGroup !== group) {
+                const divLi = document.createElement("li");
+                divLi.className = "psd-version-divider";
+                divLi.setAttribute("role", "presentation");
+                frag.appendChild(divLi);
+              }
+              if (group) prevGroup = group;
+
+              const li = document.createElement("li");
+              const a = document.createElement("a");
+              const hasPage =
+                Boolean(entry.same_layout) &&
+                !(pageRel === "examples.html" && ["0.7", "0.7.1", "0.7.2"].includes(entry.slug));
+              const suffix = hasPage ? pageRel : "";
+              a.href = `https://www.scenedetect.com/docs/${encodeURIComponent(entry.slug)}/${suffix}`;
+              a.setAttribute("data-version-slug", entry.slug);
+              const span = document.createElement("span");
+              span.className = "psd-version-item-label";
+              span.textContent = typeof entry.label === "string" && entry.label ? entry.label : `v${entry.slug}`;
+              a.appendChild(span);
+              a.insertAdjacentHTML(
+                "beforeend",
+                '<svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+              );
+              li.appendChild(a);
+              frag.appendChild(li);
+              added += 1;
+            }
+
+            if (added === 0) return;
+
+            const tailDivider = document.createElement("li");
+            tailDivider.className = "psd-version-divider";
+            tailDivider.setAttribute("role", "presentation");
+            frag.appendChild(tailDivider);
+
+            const allLi = document.createElement("li");
+            const allLink = document.createElement("a");
+            allLink.className = "psd-version-all";
+            allLink.href = "https://www.scenedetect.com/docs/";
+            allLink.innerHTML = '<span>All versions</span><span aria-hidden="true">&rarr;</span>';
+            allLi.appendChild(allLink);
+            frag.appendChild(allLi);
+
+            listEl.replaceChildren(frag);
+            if (typeof data.latest === "string" && data.latest) {
+              latestVersion = data.latest;
+            }
+            syncActiveLink();
+          } catch (err) {
+            // Local builds without /versions.json safely keep the static build-time version list.
+          }
+        };
+
+        menu.addEventListener("toggle", () => {
+          const isOpen = isMenuOpen();
+          trigger.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) {
+            positionFallback();
+            maybeLoadRemoteVersions();
+          }
+        });
+
+        window.addEventListener("resize", () => {
+          if (isMenuOpen()) {
+            positionFallback();
+          }
+        });
+
+        switcher.addEventListener("focusout", (e) => {
+          if (!(e.relatedTarget instanceof Node) || switcher.contains(e.relatedTarget)) return;
+          if (isMenuOpen()) {
+            menu.hidePopover?.();
+          }
+        });
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initVersionSwitcher, { once: true });
+      } else {
+        initVersionSwitcher();
+      }
+    })();
+  </script>
+  
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+<header class="psd-topbar">
+  <div class="psd-topbar-inner">
+    <nav class="psd-topbar-nav" aria-label="Documentation navigation">
+      <a class="psd-backlink" href="https://www.scenedetect.com/">&larr; scenedetect.com</a>
+      <span class="psd-sep" aria-hidden="true">/</span>
+      <a href="../cli.html">CLI Reference</a>
+      <a href="../api.html" class="current">Python API</a>
+      <a href="../examples.html">Examples</a>
+    </nav>
+    <div class="psd-topbar-meta">
+      <div class="psd-version-switcher" data-release="0.7.4" data-page-rel="api/platform.html" data-latest-version="0.7.4">
+        <button
+          type="button"
+          class="psd-version-btn"
+          popovertarget="psd-version-menu"
+          aria-controls="psd-version-menu"
+          aria-expanded="false"
+        >
+          <span class="psd-sr-only">Documentation version: </span>
+          <span class="psd-version-label">v0.7.4</span>
+          <svg class="psd-version-chevron" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="psd-version-menu" class="psd-version-menu" popover="auto">
+          <nav aria-label="Documentation versions">
+            <ul class="psd-version-list">
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/latest/api/platform.html"
+                  data-version-slug="latest" aria-current="true"
+                >
+                  <span class="psd-version-item-label">v0.7.4 (latest)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/head/api/platform.html"
+                  data-version-slug="head"
+                >
+                  <span class="psd-version-item-label">dev (head)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.3/api/platform.html"
+                  data-version-slug="0.7.3"
+                >
+                  <span class="psd-version-item-label">v0.7.3</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.2/api/platform.html"
+                  data-version-slug="0.7.2"
+                >
+                  <span class="psd-version-item-label">v0.7.2</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.1/api/platform.html"
+                  data-version-slug="0.7.1"
+                >
+                  <span class="psd-version-item-label">v0.7.1</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7/api/platform.html"
+                  data-version-slug="0.7"
+                >
+                  <span class="psd-version-item-label">v0.7</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.6.7/"
+                  data-version-slug="0.6.7"
+                >
+                  <span class="psd-version-item-label">v0.6.7 (legacy)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a class="psd-version-all" href="https://www.scenedetect.com/docs/">
+                  <span>All versions</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <button type="button" class="psd-theme-toggle">
+        <svg class="psd-icon-sun" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="psd-icon-moon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span class="psd-sr-only psd-label-dark">Switch to dark theme</span>
+        <span class="psd-sr-only psd-label-light">Switch to light theme</span>
+      </button>
+      <a class="psd-gh-link" href="https://github.com/Breakthrough/PySceneDetect">
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-scenedetect.platform">
+<span id="platform-logging"></span><span id="scenedetect-platform"></span><h1>Platform &amp; Logging<a class="headerlink" href="#module-scenedetect.platform" title="Permalink to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect.platform</span></code> Module</p>
+<p>This module contains all platform/library specific compatibility fixes, as well as some utility
+functions to handle logging and invoking external commands.</p>
+<section id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this heading">¶</a></h2>
+<p>PySceneDetect writes log messages to the <code class="docutils literal notranslate"><span class="pre">pyscenedetect</span></code> logger, which has no default handlers. Call <a class="reference internal" href="#scenedetect.platform.init_logger" title="scenedetect.platform.init_logger"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.init_logger</span></code></a> with <code class="docutils literal notranslate"><span class="pre">show_stdout=True</span></code> or a log file path to attach standard handlers, or configure <code class="docutils literal notranslate"><span class="pre">logging.getLogger(&quot;pyscenedetect&quot;)</span></code> directly.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli.html#cmdoption-scenedetect-v"><code class="xref std std-option docutils literal notranslate"><span class="pre">-v/--verbosity</span></code></a>, <a class="reference internal" href="../cli.html#cmdoption-scenedetect-l"><code class="xref std std-option docutils literal notranslate"><span class="pre">-l/--logfile</span></code></a>, <a class="reference internal" href="../cli.html#cmdoption-scenedetect-q"><code class="xref std std-option docutils literal notranslate"><span class="pre">-q/--quiet</span></code></a></p>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.init_logger">
+<span class="sig-name descname"><span class="pre">init_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_stdout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.init_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes logging for PySceneDetect. The logger instance used is named ‘pyscenedetect’.
+By default the logger has no handlers to suppress output. All existing log handlers are replaced
+every time this function is invoked.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_level</strong> (<em>int</em>) – Verbosity of log messages. Should be one of [logging.INFO, logging.DEBUG,
+logging.WARNING, logging.ERROR, logging.CRITICAL].</p></li>
+<li><p><strong>show_stdout</strong> (<em>bool</em>) – If True, add handler to show log messages on stdout (default: False).</p></li>
+<li><p><strong>log_file</strong> (<em>str</em><em> | </em><em>None</em>) – If set, add handler to dump debug log messages to given file path.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="system-information">
+<h2>System Information<a class="headerlink" href="#system-information" title="Permalink to this heading">¶</a></h2>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><strong>Command Line:</strong> <a class="reference internal" href="../cli.html#command-help"><span class="std std-ref">version</span></a></p>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.get_system_version_info">
+<span class="sig-name descname"><span class="pre">get_system_version_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_system_version_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the system’s operating system, Python, packages, and external tool versions.
+Useful for debugging or filing bug reports.</p>
+<p>Used for the <code class="docutils literal notranslate"><span class="pre">scenedetect</span> <span class="pre">version</span></code> command.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="files-and-paths">
+<h2>Files and Paths<a class="headerlink" href="#files-and-paths" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.get_file_name">
+<span class="sig-name descname"><span class="pre">get_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_file_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the file name that <code class="docutils literal notranslate"><span class="pre">file_path</span></code> refers to, optionally removing the extension.</p>
+<p>E.g. /tmp/foo.bar -&gt; foo</p>
+<dl>
+<dt>URL and URI-like inputs:</dt><dd><p>Inputs containing “://” are treated as URLs (see <a class="reference internal" href="#scenedetect.platform.is_url" title="scenedetect.platform.is_url"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_url()</span></code></a>) and handled by their
+URL components rather than as paths, since a path separator inside a query string or
+fragment is not part of the name. The name is the last non-empty segment of the path
+component, percent-decoded, e.g. <a class="reference external" href="https://example.com/videos/clip.mp4?token=1.2">https://example.com/videos/clip.mp4?token=1.2</a> -&gt; clip.</p>
+<p>When the path component is empty there is no segment to use, so the host becomes the
+name, e.g. <a class="reference external" href="rtsp://192.168.0.1:554">rtsp://192.168.0.1:554</a> -&gt; 192.168.0.1_554. Userinfo (credentials) is never
+part of the result, and the port is joined with “_” because “:” is not valid in a file
+name on Windows. Hosts are returned in full even when <code class="docutils literal notranslate"><span class="pre">include_extension</span></code> is False, as
+the last “.” in a host is a domain separator and not an extension.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em>) – Path, or URL, to get the name of.</p></li>
+<li><p><strong>include_extension</strong> (<em>bool</em>) – If False, remove the extension (the last “.” and everything after
+it) from the name. Has no effect on names derived from a URL host.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The name, or an empty string if none can be derived (e.g. a path that is only
+separators, or a URL with neither a path nor a host).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.get_and_create_path">
+<span class="sig-name descname"><span class="pre">get_and_create_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_and_create_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get &amp; Create Path: Gets and returns the full/absolute path to file_path
+in the specified output_directory if set, creating any required directories
+along the way.</p>
+<p>If file_path is already an absolute path, then output_directory is ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em>) – File name to get path for.  If file_path is an absolute
+path (e.g. starts at a drive/root), no modification of the path
+is performed, only ensuring that all output directories are created.</p></li>
+<li><p><strong>output_dir</strong> – An optional output directory to override the
+directory of file_path if it is relative to the working directory.</p></li>
+<li><p><strong>output_directory</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Full path to output file suitable for writing.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.is_url">
+<span class="sig-name descname"><span class="pre">is_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.is_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if <code class="docutils literal notranslate"><span class="pre">path</span></code> looks like a URL or network stream (e.g. <a class="reference external" href="https://">https://</a>…, <a class="reference external" href="rtsp://">rtsp://</a>…).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em><em> | </em><em>PathLike</em><em>[</em><em>str</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>bool</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.platform.Template">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.Template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Template matcher used to replace instances of $TEMPLATES in filenames.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.platform.StrPath">
+<span class="sig-name descname"><span class="pre">StrPath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">str</span> <span class="pre">|</span> <span class="pre">os.PathLike[str]</span></em><a class="headerlink" href="#scenedetect.platform.StrPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for filesystem paths. Accepts a <code class="docutils literal notranslate"><span class="pre">str</span></code> or any object implementing <code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code>
+(e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code>).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.platform.BytePath">
+<span class="sig-name descname"><span class="pre">BytePath</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">bytes</span> <span class="pre">|</span> <span class="pre">os.PathLike[bytes]</span></em><a class="headerlink" href="#scenedetect.platform.BytePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type hint for byte-based filesystem paths. Accepts <code class="docutils literal notranslate"><span class="pre">bytes</span></code> or any object implementing
+<code class="xref py py-class docutils literal notranslate"><span class="pre">os.PathLike</span></code> that returns <code class="docutils literal notranslate"><span class="pre">bytes</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="external-tools">
+<h2>External Tools<a class="headerlink" href="#external-tools" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.get_ffmpeg_path">
+<span class="sig-name descname"><span class="pre">get_ffmpeg_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_ffmpeg_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get path to ffmpeg if available on the current system. First looks at PATH, then checks if
+one is available from the <code class="docutils literal notranslate"><span class="pre">imageio_ffmpeg</span></code> package. Returns None if ffmpeg couldn’t be found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em> | <em>None</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.get_ffmpeg_version">
+<span class="sig-name descname"><span class="pre">get_ffmpeg_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_ffmpeg_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get ffmpeg version identifier, or None if ffmpeg is not found. Uses <code class="docutils literal notranslate"><span class="pre">get_ffmpeg_path()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em> | <em>None</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.get_mkvmerge_path">
+<span class="sig-name descname"><span class="pre">get_mkvmerge_path</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_mkvmerge_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get path to mkvmerge if available on the current system by checking PATH. Returns None if
+mkvmerge couldn’t be found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em> | <em>None</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.get_mkvmerge_version">
+<span class="sig-name descname"><span class="pre">get_mkvmerge_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_mkvmerge_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get mkvmerge version identifier, or None if mkvmerge is not found in PATH.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>str</em> | <em>None</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.invoke_command">
+<span class="sig-name descname"><span class="pre">invoke_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.invoke_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as calling Python’s subprocess.call() method, but explicitly
+raises a different exception when the command length is too long.</p>
+<p>See <a class="reference external" href="https://github.com/Breakthrough/PySceneDetect/issues/164">https://github.com/Breakthrough/PySceneDetect/issues/164</a> for details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – List of strings to pass to subprocess.call().</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Return code of command.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#scenedetect.platform.CommandTooLong" title="scenedetect.platform.CommandTooLong"><strong>CommandTooLong</strong></a> – <code class="docutils literal notranslate"><span class="pre">args</span></code> exceeds built in command line length limit on Windows.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>int</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="scenedetect.platform.CommandTooLong">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CommandTooLong</span></span><a class="headerlink" href="#scenedetect.platform.CommandTooLong" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised if the length of a command line argument exceeds the limit allowed on Windows.</p>
+</dd></dl>
+
+</section>
+<section id="internals">
+<h2>Internals<a class="headerlink" href="#internals" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="scenedetect.platform.DEBUG_MODE">
+<span class="sig-name descname"><span class="pre">DEBUG_MODE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#scenedetect.platform.DEBUG_MODE" title="Permalink to this definition">¶</a></dt>
+<dd><p>True when the <code class="docutils literal notranslate"><span class="pre">SCENEDETECT_DEBUG</span></code> environment variable is set to a truthy value
+(<code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code>, <code class="docutils literal notranslate"><span class="pre">yes</span></code>, <code class="docutils literal notranslate"><span class="pre">on</span></code>, etc.); False when unset or set to <code class="docutils literal notranslate"><span class="pre">0</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>/<code class="docutils literal notranslate"><span class="pre">no</span></code>/<code class="docutils literal notranslate"><span class="pre">off</span></code>/empty.
+Use this to gate behavior intended only for development - e.g. re-raising unhandled
+exceptions for debuggers/pytest instead of logging gracefully and exiting. Default-off so
+end users on any install path (pip, pipx, the Windows .exe) get clean error output; pytest
+opts in via <code class="docutils literal notranslate"><span class="pre">tests/conftest.py</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scenedetect.platform.get_cv2_imwrite_params">
+<span class="sig-name descname"><span class="pre">get_cv2_imwrite_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.get_cv2_imwrite_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get OpenCV imwrite Params: Returns a dict of supported image formats and
+their associated quality/compression parameter index, or None if that format
+is not supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of supported image formats/extensions (‘jpg’, ‘png’, etc…) mapped to the
+respective OpenCV quality or compression parameter as {‘jpg’: cv2.IMWRITE_JPEG_QUALITY,
+‘png’: cv2.IMWRITE_PNG_COMPRESSION, …}. Parameter will be None if not found on the
+current system library (e.g. {‘jpg’: None}).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>dict</em>[<em>str</em>, <em>int</em> | <em>None</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.platform.FakeTqdmObject">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FakeTqdmObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.FakeTqdmObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides a no-op tqdm-like object.</p>
+<p>No-op.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.platform.FakeTqdmObject.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.FakeTqdmObject.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>No-op.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.platform.FakeTqdmObject.set_description">
+<span class="sig-name descname"><span class="pre">set_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">desc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.FakeTqdmObject.set_description" title="Permalink to this definition">¶</a></dt>
+<dd><p>No-op.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.platform.FakeTqdmObject.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.FakeTqdmObject.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>No-op.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.platform.FakeTqdmLoggingRedirect">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FakeTqdmLoggingRedirect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.platform.FakeTqdmLoggingRedirect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provides a no-op tqdm context manager for redirecting log messages.</p>
+<p>No-op.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="stats_manager.html" title="Previous document">Stats Manager</a>
+        </li>
+        <li>
+          <a href="migration_guide.html" title="Next document">Migration Guide (v0.7)</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo">
+  <a href="../index.html">
+    <img class="logo psd-logo-light" src="../_static/pyscenedetect_logo_small.png" alt="PySceneDetect" width="300" height="141" />
+    <img class="logo psd-logo-dark" src="../_static/pyscenedetect_logo_small_darkmode.png" alt="PySceneDetect" width="462" height="217" />
+  </a>
+</p>
+<p class="psd-sidebar-subtitle">0.7.4</p>
+<search class="psd-searchbox">
+  <form class="search" action="../search.html" method="get">
+    <input type="search" name="q" aria-label="Search documentation" placeholder="Search docs..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+  </form>
+</search>
+<nav class="psd-sidebar-toc" aria-label="Section navigation">
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-scenedetect">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#adaptivedetector">AdaptiveDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#contentdetector">ContentDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#hashdetector">HashDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#histogramdetector">HistogramDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#thresholddetector">ThresholdDetector</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output.html#splitting-video">Splitting Video</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#saving-images">Saving Images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#scene-lists">Scene Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#filename-formatting">Filename Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#opencv">OpenCV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#pyav">PyAV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#moviepy">MoviePy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#module-scenedetect.backends.concat">Multiple Videos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.concat.VideoStreamConcat"><code class="docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="common.html#timecodes">Timecodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#type-aliases">Type Aliases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detector.html#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Platform &amp; Logging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.init_logger"><code class="docutils literal notranslate"><span class="pre">init_logger()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#system-information">System Information</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.get_system_version_info"><code class="docutils literal notranslate"><span class="pre">get_system_version_info()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#files-and-paths">Files and Paths</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.get_file_name"><code class="docutils literal notranslate"><span class="pre">get_file_name()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.get_and_create_path"><code class="docutils literal notranslate"><span class="pre">get_and_create_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.is_url"><code class="docutils literal notranslate"><span class="pre">is_url()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.Template"><code class="docutils literal notranslate"><span class="pre">Template</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.StrPath"><code class="docutils literal notranslate"><span class="pre">StrPath</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.BytePath"><code class="docutils literal notranslate"><span class="pre">BytePath</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#external-tools">External Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.get_ffmpeg_path"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.get_ffmpeg_version"><code class="docutils literal notranslate"><span class="pre">get_ffmpeg_version()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.get_mkvmerge_path"><code class="docutils literal notranslate"><span class="pre">get_mkvmerge_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.get_mkvmerge_version"><code class="docutils literal notranslate"><span class="pre">get_mkvmerge_version()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.invoke_command"><code class="docutils literal notranslate"><span class="pre">invoke_command()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.CommandTooLong"><code class="docutils literal notranslate"><span class="pre">CommandTooLong</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#internals">Internals</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.DEBUG_MODE"><code class="docutils literal notranslate"><span class="pre">DEBUG_MODE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.get_cv2_imwrite_params"><code class="docutils literal notranslate"><span class="pre">get_cv2_imwrite_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.FakeTqdmObject"><code class="docutils literal notranslate"><span class="pre">FakeTqdmObject</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.platform.FakeTqdmObject.close"><code class="docutils literal notranslate"><span class="pre">close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.platform.FakeTqdmObject.set_description"><code class="docutils literal notranslate"><span class="pre">set_description()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.platform.FakeTqdmObject.update"><code class="docutils literal notranslate"><span class="pre">update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.platform.FakeTqdmLoggingRedirect"><code class="docutils literal notranslate"><span class="pre">FakeTqdmLoggingRedirect</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
+</ul>
+
+</nav>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      <div class="psd-footer-inner">
+        <span class="psd-footer-meta">&#169;2014, Brandon Castellano. | 
+          Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+          &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a> | 
+          <a href="../_sources/api/platform.rst.txt" rel="nofollow">Page source</a>
+        </span>
+        <ul class="psd-footer-links" role="list">
+          <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+          <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+          <li><a href="https://www.scenedetect.com/changelog/">Changelog</a></li>
+          <li><a href="https://www.scenedetect.com/copyright/">License</a></li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

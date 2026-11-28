@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Detector Interface &#8212; PySceneDetect 0.7.4 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Stream Interface" href="video_stream.html" />
+    <link rel="prev" title="Scene Manager" href="scene_manager.html" />
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <!-- Google tag (gtag.js) -->
+  <script>
+    if (
+      location.protocol.startsWith("http") &&
+      location.hostname !== "localhost" &&
+      location.hostname !== "127.0.0.1" &&
+      location.hostname !== "[::1]" &&
+      !navigator.webdriver
+    ) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", "G-EWBNLVRWW0");
+      const ga = document.createElement("script");
+      ga.async = true;
+      ga.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(ga);
+    }
+  </script>
+  <script type="module">
+    (() => {
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (meta) {
+        document.addEventListener("click", (e) => {
+          if (!(e.target instanceof Element) || !e.target.closest(".psd-theme-toggle")) return;
+          let stored = null;
+          try {
+            const v = localStorage.getItem("color-scheme");
+            stored = v === "light" || v === "dark" ? v : null;
+          } catch (err) {}
+          const sys = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          const cur = meta.content === "light" || meta.content === "dark" ? meta.content : (stored ?? sys);
+          const next = cur === "dark" ? "light" : "dark";
+          if (next === sys) {
+            try { localStorage.removeItem("color-scheme"); } catch (err) {}
+            meta.content = "light dark";
+          } else {
+            try { localStorage.setItem("color-scheme", next); } catch (err) {}
+            meta.content = next;
+          }
+        });
+        window.addEventListener("storage", (e) => {
+          if (e.key === "color-scheme" || e.key === null) {
+            const v = e.newValue;
+            meta.content = v === "light" || v === "dark" ? v : "light dark";
+          }
+        });
+      }
+
+      const initVersionSwitcher = () => {
+        const switcher = document.querySelector(".psd-version-switcher");
+        const trigger = switcher?.querySelector(".psd-version-btn");
+        const labelEl = switcher?.querySelector(".psd-version-label");
+        const menu = document.getElementById("psd-version-menu");
+        const listEl = menu?.querySelector(".psd-version-list");
+        if (!switcher || !trigger || !menu || !listEl) return;
+
+        const release = switcher.getAttribute("data-release") || "";
+        const pageRel = switcher.getAttribute("data-page-rel") || "";
+        let latestVersion = switcher.getAttribute("data-latest-version") || "";
+        const pathMatch = window.location.pathname.match(/\/docs\/([^/]+)(?:\/|$)/);
+        const activeSlug = pathMatch ? pathMatch[1] : (release.includes("dev") ? "head" : release);
+
+        const isMenuOpen = () => {
+          try {
+            return menu.matches(":popover-open, .\\:popover-open");
+          } catch {
+            return menu.classList.contains(":popover-open");
+          }
+        };
+
+        const syncActiveLink = () => {
+          let matchedLabel = "";
+          const hasExactMatch = Boolean(
+            listEl.querySelector(`a[data-version-slug="${CSS.escape(activeSlug)}"]`)
+          );
+          for (const link of listEl.querySelectorAll("a[data-version-slug]")) {
+            const slug = link.getAttribute("data-version-slug");
+            const isCurrent =
+              slug === activeSlug ||
+              (!hasExactMatch && slug === "latest" && Boolean(latestVersion) && activeSlug === latestVersion);
+            if (isCurrent) {
+              link.setAttribute("aria-current", "true");
+              matchedLabel = link.querySelector(".psd-version-item-label")?.textContent?.trim() || "";
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          }
+          if (pathMatch && matchedLabel && labelEl) {
+            labelEl.textContent = matchedLabel;
+          }
+        };
+        syncActiveLink();
+
+        const supportsAnchorArea =
+          typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("position-area: block-end");
+
+        const positionFallback = () => {
+          if (supportsAnchorArea) return;
+          const rect = trigger.getBoundingClientRect();
+          const menuWidth = menu.offsetWidth || 210;
+          const menuHeight = menu.offsetHeight || 260;
+          const pad = 8;
+          let left = rect.right - menuWidth;
+          left = Math.max(pad, Math.min(left, window.innerWidth - menuWidth - pad));
+          let top = rect.bottom + 6;
+          if (top + menuHeight > window.innerHeight - pad && rect.top - menuHeight - 6 >= pad) {
+            top = rect.top - menuHeight - 6;
+          }
+          menu.style.left = `${Math.round(left)}px`;
+          menu.style.top = `${Math.round(top)}px`;
+        };
+
+        let fetchedVersions = false;
+        const maybeLoadRemoteVersions = async () => {
+          if (fetchedVersions) return;
+          fetchedVersions = true;
+          try {
+            const resp = await fetch("/versions.json", { headers: { Accept: "application/json" } });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (!data || !Array.isArray(data.versions) || data.versions.length === 0) return;
+
+            const frag = document.createDocumentFragment();
+            const seen = new Set();
+            let prevGroup = "";
+            let added = 0;
+
+            for (const entry of data.versions) {
+              if (!entry || typeof entry.slug !== "string" || !entry.slug || seen.has(entry.slug)) {
+                continue;
+              }
+              seen.add(entry.slug);
+              const group = typeof entry.group === "string" ? entry.group : "";
+              if (prevGroup && group && prevGroup !== group) {
+                const divLi = document.createElement("li");
+                divLi.className = "psd-version-divider";
+                divLi.setAttribute("role", "presentation");
+                frag.appendChild(divLi);
+              }
+              if (group) prevGroup = group;
+
+              const li = document.createElement("li");
+              const a = document.createElement("a");
+              const hasPage =
+                Boolean(entry.same_layout) &&
+                !(pageRel === "examples.html" && ["0.7", "0.7.1", "0.7.2"].includes(entry.slug));
+              const suffix = hasPage ? pageRel : "";
+              a.href = `https://www.scenedetect.com/docs/${encodeURIComponent(entry.slug)}/${suffix}`;
+              a.setAttribute("data-version-slug", entry.slug);
+              const span = document.createElement("span");
+              span.className = "psd-version-item-label";
+              span.textContent = typeof entry.label === "string" && entry.label ? entry.label : `v${entry.slug}`;
+              a.appendChild(span);
+              a.insertAdjacentHTML(
+                "beforeend",
+                '<svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+              );
+              li.appendChild(a);
+              frag.appendChild(li);
+              added += 1;
+            }
+
+            if (added === 0) return;
+
+            const tailDivider = document.createElement("li");
+            tailDivider.className = "psd-version-divider";
+            tailDivider.setAttribute("role", "presentation");
+            frag.appendChild(tailDivider);
+
+            const allLi = document.createElement("li");
+            const allLink = document.createElement("a");
+            allLink.className = "psd-version-all";
+            allLink.href = "https://www.scenedetect.com/docs/";
+            allLink.innerHTML = '<span>All versions</span><span aria-hidden="true">&rarr;</span>';
+            allLi.appendChild(allLink);
+            frag.appendChild(allLi);
+
+            listEl.replaceChildren(frag);
+            if (typeof data.latest === "string" && data.latest) {
+              latestVersion = data.latest;
+            }
+            syncActiveLink();
+          } catch (err) {
+            // Local builds without /versions.json safely keep the static build-time version list.
+          }
+        };
+
+        menu.addEventListener("toggle", () => {
+          const isOpen = isMenuOpen();
+          trigger.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) {
+            positionFallback();
+            maybeLoadRemoteVersions();
+          }
+        });
+
+        window.addEventListener("resize", () => {
+          if (isMenuOpen()) {
+            positionFallback();
+          }
+        });
+
+        switcher.addEventListener("focusout", (e) => {
+          if (!(e.relatedTarget instanceof Node) || switcher.contains(e.relatedTarget)) return;
+          if (isMenuOpen()) {
+            menu.hidePopover?.();
+          }
+        });
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initVersionSwitcher, { once: true });
+      } else {
+        initVersionSwitcher();
+      }
+    })();
+  </script>
+  
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+<header class="psd-topbar">
+  <div class="psd-topbar-inner">
+    <nav class="psd-topbar-nav" aria-label="Documentation navigation">
+      <a class="psd-backlink" href="https://www.scenedetect.com/">&larr; scenedetect.com</a>
+      <span class="psd-sep" aria-hidden="true">/</span>
+      <a href="../cli.html">CLI Reference</a>
+      <a href="../api.html" class="current">Python API</a>
+      <a href="../examples.html">Examples</a>
+    </nav>
+    <div class="psd-topbar-meta">
+      <div class="psd-version-switcher" data-release="0.7.4" data-page-rel="api/detector.html" data-latest-version="0.7.4">
+        <button
+          type="button"
+          class="psd-version-btn"
+          popovertarget="psd-version-menu"
+          aria-controls="psd-version-menu"
+          aria-expanded="false"
+        >
+          <span class="psd-sr-only">Documentation version: </span>
+          <span class="psd-version-label">v0.7.4</span>
+          <svg class="psd-version-chevron" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="psd-version-menu" class="psd-version-menu" popover="auto">
+          <nav aria-label="Documentation versions">
+            <ul class="psd-version-list">
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/latest/api/detector.html"
+                  data-version-slug="latest" aria-current="true"
+                >
+                  <span class="psd-version-item-label">v0.7.4 (latest)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/head/api/detector.html"
+                  data-version-slug="head"
+                >
+                  <span class="psd-version-item-label">dev (head)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.3/api/detector.html"
+                  data-version-slug="0.7.3"
+                >
+                  <span class="psd-version-item-label">v0.7.3</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.2/api/detector.html"
+                  data-version-slug="0.7.2"
+                >
+                  <span class="psd-version-item-label">v0.7.2</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.1/api/detector.html"
+                  data-version-slug="0.7.1"
+                >
+                  <span class="psd-version-item-label">v0.7.1</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7/api/detector.html"
+                  data-version-slug="0.7"
+                >
+                  <span class="psd-version-item-label">v0.7</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.6.7/"
+                  data-version-slug="0.6.7"
+                >
+                  <span class="psd-version-item-label">v0.6.7 (legacy)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a class="psd-version-all" href="https://www.scenedetect.com/docs/">
+                  <span>All versions</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <button type="button" class="psd-theme-toggle">
+        <svg class="psd-icon-sun" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="psd-icon-moon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span class="psd-sr-only psd-label-dark">Switch to dark theme</span>
+        <span class="psd-sr-only psd-label-light">Switch to light theme</span>
+      </button>
+      <a class="psd-gh-link" href="https://github.com/Breakthrough/PySceneDetect">
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-scenedetect.detector">
+<span id="detector-interface"></span><span id="scenedetect-detector"></span><h1>Detector Interface<a class="headerlink" href="#module-scenedetect.detector" title="Permalink to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">scenedetect.detector</span></code> Module</p>
+<p>This module contains the <a class="reference internal" href="#scenedetect.detector.SceneDetector" title="scenedetect.detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> interface, from which all scene detectors in
+<a class="reference internal" href="detectors.html#module-scenedetect.detectors" title="scenedetect.detectors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scenedetect.detectors</span></code></a> module are derived from.</p>
+<p>The SceneDetector class represents the interface which detection algorithms are expected to provide
+in order to be compatible with PySceneDetect.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This API is still unstable, and changes and design improvements are planned for the v1.0
+release. Instead of just timecodes, detection algorithms will also provide a specific type of
+event (in, out, cut, etc…).</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.detector.SceneDetector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SceneDetector</span></span><a class="headerlink" href="#scenedetect.detector.SceneDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class to inherit from when implementing a scene detection algorithm.</p>
+<p>This API is not yet stable and subject to change.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.get_metrics">
+<span class="sig-name descname"><span class="pre">get_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.get_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all metric names/keys used by this detector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of strings of frame metric key names that will be used by
+the detector when a StatsManager is passed to process_frame.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>list</em>[<em>str</em>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.post_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called after there are no more frames to process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – The last position in the video which was read.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of timecodes where scene cuts have been detected, if any.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>list</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.process_frame">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">process_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timecode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.SceneDetector.process_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the next frame. <code class="docutils literal notranslate"><span class="pre">timecode</span></code> is assumed to be sequential.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timecode</strong> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Timecode corresponding to the frame being processed.</p></li>
+<li><p><strong>frame_img</strong> (<em>ndarray</em>) – Video frame as a 24-bit BGR image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of timecodes where scene cuts have been detected, if any.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>list</em>[<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.event_buffer_length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">event_buffer_length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#scenedetect.detector.SceneDetector.event_buffer_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>The amount of frames a given event can be buffered for, in time. This must be set to the
+amount of frames a detector might emit an event in the past.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="scenedetect.detector.SceneDetector.stats_manager">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stats_manager</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><span class="pre">StatsManager</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#scenedetect.detector.SceneDetector.stats_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> to use for
+storing frame metrics. When this detector is added to a parent
+<a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager" title="scenedetect.scene_manager.SceneManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneManager</span></code></a>, then this is set to the
+same <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager" title="scenedetect.stats_manager.StatsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatsManager</span></code></a> of the parent - but
+only if it has one itself.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FlashFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.FlashFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters fast-cuts to enforce minimum scene length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> (<a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode" title="scenedetect.detector.FlashFilter.Mode"><em>Mode</em></a>) – The mode to use when enforcing <code class="docutils literal notranslate"><span class="pre">length</span></code>.</p></li>
+<li><p><strong>length</strong> (<em>int</em><em> | </em><em>float</em><em> | </em><em>str</em><em> | </em><a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><em>Timecode</em></a><em> | </em><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><em>FrameTimecode</em></a>) – Minimum scene length. Accepts any <a class="reference internal" href="common.html#scenedetect.common.TimecodeLike" title="scenedetect.common.TimecodeLike"><code class="xref py py-data docutils literal notranslate"><span class="pre">TimecodeLike</span></code></a> value
+(e.g. <code class="docutils literal notranslate"><span class="pre">int</span></code> frames, <code class="docutils literal notranslate"><span class="pre">float</span></code> seconds, <code class="docutils literal notranslate"><span class="pre">str</span></code> such as <code class="docutils literal notranslate"><span class="pre">&quot;0.6s&quot;</span></code> /
+<code class="docutils literal notranslate"><span class="pre">&quot;00:00:00.600&quot;</span></code>, or a <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a> /
+<a class="reference internal" href="common.html#scenedetect.common.Timecode" title="scenedetect.common.Timecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">Timecode</span></code></a>).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter.Mode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#scenedetect.detector.FlashFilter.Mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Which mode the filter should use for enforcing minimum scene length.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter.Mode.MERGE">
+<span class="sig-name descname"><span class="pre">MERGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#scenedetect.detector.FlashFilter.Mode.MERGE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge consecutive cuts shorter than filter length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="scenedetect.detector.FlashFilter.Mode.SUPPRESS">
+<span class="sig-name descname"><span class="pre">SUPPRESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#scenedetect.detector.FlashFilter.Mode.SUPPRESS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suppress consecutive cuts until the filter length has passed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="scene_manager.html" title="Previous document">Scene Manager</a>
+        </li>
+        <li>
+          <a href="video_stream.html" title="Next document">Stream Interface</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo">
+  <a href="../index.html">
+    <img class="logo psd-logo-light" src="../_static/pyscenedetect_logo_small.png" alt="PySceneDetect" width="300" height="141" />
+    <img class="logo psd-logo-dark" src="../_static/pyscenedetect_logo_small_darkmode.png" alt="PySceneDetect" width="462" height="217" />
+  </a>
+</p>
+<p class="psd-sidebar-subtitle">0.7.4</p>
+<search class="psd-searchbox">
+  <form class="search" action="../search.html" method="get">
+    <input type="search" name="q" aria-label="Search documentation" placeholder="Search docs..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+  </form>
+</search>
+<nav class="psd-sidebar-toc" aria-label="Section navigation">
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-scenedetect">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#adaptivedetector">AdaptiveDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#contentdetector">ContentDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#hashdetector">HashDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#histogramdetector">HistogramDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#thresholddetector">ThresholdDetector</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output.html#splitting-video">Splitting Video</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#saving-images">Saving Images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#scene-lists">Scene Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#filename-formatting">Filename Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#opencv">OpenCV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#pyav">PyAV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#moviepy">MoviePy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#module-scenedetect.backends.concat">Multiple Videos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.concat.VideoStreamConcat"><code class="docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="common.html#timecodes">Timecodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#type-aliases">Type Aliases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Detector Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.get_metrics"><code class="docutils literal notranslate"><span class="pre">get_metrics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.post_process"><code class="docutils literal notranslate"><span class="pre">post_process()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.process_frame"><code class="docutils literal notranslate"><span class="pre">process_frame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.event_buffer_length"><code class="docutils literal notranslate"><span class="pre">event_buffer_length</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.SceneDetector.stats_manager"><code class="docutils literal notranslate"><span class="pre">stats_manager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetect.detector.FlashFilter"><code class="docutils literal notranslate"><span class="pre">FlashFilter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode"><code class="docutils literal notranslate"><span class="pre">Mode</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode.MERGE"><code class="docutils literal notranslate"><span class="pre">MERGE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scenedetect.detector.FlashFilter.Mode.SUPPRESS"><code class="docutils literal notranslate"><span class="pre">SUPPRESS</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="migration_guide.html">Migration Guide (v0.7)</a></li>
+</ul>
+
+</nav>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      <div class="psd-footer-inner">
+        <span class="psd-footer-meta">&#169;2014, Brandon Castellano. | 
+          Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+          &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a> | 
+          <a href="../_sources/api/detector.rst.txt" rel="nofollow">Page source</a>
+        </span>
+        <ul class="psd-footer-links" role="list">
+          <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+          <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+          <li><a href="https://www.scenedetect.com/changelog/">Changelog</a></li>
+          <li><a href="https://www.scenedetect.com/copyright/">License</a></li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

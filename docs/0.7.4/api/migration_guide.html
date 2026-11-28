@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Migration Guide (v0.7) &#8212; PySceneDetect 0.7.4 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pyscenedetect.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Examples" href="../examples.html" />
+    <link rel="prev" title="Platform &amp; Logging" href="platform.html" />
+  <meta name="color-scheme" content="light dark">
+  <script>try{const s=localStorage.getItem("color-scheme");if(s==="light"||s==="dark")document.querySelector('meta[name="color-scheme"]').content=s;}catch(e){}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400..700;1,400..700&display=swap">
+  <!-- Google tag (gtag.js) -->
+  <script>
+    if (
+      location.protocol.startsWith("http") &&
+      location.hostname !== "localhost" &&
+      location.hostname !== "127.0.0.1" &&
+      location.hostname !== "[::1]" &&
+      !navigator.webdriver
+    ) {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", "G-EWBNLVRWW0");
+      const ga = document.createElement("script");
+      ga.async = true;
+      ga.src = "https://www.googletagmanager.com/gtag/js?id=G-EWBNLVRWW0";
+      document.head.appendChild(ga);
+    }
+  </script>
+  <script type="module">
+    (() => {
+      const meta = document.querySelector('meta[name="color-scheme"]');
+      if (meta) {
+        document.addEventListener("click", (e) => {
+          if (!(e.target instanceof Element) || !e.target.closest(".psd-theme-toggle")) return;
+          let stored = null;
+          try {
+            const v = localStorage.getItem("color-scheme");
+            stored = v === "light" || v === "dark" ? v : null;
+          } catch (err) {}
+          const sys = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          const cur = meta.content === "light" || meta.content === "dark" ? meta.content : (stored ?? sys);
+          const next = cur === "dark" ? "light" : "dark";
+          if (next === sys) {
+            try { localStorage.removeItem("color-scheme"); } catch (err) {}
+            meta.content = "light dark";
+          } else {
+            try { localStorage.setItem("color-scheme", next); } catch (err) {}
+            meta.content = next;
+          }
+        });
+        window.addEventListener("storage", (e) => {
+          if (e.key === "color-scheme" || e.key === null) {
+            const v = e.newValue;
+            meta.content = v === "light" || v === "dark" ? v : "light dark";
+          }
+        });
+      }
+
+      const initVersionSwitcher = () => {
+        const switcher = document.querySelector(".psd-version-switcher");
+        const trigger = switcher?.querySelector(".psd-version-btn");
+        const labelEl = switcher?.querySelector(".psd-version-label");
+        const menu = document.getElementById("psd-version-menu");
+        const listEl = menu?.querySelector(".psd-version-list");
+        if (!switcher || !trigger || !menu || !listEl) return;
+
+        const release = switcher.getAttribute("data-release") || "";
+        const pageRel = switcher.getAttribute("data-page-rel") || "";
+        let latestVersion = switcher.getAttribute("data-latest-version") || "";
+        const pathMatch = window.location.pathname.match(/\/docs\/([^/]+)(?:\/|$)/);
+        const activeSlug = pathMatch ? pathMatch[1] : (release.includes("dev") ? "head" : release);
+
+        const isMenuOpen = () => {
+          try {
+            return menu.matches(":popover-open, .\\:popover-open");
+          } catch {
+            return menu.classList.contains(":popover-open");
+          }
+        };
+
+        const syncActiveLink = () => {
+          let matchedLabel = "";
+          const hasExactMatch = Boolean(
+            listEl.querySelector(`a[data-version-slug="${CSS.escape(activeSlug)}"]`)
+          );
+          for (const link of listEl.querySelectorAll("a[data-version-slug]")) {
+            const slug = link.getAttribute("data-version-slug");
+            const isCurrent =
+              slug === activeSlug ||
+              (!hasExactMatch && slug === "latest" && Boolean(latestVersion) && activeSlug === latestVersion);
+            if (isCurrent) {
+              link.setAttribute("aria-current", "true");
+              matchedLabel = link.querySelector(".psd-version-item-label")?.textContent?.trim() || "";
+            } else {
+              link.removeAttribute("aria-current");
+            }
+          }
+          if (pathMatch && matchedLabel && labelEl) {
+            labelEl.textContent = matchedLabel;
+          }
+        };
+        syncActiveLink();
+
+        const supportsAnchorArea =
+          typeof CSS !== "undefined" && typeof CSS.supports === "function" && CSS.supports("position-area: block-end");
+
+        const positionFallback = () => {
+          if (supportsAnchorArea) return;
+          const rect = trigger.getBoundingClientRect();
+          const menuWidth = menu.offsetWidth || 210;
+          const menuHeight = menu.offsetHeight || 260;
+          const pad = 8;
+          let left = rect.right - menuWidth;
+          left = Math.max(pad, Math.min(left, window.innerWidth - menuWidth - pad));
+          let top = rect.bottom + 6;
+          if (top + menuHeight > window.innerHeight - pad && rect.top - menuHeight - 6 >= pad) {
+            top = rect.top - menuHeight - 6;
+          }
+          menu.style.left = `${Math.round(left)}px`;
+          menu.style.top = `${Math.round(top)}px`;
+        };
+
+        let fetchedVersions = false;
+        const maybeLoadRemoteVersions = async () => {
+          if (fetchedVersions) return;
+          fetchedVersions = true;
+          try {
+            const resp = await fetch("/versions.json", { headers: { Accept: "application/json" } });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (!data || !Array.isArray(data.versions) || data.versions.length === 0) return;
+
+            const frag = document.createDocumentFragment();
+            const seen = new Set();
+            let prevGroup = "";
+            let added = 0;
+
+            for (const entry of data.versions) {
+              if (!entry || typeof entry.slug !== "string" || !entry.slug || seen.has(entry.slug)) {
+                continue;
+              }
+              seen.add(entry.slug);
+              const group = typeof entry.group === "string" ? entry.group : "";
+              if (prevGroup && group && prevGroup !== group) {
+                const divLi = document.createElement("li");
+                divLi.className = "psd-version-divider";
+                divLi.setAttribute("role", "presentation");
+                frag.appendChild(divLi);
+              }
+              if (group) prevGroup = group;
+
+              const li = document.createElement("li");
+              const a = document.createElement("a");
+              const hasPage =
+                Boolean(entry.same_layout) &&
+                !(pageRel === "examples.html" && ["0.7", "0.7.1", "0.7.2"].includes(entry.slug));
+              const suffix = hasPage ? pageRel : "";
+              a.href = `https://www.scenedetect.com/docs/${encodeURIComponent(entry.slug)}/${suffix}`;
+              a.setAttribute("data-version-slug", entry.slug);
+              const span = document.createElement("span");
+              span.className = "psd-version-item-label";
+              span.textContent = typeof entry.label === "string" && entry.label ? entry.label : `v${entry.slug}`;
+              a.appendChild(span);
+              a.insertAdjacentHTML(
+                "beforeend",
+                '<svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+              );
+              li.appendChild(a);
+              frag.appendChild(li);
+              added += 1;
+            }
+
+            if (added === 0) return;
+
+            const tailDivider = document.createElement("li");
+            tailDivider.className = "psd-version-divider";
+            tailDivider.setAttribute("role", "presentation");
+            frag.appendChild(tailDivider);
+
+            const allLi = document.createElement("li");
+            const allLink = document.createElement("a");
+            allLink.className = "psd-version-all";
+            allLink.href = "https://www.scenedetect.com/docs/";
+            allLink.innerHTML = '<span>All versions</span><span aria-hidden="true">&rarr;</span>';
+            allLi.appendChild(allLink);
+            frag.appendChild(allLi);
+
+            listEl.replaceChildren(frag);
+            if (typeof data.latest === "string" && data.latest) {
+              latestVersion = data.latest;
+            }
+            syncActiveLink();
+          } catch (err) {
+            // Local builds without /versions.json safely keep the static build-time version list.
+          }
+        };
+
+        menu.addEventListener("toggle", () => {
+          const isOpen = isMenuOpen();
+          trigger.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) {
+            positionFallback();
+            maybeLoadRemoteVersions();
+          }
+        });
+
+        window.addEventListener("resize", () => {
+          if (isMenuOpen()) {
+            positionFallback();
+          }
+        });
+
+        switcher.addEventListener("focusout", (e) => {
+          if (!(e.relatedTarget instanceof Node) || switcher.contains(e.relatedTarget)) return;
+          if (isMenuOpen()) {
+            menu.hidePopover?.();
+          }
+        });
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initVersionSwitcher, { once: true });
+      } else {
+        initVersionSwitcher();
+      }
+    })();
+  </script>
+  
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+<header class="psd-topbar">
+  <div class="psd-topbar-inner">
+    <nav class="psd-topbar-nav" aria-label="Documentation navigation">
+      <a class="psd-backlink" href="https://www.scenedetect.com/">&larr; scenedetect.com</a>
+      <span class="psd-sep" aria-hidden="true">/</span>
+      <a href="../cli.html">CLI Reference</a>
+      <a href="../api.html" class="current">Python API</a>
+      <a href="../examples.html">Examples</a>
+    </nav>
+    <div class="psd-topbar-meta">
+      <div class="psd-version-switcher" data-release="0.7.4" data-page-rel="api/migration_guide.html" data-latest-version="0.7.4">
+        <button
+          type="button"
+          class="psd-version-btn"
+          popovertarget="psd-version-menu"
+          aria-controls="psd-version-menu"
+          aria-expanded="false"
+        >
+          <span class="psd-sr-only">Documentation version: </span>
+          <span class="psd-version-label">v0.7.4</span>
+          <svg class="psd-version-chevron" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="psd-version-menu" class="psd-version-menu" popover="auto">
+          <nav aria-label="Documentation versions">
+            <ul class="psd-version-list">
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/latest/api/migration_guide.html"
+                  data-version-slug="latest" aria-current="true"
+                >
+                  <span class="psd-version-item-label">v0.7.4 (latest)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/head/api/migration_guide.html"
+                  data-version-slug="head"
+                >
+                  <span class="psd-version-item-label">dev (head)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.3/api/migration_guide.html"
+                  data-version-slug="0.7.3"
+                >
+                  <span class="psd-version-item-label">v0.7.3</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.2/api/migration_guide.html"
+                  data-version-slug="0.7.2"
+                >
+                  <span class="psd-version-item-label">v0.7.2</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7.1/api/migration_guide.html"
+                  data-version-slug="0.7.1"
+                >
+                  <span class="psd-version-item-label">v0.7.1</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.7/api/migration_guide.html"
+                  data-version-slug="0.7"
+                >
+                  <span class="psd-version-item-label">v0.7</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a
+                  href="https://www.scenedetect.com/docs/0.6.7/"
+                  data-version-slug="0.6.7"
+                >
+                  <span class="psd-version-item-label">v0.6.7 (legacy)</span>
+                  <svg class="psd-version-check" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                </a>
+              </li>
+              <li class="psd-version-divider" role="presentation"></li>
+              <li>
+                <a class="psd-version-all" href="https://www.scenedetect.com/docs/">
+                  <span>All versions</span>
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <button type="button" class="psd-theme-toggle">
+        <svg class="psd-icon-sun" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="psd-icon-moon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span class="psd-sr-only psd-label-dark">Switch to dark theme</span>
+        <span class="psd-sr-only psd-label-light">Switch to light theme</span>
+      </button>
+      <a class="psd-gh-link" href="https://github.com/Breakthrough/PySceneDetect">
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</header>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="migration-guide-v0-7">
+<span id="scenedetect-migration-guide"></span><h1>Migration Guide (v0.7)<a class="headerlink" href="#migration-guide-v0-7" title="Permalink to this heading">¶</a></h1>
+<p>PySceneDetect v0.7 is a major release that updates timestamp handling to support variable frame rate (VFR) videos. While the high-level <a class="reference internal" href="../api.html#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.detect()</span></code></a> workflow is largely unchanged, several internal APIs changed. This guide lists the updates needed when migrating from v0.6 to v0.7.</p>
+<p>The minimum supported Python version is now <strong>Python 3.10</strong>.</p>
+<section id="quick-check">
+<h2>Quick Check<a class="headerlink" href="#quick-check" title="Permalink to this heading">¶</a></h2>
+<p>If your code only uses <a class="reference internal" href="../api.html#scenedetect.detect" title="scenedetect.detect"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.detect()</span></code></a> with a built-in detector, it should work without changes:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This still works in v0.7</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scenedetect</span><span class="w"> </span><span class="kn">import</span> <span class="n">detect</span><span class="p">,</span> <span class="n">ContentDetector</span>
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">detect</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">ContentDetector</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="import-changes">
+<h2>Import Changes<a class="headerlink" href="#import-changes" title="Permalink to this heading">¶</a></h2>
+<p>Several submodules have been reorganized. If you import directly from <code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> you do not need to make any changes. Update imports as follows:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>v0.6</p></th>
+<th class="head"><p>v0.7</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.frame_timecode</span> <span class="pre">import</span> <span class="pre">FrameTimecode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.common</span> <span class="pre">import</span> <span class="pre">FrameTimecode</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.scene_detector</span> <span class="pre">import</span> <span class="pre">SceneDetector</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.detector</span> <span class="pre">import</span> <span class="pre">SceneDetector</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.video_splitter</span> <span class="pre">import</span> <span class="pre">split_video_ffmpeg</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.output</span> <span class="pre">import</span> <span class="pre">split_video_ffmpeg</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.video_splitter</span> <span class="pre">import</span> <span class="pre">split_video_mkvmerge</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.output</span> <span class="pre">import</span> <span class="pre">split_video_mkvmerge</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.scene_manager</span> <span class="pre">import</span> <span class="pre">save_images</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.output</span> <span class="pre">import</span> <span class="pre">save_images</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.scene_manager</span> <span class="pre">import</span> <span class="pre">write_scene_list</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.output</span> <span class="pre">import</span> <span class="pre">write_scene_list</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.scene_manager</span> <span class="pre">import</span> <span class="pre">write_scene_list_html</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.output</span> <span class="pre">import</span> <span class="pre">write_scene_list_html</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect.video_manager</span> <span class="pre">import</span> <span class="pre">VideoManager</span></code></p></td>
+<td><p>Removed. Use <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a> instead.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Most commonly used types and functions are also available directly from the top-level <code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> package (e.g. <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">scenedetect</span> <span class="pre">import</span> <span class="pre">FrameTimecode</span></code>), which has not changed.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">frame_timecode</span></code>, <code class="docutils literal notranslate"><span class="pre">scene_detector</span></code>, and <code class="docutils literal notranslate"><span class="pre">video_splitter</span></code> submodules emit a <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> when imported directly. The <code class="docutils literal notranslate"><span class="pre">save_images</span></code>, <code class="docutils literal notranslate"><span class="pre">write_scene_list</span></code>, and <code class="docutils literal notranslate"><span class="pre">write_scene_list_html</span></code> re-exports from <code class="docutils literal notranslate"><span class="pre">scenedetect.scene_manager</span></code> continue to work silently in v0.7 but <strong>will be removed in v0.8</strong>. Import these symbols from <code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> directly to avoid breakage.</p>
+</div>
+</section>
+<section id="custom-detector-changes">
+<h2>Custom Detector Changes<a class="headerlink" href="#custom-detector-changes" title="Permalink to this heading">¶</a></h2>
+<p>If you have written a custom <a class="reference internal" href="detector.html#scenedetect.detector.SceneDetector" title="scenedetect.detector.SceneDetector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SceneDetector</span></code></a> subclass, there are several interface changes.</p>
+<section id="process-frame-signature">
+<h3><code class="docutils literal notranslate"><span class="pre">process_frame</span></code> Signature<a class="headerlink" href="#process-frame-signature" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">frame_num</span></code> parameter (<code class="docutils literal notranslate"><span class="pre">int</span></code>) has been replaced with <code class="docutils literal notranslate"><span class="pre">timecode</span></code> (<a class="reference internal" href="common.html#scenedetect.common.FrameTimecode" title="scenedetect.common.FrameTimecode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># v0.6</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyDetector</span><span class="p">(</span><span class="n">SceneDetector</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">frame_img</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="o">...</span>
+
+<span class="c1"># v0.7</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyDetector</span><span class="p">(</span><span class="n">SceneDetector</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timecode</span><span class="p">:</span> <span class="n">FrameTimecode</span><span class="p">,</span> <span class="n">frame_img</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">FrameTimecode</span><span class="p">]:</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>The same change applies to <code class="docutils literal notranslate"><span class="pre">post_process()</span></code>. Using timecodes instead of frame numbers keeps timing accurate on VFR video. Use <code class="docutils literal notranslate"><span class="pre">timecode.frame_num</span></code> if you need an integer frame number.</p>
+</section>
+<section id="scenedetector-is-now-abstract">
+<h3><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code> is Now Abstract<a class="headerlink" href="#scenedetector-is-now-abstract" title="Permalink to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code> is now a Python <a class="reference external" href="https://docs.python.org/3/library/abc.html">abstract class</a>. Subclasses <strong>must</strong> implement <code class="docutils literal notranslate"><span class="pre">process_frame()</span></code>.</p>
+</section>
+<section id="removed-methods-and-properties">
+<h3>Removed Methods and Properties<a class="headerlink" href="#removed-methods-and-properties" title="Permalink to this heading">¶</a></h3>
+<p>The following have been removed from the <code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code> interface:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">is_processing_required()</span></code> - detectors can now assume they always have frame data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stats_manager_required</span></code> property - no longer needed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SparseSceneDetector</span></code> interface - removed entirely</p></li>
+</ul>
+</section>
+</section>
+<section id="frametimecode-changes">
+<h2><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> Changes<a class="headerlink" href="#frametimecode-changes" title="Permalink to this heading">¶</a></h2>
+<section id="read-only-properties">
+<h3>Read-Only Properties<a class="headerlink" href="#read-only-properties" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.frame_num" title="scenedetect.common.FrameTimecode.frame_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_num</span></code></a> and <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.frame_rate" title="scenedetect.common.FrameTimecode.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a> are now read-only properties. To change them, construct a new <code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tc</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">24.0</span><span class="p">)</span>
+<span class="c1"># Can no longer reassign frame_num, must create a new FrameTimecode instead:</span>
+<span class="c1">#tc.frame_num = 100</span>
+<span class="n">tc</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">tc</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="new-properties">
+<h3>New Properties<a class="headerlink" href="#new-properties" title="Permalink to this heading">¶</a></h3>
+<p>Access <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.frame_num" title="scenedetect.common.FrameTimecode.frame_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_num</span></code></a>, <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.frame_rate" title="scenedetect.common.FrameTimecode.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a>, and <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.seconds" title="scenedetect.common.FrameTimecode.seconds"><code class="xref py py-attr docutils literal notranslate"><span class="pre">seconds</span></code></a> as properties instead of getter methods. The new <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.frame_rate" title="scenedetect.common.FrameTimecode.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a> property returns an exact <code class="xref py py-class docutils literal notranslate"><span class="pre">fractions.Fraction</span></code> and matches <a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream.frame_rate" title="scenedetect.video_stream.VideoStream.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fractions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fraction</span>
+<span class="n">tc</span> <span class="o">=</span> <span class="n">FrameTimecode</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mf">29.97</span><span class="p">)</span>
+<span class="n">tc</span><span class="o">.</span><span class="n">frame_num</span>    <span class="c1"># 100</span>
+<span class="n">tc</span><span class="o">.</span><span class="n">frame_rate</span>   <span class="c1"># Fraction(30000, 1001) (exact)</span>
+<span class="n">tc</span><span class="o">.</span><span class="n">time_base</span>    <span class="c1"># Fraction(1001, 30000)</span>
+<span class="n">tc</span><span class="o">.</span><span class="n">seconds</span>      <span class="c1"># ~3.337</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">time_base</span></code> equals <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">frame_rate</span></code> for CFR sources. For VFR (<code class="docutils literal notranslate"><span class="pre">Timecode</span></code>-backed) instances, <code class="docutils literal notranslate"><span class="pre">time_base</span></code> is authoritative and <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> is an approximation.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Fraction</span></code> participates in numeric arithmetic and comparisons just like <code class="docutils literal notranslate"><span class="pre">float</span></code>, and converts implicitly when mixed with floats (the result is a <code class="docutils literal notranslate"><span class="pre">float</span></code>). When a <code class="docutils literal notranslate"><span class="pre">float</span></code> is explicitly required (e.g. format specifiers, <code class="docutils literal notranslate"><span class="pre">json.dumps</span></code>, <code class="docutils literal notranslate"><span class="pre">isinstance(x,</span> <span class="pre">float)</span></code> checks) wrap the value with <code class="docutils literal notranslate"><span class="pre">float(...)</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rate</span> <span class="o">=</span> <span class="n">tc</span><span class="o">.</span><span class="n">frame_rate</span>            <span class="c1"># Fraction(30000, 1001)</span>
+<span class="n">rate</span> <span class="o">*</span> <span class="mi">2</span>                        <span class="c1"># Fraction(60000, 1001)</span>
+<span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">24</span>                       <span class="c1"># True</span>
+<span class="n">rate</span> <span class="o">*</span> <span class="mf">0.5</span>                      <span class="c1"># 14.985... (float, mixed arithmetic)</span>
+<span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span>            <span class="c1"># '29.970' (explicit cast for format spec)</span>
+</pre></div>
+</div>
+<p>The legacy <code class="docutils literal notranslate"><span class="pre">framerate</span></code> property (one word, returns <code class="docutils literal notranslate"><span class="pre">float</span></code>) is retained as a deprecated alias and emits a <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> (scheduled for removal in v0.9). Migrate to <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code>; cast with <code class="docutils literal notranslate"><span class="pre">float(...)</span></code> at the call site if you specifically need a <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p>
+</section>
+<section id="renamed-method-equal-framerate">
+<h3>Renamed Method: <code class="docutils literal notranslate"><span class="pre">equal_framerate()</span></code><a class="headerlink" href="#renamed-method-equal-framerate" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.equal_framerate" title="scenedetect.common.FrameTimecode.equal_framerate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">equal_framerate()</span></code></a> has been renamed to <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.equal_frame_rate" title="scenedetect.common.FrameTimecode.equal_frame_rate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">equal_frame_rate()</span></code></a> for consistency with the <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.frame_rate" title="scenedetect.common.FrameTimecode.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a> property. The legacy <code class="docutils literal notranslate"><span class="pre">equal_framerate()</span></code> method is retained as a deprecated alias and emits a <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> (scheduled for removal in v0.9). The new form additionally accepts a <code class="docutils literal notranslate"><span class="pre">Fraction</span></code> or another <code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> (in addition to <code class="docutils literal notranslate"><span class="pre">float</span></code>).</p>
+</section>
+<section id="removed-methods">
+<h3>Removed Methods<a class="headerlink" href="#removed-methods" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">previous_frame()</span></code> - removed, use <code class="docutils literal notranslate"><span class="pre">FrameTimecode(tc.frame_num</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">tc)</span></code> instead (passing a <code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> as the <code class="docutils literal notranslate"><span class="pre">fps</span></code> argument reuses its rate)</p></li>
+</ul>
+</section>
+</section>
+<section id="frame-rate-and-timestamp-changes">
+<h2>Frame Rate and Timestamp Changes<a class="headerlink" href="#frame-rate-and-timestamp-changes" title="Permalink to this heading">¶</a></h2>
+<section id="rational-frame-rates">
+<h3>Rational Frame Rates<a class="headerlink" href="#rational-frame-rates" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream.frame_rate" title="scenedetect.video_stream.VideoStream.frame_rate"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_rate</span></code></a> now returns a <code class="docutils literal notranslate"><span class="pre">Fraction</span></code> instead of <code class="docutils literal notranslate"><span class="pre">float</span></code>. Common NTSC rates (23.976, 29.97, 59.94) are automatically detected from float values:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fractions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Fraction</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">video</span><span class="o">.</span><span class="n">frame_rate</span><span class="p">,</span> <span class="n">Fraction</span><span class="p">)</span>
+<span class="c1"># e.g. Fraction(24000, 1001) instead of 23.976023976...</span>
+</pre></div>
+</div>
+</section>
+<section id="frame-rate-keyword-argument">
+<h3><code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> Keyword Argument<a class="headerlink" href="#frame-rate-keyword-argument" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">framerate</span></code> keyword argument has been renamed to <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> on <a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">open_video()</span></code></a> and on every backend constructor (<a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoStreamCv2" title="scenedetect.backends.opencv.VideoStreamCv2"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a>, <a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoCaptureAdapter" title="scenedetect.backends.opencv.VideoCaptureAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoCaptureAdapter</span></code></a>, <a class="reference internal" href="backends.html#scenedetect.backends.pyav.VideoStreamAv" title="scenedetect.backends.pyav.VideoStreamAv"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a>, <a class="reference internal" href="backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy" title="scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="xref py py-class docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a>). The new form accepts <code class="docutils literal notranslate"><span class="pre">float</span> <span class="pre">|</span> <span class="pre">Fraction</span> <span class="pre">|</span> <span class="pre">None</span></code>. The legacy <code class="docutils literal notranslate"><span class="pre">framerate</span></code> keyword is retained as a deprecated alias and emits a <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> (scheduled for removal in v0.9); if both are supplied, <code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> takes precedence.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># v0.6 - will still work but will be removed in a future version</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">framerate</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span>
+
+<span class="c1"># v0.7</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">open_video</span><span class="p">(</span><span class="s2">"video.mp4"</span><span class="p">,</span> <span class="n">frame_rate</span><span class="o">=</span><span class="mf">30.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="pts-backed-timestamps">
+<h3>PTS-Backed Timestamps<a class="headerlink" href="#pts-backed-timestamps" title="Permalink to this heading">¶</a></h3>
+<p>All backends now return presentation timestamp (PTS) backed values from <a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream.position" title="scenedetect.video_stream.VideoStream.position"><code class="xref py py-attr docutils literal notranslate"><span class="pre">position</span></code></a>. This enables correct handling of VFR videos.</p>
+<p><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> has new <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.time_base" title="scenedetect.common.FrameTimecode.time_base"><code class="xref py py-attr docutils literal notranslate"><span class="pre">time_base</span></code></a> and <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.pts" title="scenedetect.common.FrameTimecode.pts"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pts</span></code></a> properties for accessing the underlying timing information. For VFR videos, <a class="reference internal" href="common.html#scenedetect.common.FrameTimecode.frame_num" title="scenedetect.common.FrameTimecode.frame_num"><code class="xref py py-attr docutils literal notranslate"><span class="pre">frame_num</span></code></a> is now an approximation based on PTS-derived time rather than a sequential count.</p>
+</section>
+</section>
+<section id="statsmanager-changes">
+<h2><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code> Changes<a class="headerlink" href="#statsmanager-changes" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">StatsManager</span></code> methods <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager.get_metrics" title="scenedetect.stats_manager.StatsManager.get_metrics"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_metrics()</span></code></a>, <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager.set_metrics" title="scenedetect.stats_manager.StatsManager.set_metrics"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_metrics()</span></code></a>, and <a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager.metrics_exist" title="scenedetect.stats_manager.StatsManager.metrics_exist"><code class="xref py py-meth docutils literal notranslate"><span class="pre">metrics_exist()</span></code></a> now formally accept either a <code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> or a plain <code class="docutils literal notranslate"><span class="pre">int</span></code> frame number for the timecode argument. Passing a <code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> is preferred and matches the detector interface; the <code class="docutils literal notranslate"><span class="pre">int</span></code> form is retained for compatibility with the deprecated <code class="docutils literal notranslate"><span class="pre">load_from_csv()</span></code> path, which keys metrics by integer frame number.</p>
+<p><code class="docutils literal notranslate"><span class="pre">StatsManager.load_from_csv()</span></code> also accepts <code class="docutils literal notranslate"><span class="pre">os.PathLike</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">pathlib.Path</span></code>) in addition to <code class="docutils literal notranslate"><span class="pre">str</span></code> / <code class="docutils literal notranslate"><span class="pre">bytes</span></code> / file handles.</p>
+</section>
+<section id="scenedetector-annotation-fixes">
+<h2><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code> Annotation Fixes<a class="headerlink" href="#scenedetector-annotation-fixes" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference internal" href="detector.html#scenedetect.detector.SceneDetector.post_process" title="scenedetect.detector.SceneDetector.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> now declares its parameter as <code class="docutils literal notranslate"><span class="pre">timecode:</span> <span class="pre">FrameTimecode</span></code> (previously typed as <code class="docutils literal notranslate"><span class="pre">int</span></code>). The method already received a <code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> at runtime and built-in detectors (such as <code class="docutils literal notranslate"><span class="pre">ThresholdDetector</span></code> and <code class="docutils literal notranslate"><span class="pre">ContentDetector</span></code>) already used <code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code>. Only the abstract base class annotation differed; no call-site changes are needed.</p>
+</section>
+<section id="scenemanager-detect-scenes-time-arguments">
+<h2><code class="docutils literal notranslate"><span class="pre">SceneManager.detect_scenes()</span></code> Time Arguments<a class="headerlink" href="#scenemanager-detect-scenes-time-arguments" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">duration</span></code> and <code class="docutils literal notranslate"><span class="pre">end_time</span></code> arguments of <a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager.detect_scenes" title="scenedetect.scene_manager.SceneManager.detect_scenes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">detect_scenes()</span></code></a> now formally accept <code class="docutils literal notranslate"><span class="pre">int</span></code> (frames), <code class="docutils literal notranslate"><span class="pre">float</span></code> (seconds), <code class="docutils literal notranslate"><span class="pre">str</span></code> (timecode string, e.g. <code class="docutils literal notranslate"><span class="pre">&quot;00:00:05.000&quot;</span></code>), or <code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code>. The internal code already validated these forms; the annotation was previously narrower than the documented behavior.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># All of these were always supported at runtime; now they type-check too:</span>
+<span class="n">scene_manager</span><span class="o">.</span><span class="n">detect_scenes</span><span class="p">(</span><span class="n">video</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="mf">15.0</span><span class="p">)</span>         <span class="c1"># seconds</span>
+<span class="n">scene_manager</span><span class="o">.</span><span class="n">detect_scenes</span><span class="p">(</span><span class="n">video</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="mi">1500</span><span class="p">)</span>         <span class="c1"># frames</span>
+<span class="n">scene_manager</span><span class="o">.</span><span class="n">detect_scenes</span><span class="p">(</span><span class="n">video</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="s2">"00:01:00"</span><span class="p">)</span>   <span class="c1"># timecode</span>
+</pre></div>
+</div>
+</section>
+<section id="save-images-path-handling">
+<h2><code class="docutils literal notranslate"><span class="pre">save_images()</span></code> Path Handling<a class="headerlink" href="#save-images-path-handling" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">output_dir</span></code> argument of <a class="reference internal" href="output.html#scenedetect.output.save_images" title="scenedetect.output.save_images"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.output.save_images()</span></code></a> now accepts <code class="docutils literal notranslate"><span class="pre">os.PathLike</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">pathlib.Path</span></code>) in addition to <code class="docutils literal notranslate"><span class="pre">str</span></code>. No changes are required for existing string-based callers.</p>
+</section>
+<section id="removed-apis">
+<h2>Removed APIs<a class="headerlink" href="#removed-apis" title="Permalink to this heading">¶</a></h2>
+<p>The following deprecated APIs have been fully removed in v0.7:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Removed</p></th>
+<th class="head"><p>Replacement</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scenedetect.video_manager</span></code> module</p></td>
+<td><p><a class="reference internal" href="../api.html#scenedetect.open_video" title="scenedetect.open_video"><code class="xref py py-func docutils literal notranslate"><span class="pre">scenedetect.open_video()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">base_timecode</span></code> parameter (various functions)</p></td>
+<td><p>No longer needed, remove the argument</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">video_manager</span></code> parameter (various functions)</p></td>
+<td><p>Use <code class="docutils literal notranslate"><span class="pre">video</span></code> parameter instead</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SceneManager.get_event_list()</span></code></p></td>
+<td><p>Use <a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager.get_cut_list" title="scenedetect.scene_manager.SceneManager.get_cut_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_cut_list()</span></code></a> or <a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager.get_scene_list" title="scenedetect.scene_manager.SceneManager.get_scene_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_scene_list()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector.get_content_val()</span></code></p></td>
+<td><p>Use <code class="docutils literal notranslate"><span class="pre">StatsManager</span></code> to query metrics</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AdaptiveDetector(min_delta_hsv=...)</span></code></p></td>
+<td><p>Use <code class="docutils literal notranslate"><span class="pre">min_content_val</span></code> parameter instead</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">VideoStream.read(advance=...)</span></code></p></td>
+<td><p>Call <code class="docutils literal notranslate"><span class="pre">read()</span></code> without the <code class="docutils literal notranslate"><span class="pre">advance</span></code> parameter</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SparseSceneDetector</span></code></p></td>
+<td><p>No direct replacement, use <code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Deprecated v0.6 compatibility shims that still exist now emit warnings using the <code class="docutils literal notranslate"><span class="pre">warnings</span></code> module. Address any <code class="docutils literal notranslate"><span class="pre">DeprecationWarning</span></code> messages to prepare for future releases.</p>
+</div>
+</section>
+<section id="cli-changes">
+<h2>CLI Changes<a class="headerlink" href="#cli-changes" title="Permalink to this heading">¶</a></h2>
+<section id="removed-renamed">
+<h3>Removed / Renamed<a class="headerlink" href="#removed-renamed" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">-d</span></code>/<code class="docutils literal notranslate"><span class="pre">--min-delta-hsv</span></code> option on <code class="docutils literal notranslate"><span class="pre">detect-adaptive</span></code> has been removed. Use <code class="docutils literal notranslate"><span class="pre">-c</span></code>/<code class="docutils literal notranslate"><span class="pre">--min-content-val</span></code> instead.</p></li>
+<li><p>The global <code class="docutils literal notranslate"><span class="pre">--framerate</span></code> flag has been renamed to <code class="docutils literal notranslate"><span class="pre">-f</span></code>/<code class="docutils literal notranslate"><span class="pre">--frame-rate</span></code> for consistency with the API. The legacy <code class="docutils literal notranslate"><span class="pre">--framerate</span></code> form is retained as a hidden alias and will be removed in v0.8; if both are supplied, <code class="docutils literal notranslate"><span class="pre">--frame-rate</span></code> takes precedence and a warning is logged.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">export-html</span></code> command has been renamed to <a class="reference internal" href="../cli.html#command-save-html"><span class="std std-ref">save-html</span></a>. The legacy <code class="docutils literal notranslate"><span class="pre">export-html</span></code> command is retained as a deprecated alias and emits a deprecation warning when used.</p></li>
+</ul>
+</section>
+<section id="new-commands-and-options">
+<h3>New Commands and Options<a class="headerlink" href="#new-commands-and-options" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>New <a class="reference internal" href="../cli.html#command-save-fcp"><span class="std std-ref">save-fcp</span></a> command exports scenes in Final Cut Pro XML format (FCP7/FCPX).</p></li>
+<li><p>New <a class="reference internal" href="../cli.html#command-save-qp"><span class="std std-ref">save-qp</span></a> command writes a QP file with scene boundary frame numbers, suitable for forcing keyframes at scene cuts in x264/x265.</p></li>
+<li><p>New <a class="reference internal" href="../cli.html#command-save-html"><span class="std std-ref">save-html</span></a> command (replaces <code class="docutils literal notranslate"><span class="pre">export-html</span></code>).</p></li>
+<li><p>New <code class="docutils literal notranslate"><span class="pre">-s</span></code>/<code class="docutils literal notranslate"><span class="pre">--start-timecode</span></code> option on <a class="reference internal" href="../cli.html#command-save-edl"><span class="std std-ref">save-edl</span></a> provides a custom start timecode for generated EDLs (SMPTE <code class="docutils literal notranslate"><span class="pre">HH:MM:SS:FF</span></code> or 8-digit <code class="docutils literal notranslate"><span class="pre">HHMMSSFF</span></code>).</p></li>
+</ul>
+</section>
+<section id="other-changes">
+<h3>Other Changes<a class="headerlink" href="#other-changes" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>VFR videos now work correctly with both the OpenCV and PyAV backends.</p></li>
+<li><p>All CLI options that previously accepted only frame numbers now also accept seconds (e.g. <code class="docutils literal notranslate"><span class="pre">0.6s</span></code>) and timecodes (e.g. <code class="docutils literal notranslate"><span class="pre">00:00:00.600</span></code>).</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+        <li>
+          &larr;
+          <a href="platform.html" title="Previous document">Platform &amp; Logging</a>
+        </li>
+        <li>
+          <a href="../examples.html" title="Next document">Examples</a>
+          &rarr;
+        </li>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><p class="logo">
+  <a href="../index.html">
+    <img class="logo psd-logo-light" src="../_static/pyscenedetect_logo_small.png" alt="PySceneDetect" width="300" height="141" />
+    <img class="logo psd-logo-dark" src="../_static/pyscenedetect_logo_small_darkmode.png" alt="PySceneDetect" width="462" height="217" />
+  </a>
+</p>
+<p class="psd-sidebar-subtitle">0.7.4</p>
+<search class="psd-searchbox">
+  <form class="search" action="../search.html" method="get">
+    <input type="search" name="q" aria-label="Search documentation" placeholder="Search docs..." autocapitalize="off" autocorrect="off" spellcheck="false" />
+  </form>
+</search>
+<nav class="psd-sidebar-toc" aria-label="Section navigation">
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html"><code class="docutils literal notranslate"><span class="pre">scenedetect</span></code> Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#module-scenedetect">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detectors.html">Detectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#adaptivedetector">AdaptiveDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#contentdetector">ContentDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#hashdetector">HashDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#histogramdetector">HistogramDetector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detectors.html#thresholddetector">ThresholdDetector</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output.html#splitting-video">Splitting Video</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#saving-images">Saving Images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#scene-lists">Scene Lists</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html#filename-formatting">Filename Formatting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Video Backends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#opencv">OpenCV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.opencv.VideoStreamCv2"><code class="docutils literal notranslate"><span class="pre">VideoStreamCv2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#pyav">PyAV</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.pyav.VideoStreamAv"><code class="docutils literal notranslate"><span class="pre">VideoStreamAv</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#moviepy">MoviePy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.moviepy.VideoStreamMoviePy"><code class="docutils literal notranslate"><span class="pre">VideoStreamMoviePy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="backends.html#module-scenedetect.backends.concat">Multiple Videos</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="backends.html#scenedetect.backends.concat.VideoStreamConcat"><code class="docutils literal notranslate"><span class="pre">VideoStreamConcat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">Common</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="common.html#timecodes">Timecodes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.FrameTimecode"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="common.html#type-aliases">Type Aliases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.SceneList"><code class="docutils literal notranslate"><span class="pre">SceneList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="common.html#scenedetect.common.CutList"><code class="docutils literal notranslate"><span class="pre">CutList</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="scene_manager.html">Scene Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.SceneManager"><code class="docutils literal notranslate"><span class="pre">SceneManager</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="scene_manager.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scene_manager.html#scenedetect.scene_manager.get_scenes_from_cuts"><code class="docutils literal notranslate"><span class="pre">get_scenes_from_cuts()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="detector.html">Detector Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="detector.html#scenedetect.detector.SceneDetector"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="video_stream.html">Stream Interface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="video_stream.html#scenedetect.video_stream.VideoStream"><code class="docutils literal notranslate"><span class="pre">VideoStream</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats_manager.html">Stats Manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stats_manager.html#scenedetect.stats_manager.StatsManager"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="platform.html">Platform &amp; Logging</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Migration Guide (v0.7)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quick-check">Quick Check</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#import-changes">Import Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-detector-changes">Custom Detector Changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#process-frame-signature"><code class="docutils literal notranslate"><span class="pre">process_frame</span></code> Signature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scenedetector-is-now-abstract"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code> is Now Abstract</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#removed-methods-and-properties">Removed Methods and Properties</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#frametimecode-changes"><code class="docutils literal notranslate"><span class="pre">FrameTimecode</span></code> Changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#read-only-properties">Read-Only Properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#new-properties">New Properties</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#renamed-method-equal-framerate">Renamed Method: <code class="docutils literal notranslate"><span class="pre">equal_framerate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#removed-methods">Removed Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#frame-rate-and-timestamp-changes">Frame Rate and Timestamp Changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rational-frame-rates">Rational Frame Rates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#frame-rate-keyword-argument"><code class="docutils literal notranslate"><span class="pre">frame_rate</span></code> Keyword Argument</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pts-backed-timestamps">PTS-Backed Timestamps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#statsmanager-changes"><code class="docutils literal notranslate"><span class="pre">StatsManager</span></code> Changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenedetector-annotation-fixes"><code class="docutils literal notranslate"><span class="pre">SceneDetector</span></code> Annotation Fixes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scenemanager-detect-scenes-time-arguments"><code class="docutils literal notranslate"><span class="pre">SceneManager.detect_scenes()</span></code> Time Arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-images-path-handling"><code class="docutils literal notranslate"><span class="pre">save_images()</span></code> Path Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#removed-apis">Removed APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cli-changes">CLI Changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#removed-renamed">Removed / Renamed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#new-commands-and-options">New Commands and Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#other-changes">Other Changes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</nav>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      <div class="psd-footer-inner">
+        <span class="psd-footer-meta">&#169;2014, Brandon Castellano. | 
+          Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.0.1</a>
+          &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a> | 
+          <a href="../_sources/api/migration_guide.rst.txt" rel="nofollow">Page source</a>
+        </span>
+        <ul class="psd-footer-links" role="list">
+          <li><a href="https://github.com/Breakthrough/PySceneDetect">GitHub</a></li>
+          <li><a href="https://pypi.org/project/scenedetect/">PyPI</a></li>
+          <li><a href="https://www.scenedetect.com/changelog/">Changelog</a></li>
+          <li><a href="https://www.scenedetect.com/copyright/">License</a></li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
