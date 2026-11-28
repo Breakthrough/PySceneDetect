@@ -35,6 +35,7 @@ from scenedetect.detectors import (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    SolidColorDetector,
     ThresholdDetector,
 )
 from scenedetect.output import is_ffmpeg_available, is_mkvmerge_available
@@ -105,6 +106,8 @@ class CliContext:
         self.save_images: bool = False  # True if the save-images command was specified
         # Result of save-images used by save-html: (image filenames, output directory).
         self.save_images_result: tuple[dict[int, list[str]], str | None] | None = None
+        self.solid_detector: SolidColorDetector | None = None
+        self.requires_scene_detection: bool = False
 
         # Input:
         self.video_stream: VideoStream | None = None
@@ -129,12 +132,18 @@ class CliContext:
         # the results of the detection pipeline by the controller.
         self.commands: list[tuple[ty.Callable, dict[str, ty.Any]]] = []
 
-    def add_command(self, command: ty.Callable, command_args: dict[str, ty.Any]):
+    def add_command(
+        self,
+        command: ty.Callable,
+        command_args: dict[str, ty.Any],
+        requires_scenes: bool = True,
+    ):
         """Add `command` to the processing pipeline. Will be called after processing the input."""
         if "output" in command_args and command_args["output"] is None:
             command_args["output"] = self.output
         logger.debug("Adding command: %s(%s)", command.__name__, command_args)
         self.commands.append((command, command_args))
+        self.requires_scene_detection |= requires_scenes
 
     def add_detector(self, detector: type[SceneDetector], detector_args: dict[str, ty.Any]):
         """Instantiate and add `detector` to the processing pipeline."""
@@ -145,10 +154,17 @@ class CliContext:
         self.scene_manager.add_detector(detector(**detector_args))
 
     def ensure_detector(self):
-        """Ensures at least one detector has been instantiated, otherwise adds a default one."""
+        """Add the default cut detector when scene detection is required."""
         assert self.scene_manager is not None
         assert self.default_detector is not None
-        if self.scene_manager.get_num_detectors() == 0:
+        # The solid-color observer never emits cuts and must not suppress implicit scene
+        # detection for other commands. Resolve this after all commands have been registered.
+        num_cut_detectors = self.scene_manager.get_num_detectors() - int(
+            self.solid_detector is not None
+        )
+        if num_cut_detectors == 0 and (
+            self.solid_detector is None or self.requires_scene_detection or self.stats_file_path
+        ):
             logger.debug("No detector specified, adding default detector.")
             (detector_type, detector_args) = self.default_detector
             self.add_detector(detector_type, detector_args)

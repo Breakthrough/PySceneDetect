@@ -194,6 +194,11 @@ CONCORDANCE: dict[str, list[Counterpart]] = {
             api=(f":func:`~{_OUT}.write_scene_list`",),
         ),
         Counterpart(
+            "Solid-color intervals (CSV)",
+            command="list-solid",
+            api=(f":class:`~{_DET}.solid_color_detector.SolidColorDetector`",),
+        ),
+        Counterpart(
             "Scene list (HTML)",
             command="save-html",
             api=(f":func:`~{_OUT}.write_scene_list_html`",),
@@ -824,6 +829,7 @@ CLI_INDEX_COMMAND_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
         "Scene Lists & Exports",
         (
             "list-scenes",
+            "list-solid",
             "save-html",
             "save-edl",
             "save-fcp",

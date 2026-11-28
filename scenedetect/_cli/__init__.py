@@ -45,6 +45,7 @@ from scenedetect.detectors import (
     ContentDetector,
     HashDetector,
     HistogramDetector,
+    SolidColorDetector,
     ThresholdDetector,
 )
 from scenedetect.platform import get_cv2_imwrite_params, get_system_version_info
@@ -1022,6 +1023,8 @@ def load_scenes_command(ctx: click.Context, input: str | None, start_col_name: s
     assert isinstance(ctx, CliContext)
 
     check_not_stdin(ctx, "load-scenes")
+    if ctx.solid_detector is not None:
+        raise click.ClickException("The list-solid command cannot be used with load-scenes.")
     logger.debug("Will load scenes from %s (start_col_name = %s)", input, start_col_name)
     assert ctx.scene_manager is not None
     if ctx.scene_manager.get_num_detectors() > 0:
@@ -1140,6 +1143,85 @@ Without cut list (RFC 4180 compliant CSV):
 
     {scenedetect_with_video} list-scenes --skip-cuts
 """
+
+
+@click.command("list-solid", cls=Command)
+@click.option(
+    "--filename",
+    "-f",
+    metavar="NAME",
+    type=click.STRING,
+    default=None,
+    help="Filename format to use. Supports $VIDEO_NAME.{}".format(
+        USER_CONFIG.get_help_string("list-solid", "filename")
+    ),
+)
+@click.option(
+    "--output",
+    "-o",
+    metavar="DIR",
+    type=click.Path(exists=False, dir_okay=True, writable=True, resolve_path=False),
+    help="Output directory. Overrides global -o/--output.{}".format(
+        USER_CONFIG.get_help_string("list-solid", "output", show_default=False)
+    ),
+)
+@click.option(
+    "--threshold",
+    type=_click_range("list-solid", "threshold"),
+    default=None,
+    help="Maximum per-channel spatial standard deviation for a solid-color frame.{}".format(
+        USER_CONFIG.get_help_string("list-solid", "threshold")
+    ),
+)
+@click.option(
+    "--min-frames",
+    type=_click_range("list-solid", "min-frames"),
+    default=None,
+    help="Minimum number of consecutive solid-color frames to report.{}".format(
+        USER_CONFIG.get_help_string("list-solid", "min-frames")
+    ),
+)
+@click.pass_context
+def list_solid_command(
+    ctx: click.Context,
+    filename: str | None,
+    output: str | None,
+    threshold: float | None,
+    min_frames: int | None,
+):
+    """Save solid-color frame intervals to CSV without changing scene cuts.
+
+    Intervals use the standard scene CSV columns and source-video timecodes. Combine with
+    scene output commands to generate both reports in one detection pass.
+
+    Classification uses frames after global cropping and resizing. Use --downscale 1 before
+    this command to preserve small image details that downscaling can remove.
+    """
+    ctx = ctx.obj
+    assert isinstance(ctx, CliContext)
+    if ctx.solid_detector is not None:
+        raise click.ClickException("The list-solid command must only be specified once.")
+    if ctx.load_scenes_input:
+        raise click.ClickException("The list-solid command cannot be used with load-scenes.")
+    if ctx.frame_skip:
+        raise click.ClickException("The list-solid command cannot be used with --frame-skip.")
+    assert ctx.scene_manager is not None
+    try:
+        ctx.solid_detector = SolidColorDetector(
+            threshold=ctx.config.get_value("list-solid", "threshold", threshold),
+            min_frames=ctx.config.get_value("list-solid", "min-frames", min_frames),
+        )
+    except ValueError as ex:
+        raise click.BadParameter(str(ex), param_hint="list-solid") from ex
+    ctx.scene_manager.add_detector(ctx.solid_detector)
+    ctx.add_command(
+        cli_commands.list_solid,
+        {
+            "filename": ctx.config.get_value("list-solid", "filename", filename),
+            "output": ctx.config.get_value("list-solid", "output", output),
+        },
+        requires_scenes=False,
+    )
 
 
 @click.command("list-scenes", cls=Command, help=LIST_SCENES_HELP)
@@ -2082,6 +2164,7 @@ scenedetect.add_command(detect_threshold_command)
 
 # Output
 scenedetect.add_command(list_scenes_command)
+scenedetect.add_command(list_solid_command)
 scenedetect.add_command(save_chapters_command)
 scenedetect.add_command(save_edl_command)
 scenedetect.add_command(save_html_command)

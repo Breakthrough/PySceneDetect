@@ -27,6 +27,7 @@
     - **Scene Lists & Exports**
 
       - :ref:`list-scenes <command-list-scenes>`
+      - :ref:`list-solid <command-list-solid>`
       - :ref:`save-html <command-save-html>`
       - :ref:`save-edl <command-save-edl>`
       - :ref:`save-fcp <command-save-fcp>`

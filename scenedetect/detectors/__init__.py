@@ -29,6 +29,9 @@ This module contains the following scene detection algorithms:
  * :mod:`HashDetector <scenedetect.detectors.hash_detector>`:
    Uses perceptual hashing to calculate similarity between adjacent frames.
 
+ * :mod:`SolidColorDetector <scenedetect.detectors.solid_color_detector>`:
+   Observes intervals of solid-color frames without emitting scene cuts.
+
 Detection algorithms are created by implementing the
 :class:`SceneDetector <scenedetect.detector.SceneDetector>` interface. Detectors are
 typically attached to a :class:`SceneManager <scenedetect.scene_manager.SceneManager>` when
@@ -40,6 +43,7 @@ from scenedetect.detectors.threshold_detector import ThresholdDetector as Thresh
 from scenedetect.detectors.adaptive_detector import AdaptiveDetector as AdaptiveDetector
 from scenedetect.detectors.hash_detector import HashDetector as HashDetector
 from scenedetect.detectors.histogram_detector import HistogramDetector as HistogramDetector
+from scenedetect.detectors.solid_color_detector import SolidColorDetector as SolidColorDetector
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                                                                             #

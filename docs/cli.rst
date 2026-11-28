@@ -552,6 +552,53 @@ Options
   Skip cutting list as first row in the CSV file. Set for RFC 4180 compliant output.
 
 
+.. _command-list-solid:
+
+.. program:: scenedetect list-solid
+
+
+``list-solid``
+------------------------------------------------------------------------
+
+
+.. seealso:: **Python API:** :class:`~scenedetect.detectors.solid_color_detector.SolidColorDetector` | **Config File:** :ref:`[list-solid] <config-list-solid>`
+
+Save solid-color frame intervals to CSV without changing scene cuts.
+
+    ``Intervals use the standard scene CSV columns and source-video timecodes. Combine with``
+    ``scene output commands to generate both reports in one detection pass.``
+
+    ``Classification uses frames after global cropping and resizing. Use --downscale 1 before``
+    ``this command to preserve small image details that downscaling can remove.``
+
+
+Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. option:: -f NAME, --filename NAME
+
+  Filename format to use. Supports $VIDEO_NAME.
+
+  Default: ``$VIDEO_NAME-Solid.csv``
+
+.. option:: -o DIR, --output DIR
+
+  Output directory. Overrides global :option:`-o/--output <-o>`.
+
+.. option:: --threshold
+
+  Maximum per-channel spatial standard deviation for a solid-color frame.
+
+  Default: ``2.0``
+
+.. option:: --min-frames
+
+  Minimum number of consecutive solid-color frames to report.
+
+  Default: ``2``
+
+
 .. _command-load-scenes:
 
 .. program:: scenedetect load-scenes
