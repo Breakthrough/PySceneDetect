@@ -5,9 +5,9 @@ av==19.0.2
 click==8.5.1
 imageio-ffmpeg==0.8.1
 moviepy==2.2.1
-opencv-python-headless==5.0.0.93
-numpy==2.5.4
-platformdirs==4.14.5
+opencv-python-headless==5.1.0.95
+numpy==2.5.5
+platformdirs==4.14.8
 tqdm==4.70.1
 
 # Build-only and test-only requirements.

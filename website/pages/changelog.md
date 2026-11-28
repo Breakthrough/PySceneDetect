@@ -3,6 +3,39 @@
 
 ## PySceneDetect 0.7
 
+### PySceneDetect 0.7.4 (November 28, 2026)
+
+PySceneDetect 0.7.4 adds chapter export via `save-chapters`, piped video input via `--stdin`, and PEP 561 `py.typed` typing support. It also fixes CLI validation and exit codes, `save-images` frame margin and variable-resolution aspect ratio handling, `FrameTimecode.get_timecode()` truncation and negative time formatting, and image sequence input with the default OpenCV backend. Windows distributions ship updated dependencies.
+
+Thanks to @Davidvisualstudio007, @EnesSoydan, @rishi02102017, @goranai, @hskl18, @farisbasha, @aswanth-07 and @M-Colley for their contributions to this release.
+
+#### CLI Changes
+
+ - [feature] Add `save-chapters` command to save scenes as chapters in FFmetadata format, which can be added to a video with ffmpeg without re-encoding. Also available as `write_scene_list_ffmetadata()` in the `scenedetect.output` module [#323](https://github.com/Breakthrough/PySceneDetect/issues/323)
+ - [feature] Add `--stdin` to read the input video from a pipe, e.g. `ffmpeg -i input.mp4 -c copy -f matroska - | scenedetect --stdin detect-content list-scenes`. Requires the PyAV backend. `save-html` omits images, and commands that need to seek or refer to a source file (`split-video`, `save-images`, `save-fcp`, `save-otio`, `load-scenes`, `time -s`) are not supported [#189](https://github.com/Breakthrough/PySceneDetect/issues/189) [#434](https://github.com/Breakthrough/PySceneDetect/issues/434)
+ - [bugfix] The CLI now exits with 1 when no frames could be read from the input video, or seeking to the `time -s`/`--start` time fails, instead of 0
+ - [bugfix] `--kernel-size`/`-k` values the detectors cannot use (even numbers, 1, 0 and negatives other than -1) now give a usage error instead of a traceback, and `-k -1` now means auto, like the config file. A config file with `kernel-size = 1` is now an error [#604](https://github.com/Breakthrough/PySceneDetect/issues/604)
+ - [bugfix] `save-images` no longer takes the last image of a scene from the first frame of the next scene. `--frame-margin` is counted from the last frame of the scene again, as in v0.6 (`-m 0` now selects the last frame itself)
+ - [bugfix] Out of range values for `detect-adaptive --frame-window` (below 1) and `save-images` `--num-images` (below 1), `--scale`, `--height` and `--width` (negative) now give a usage error instead of a traceback, and the same values are rejected in a config file [#609](https://github.com/Breakthrough/PySceneDetect/issues/609)
+ - [bugfix] `detect-content` / `detect-adaptive` `--weights` set to all zeros, or with a negative or non-finite weight (also in a config file), now give an error instead of NaN frame scores and no detected scenes, and `ContentDetector` / `AdaptiveDetector` raise a `ValueError` for them [#612](https://github.com/Breakthrough/PySceneDetect/issues/612)
+ - [bugfix] Allow image sequences as inputs when the default backend is already OpenCV [#620](https://github.com/Breakthrough/PySceneDetect/issues/620)
+
+#### API Changes
+
+ - [bugfix] Single-threaded `save_images()` preserves each frame's aspect ratio when the video changes resolution and only a width or height is specified [#615](https://github.com/Breakthrough/PySceneDetect/pull/615)
+ - [bugfix] `FrameTimecode.get_timecode()` with `use_rounding=False` now truncates instead of sometimes rounding up the last digit. Previously 0.4996 seconds with `precision=2` gave `00:00:00.50`, and 1.99997 seconds gave `00:00:01.000` instead of `00:00:01.999`. [#611](https://github.com/Breakthrough/PySceneDetect/issues/611)
+ - [bugfix] `FrameTimecode.get_timecode()` now shows a negative time (e.g. from a negative PTS) as zero. Previously a large negative time gave output such as `-1:-6:00.000`. A negative `precision` now raises a `ValueError`
+
+#### Packaging
+
+ - [general] The root `pyproject.toml` is now `scenedetect` again (it had a development-only `scenedetect-core` name since 0.7.1). `pip install -e .` now installs the same distribution as PyPI. The `[opencv]` and `[opencv-headless]` extras of the development config were removed because `opencv-python` is now a declared dependency [#558](https://github.com/Breakthrough/PySceneDetect/issues/558)
+ - [feature] Ship a PEP 561 `py.typed` marker in both `scenedetect` and `scenedetect-headless` distributions, add the `Typing :: Typed` classifier, and explicitly re-export `SceneManager` in `scenedetect/__init__.py` for strict type checkers [#617](https://github.com/Breakthrough/PySceneDetect/pull/617)
+ - [general] Updates to Windows distributions:
+    - ffmpeg 9.0.2 -> 9.1
+    - numpy 2.5.4 -> 2.5.5
+    - opencv-python-headless 5.0.0.93 -> 5.1.0.95
+    - platformdirs 4.14.5 -> 4.14.8
+
 ### PySceneDetect 0.7.3 (November 8, 2026)
 
 PySceneDetect 0.7.3 adds scene-length based image export to `save-images`, a `close()` method and context manager support for `VideoStream`, and fixes several timing bugs: PyAV frame timing for videos without presentation timestamps, `save-edl` timecode drift at NTSC frame rates, OTIO source durations, and the last scene of variable framerate videos. Windows distributions ship updated dependencies.
@@ -857,18 +890,3 @@ Both the Windows installer and portable distributions now include signed executa
 ### PySceneDetect 0.8 (TBD)
 
 Major breaking release that overhauls how time is managed. Rather than assigning each frame a point in time, we will now represent the presenation time, duration, and ordinal of a given frame. We will also align on a policy for how we deal with non-monotonic frame delivery from backends.
-
-### PySceneDetect 0.7.4 (TBD)
-
- - [general] The root `pyproject.toml` is now `scenedetect` again (it had a development-only `scenedetect-core` name since 0.7.1). `pip install -e .` now installs the same distribution as PyPI. The `[opencv]` and `[opencv-headless]` extras of the development config were removed because `opencv-python` is now a declared dependency [#558](https://github.com/Breakthrough/PySceneDetect/issues/558)
- - [feature] Add `save-chapters` command to save scenes as chapters in FFmetadata format, which can be added to a video with ffmpeg without re-encoding. Also available as `write_scene_list_ffmetadata()` in the `scenedetect.output` module [#323](https://github.com/Breakthrough/PySceneDetect/issues/323)
- - [feature] Add `--stdin` to read the input video from a pipe, e.g. `ffmpeg -i input.mp4 -c copy -f matroska - | scenedetect --stdin detect-content list-scenes`. Requires the PyAV backend. `save-html` omits images, and commands that need to seek or refer to a source file (`split-video`, `save-images`, `save-fcp`, `save-otio`, `load-scenes`, `time -s`) are not supported [#189](https://github.com/Breakthrough/PySceneDetect/issues/189) [#434](https://github.com/Breakthrough/PySceneDetect/issues/434)
- - [bugfix] The CLI now exits with 1 when no frames could be read from the input video, or seeking to the `time -s`/`--start` time fails, instead of 0
- - [bugfix] `--kernel-size`/`-k` values the detectors cannot use (even numbers, 1, 0 and negatives other than -1) now give a usage error instead of a traceback, and `-k -1` now means auto, like the config file. A config file with `kernel-size = 1` is now an error [#604](https://github.com/Breakthrough/PySceneDetect/issues/604)
- - [bugfix] `save-images` no longer takes the last image of a scene from the first frame of the next scene. `--frame-margin` is counted from the last frame of the scene again, as in v0.6 (`-m 0` now selects the last frame itself)
- - [bugfix] Single-threaded `save_images()` preserves each frame's aspect ratio when the video changes resolution and only a width or height is specified [#615](https://github.com/Breakthrough/PySceneDetect/pull/615)
- - [bugfix] Out of range values for `detect-adaptive --frame-window` (below 1) and `save-images` `--num-images` (below 1), `--scale`, `--height` and `--width` (negative) now give a usage error instead of a traceback, and the same values are rejected in a config file [#609](https://github.com/Breakthrough/PySceneDetect/issues/609)
- - [bugfix] `detect-content` / `detect-adaptive` `--weights` set to all zeros, or with a negative or non-finite weight (also in a config file), now give an error instead of NaN frame scores and no detected scenes, and `ContentDetector` / `AdaptiveDetector` raise a `ValueError` for them [#612](https://github.com/Breakthrough/PySceneDetect/issues/612)
- - [bugfix] `FrameTimecode.get_timecode()` with `use_rounding=False` now truncates instead of sometimes rounding up the last digit. Previously 0.4996 seconds with `precision=2` gave `00:00:00.50`, and 1.99997 seconds gave `00:00:01.000` instead of `00:00:01.999`. [#611](https://github.com/Breakthrough/PySceneDetect/issues/611)
- - [bugfix] `FrameTimecode.get_timecode()` now shows a negative time (e.g. from a negative PTS) as zero. Previously a large negative time gave output such as `-1:-6:00.000`. A negative `precision` now raises a `ValueError`
- - [bugfix] Allow image sequences as inputs when the default backend is already OpenCV [#620](https://github.com/Breakthrough/PySceneDetect/issues/620)

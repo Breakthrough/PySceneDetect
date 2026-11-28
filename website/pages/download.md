@@ -10,19 +10,19 @@ PySceneDetect is free, open-source software released under the BSD 3-Clause Lice
       <svg class="download-os-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M2 3.75 10.75 2.5v8.75H2V3.75Zm9.75-1.4L22 1v10.25H11.75V2.35ZM2 12.75h8.75v8.75L2 20.25v-7.5Zm9.75 0H22V23l-10.25-1.35v-8.9Z"/>
       </svg>
-      <span>Windows 64-bit &middot; <strong>v0.7.3</strong></span>
+      <span>Windows 64-bit &middot; <strong>v0.7.4</strong></span>
     </span>
-    <span class="download-card-date">November 8, 2026</span>
+    <span class="download-card-date">November 28, 2026</span>
   </div>
   <div class="download-btn-grid">
-    <a class="download-btn download-btn-primary" href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.3/PySceneDetect-0.7.3-win64.msi">
+    <a class="download-btn download-btn-primary" href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.4/PySceneDetect-0.7.4-win64.msi">
       <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
       </svg>
       <span>Installer <code>.msi</code></span>
       <span class="download-badge">Recommended</span>
     </a>
-    <a class="download-btn download-btn-secondary" href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.3/PySceneDetect-0.7.3-win64.zip">
+    <a class="download-btn download-btn-secondary" href="https://github.com/Breakthrough/PySceneDetect/releases/download/v0.7.4/PySceneDetect-0.7.4-win64.zip">
       <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8m18 0-2.4-4.2A2 2 0 0 0 16.86 3H7.14a2 2 0 0 0-1.74 1.01L3 8m18 0H3m7 4h4"/>
       </svg>
@@ -85,7 +85,7 @@ docker run --rm -v "$(pwd):/files" ghcr.io/breakthrough/pyscenedetect \
     -i /files/video.mp4 detect-adaptive split-video -o /files
 ```
 
-The `latest` tag points to the most recent stable release, `main` tracks the development branch, and version tags (such as `0.7.3`) point to specific releases. You can also replace `docker` with `podman` in the commands above.
+The `latest` tag points to the most recent stable release, `main` tracks the development branch, and version tags (such as `0.7.4`) point to specific releases. You can also replace `docker` with `podman` in the commands above.
 
 ## Post-Installation Check
 

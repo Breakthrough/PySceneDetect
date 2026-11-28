@@ -13,7 +13,7 @@
 
 ----------------------------------------------------------
 
-### Latest Release: v0.7.3 (November 8, 2026)
+### Latest Release: v0.7.4 (November 28, 2026)
 
 **Website**:  [scenedetect.com](https://www.scenedetect.com)
 
