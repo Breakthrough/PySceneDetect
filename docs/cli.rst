@@ -725,7 +725,7 @@ Options
 
 Save scene list to HTML file.
 
-To customize image generation, specify the :ref:`save-images <command-save-images>` command before :ref:`save-html <command-save-html>`. This command always uses the result of the preceeding :ref:`save-images <command-save-images>` command, or runs it with the default config values unless ``--no-images`` is set.
+To customize image generation, specify the :ref:`save-images <command-save-images>` command before :ref:`save-html <command-save-html>`. This command always uses the result of the preceding :ref:`save-images <command-save-images>` command, or runs it with the default config values unless ``--no-images`` is set.
 
 
 Options

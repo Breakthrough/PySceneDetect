@@ -1043,7 +1043,7 @@ def load_scenes_command(ctx: click.Context, input: str | None, start_col_name: s
 
 SAVE_HTML_HELP = """Save scene list to HTML file.
 
-To customize image generation, specify the `save-images` command before `save-html`. This command always uses the result of the preceeding `save-images` command, or runs it with the default config values unless `--no-images` is set.
+To customize image generation, specify the `save-images` command before `save-html`. This command always uses the result of the preceding `save-images` command, or runs it with the default config values unless `--no-images` is set.
 """
 
 
