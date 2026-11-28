@@ -182,11 +182,13 @@ class VideoStreamAv(VideoStream):
                 self._io = path_or_io
 
             self._container: av.container.InputContainer = self._open_container()  # type: ignore[attr-defined]
+            if not self._container.streams.video:
+                raise VideoOpenFailure("No video stream found in input file.")
             if self._threading_mode is not None:
                 self._video_stream.thread_type = self._threading_mode
                 self._reopened = False
                 logger.debug("Threading mode set: %s", self._threading_mode)
-        except OSError:
+        except (OSError, VideoOpenFailure):
             raise
         except Exception as ex:
             raise VideoOpenFailure(str(ex)) from ex
