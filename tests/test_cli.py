@@ -456,7 +456,7 @@ def test_cli_kernel_size_accepts_valid(command: str, kernel_size: str):
 def _write_fade_video(path: Path) -> None:
     """25 FPS video: 30 bright frames, a 10 frame fade out, 20 black frames, a 10 frame fade in,
     then 30 bright frames. The fade out starts at frame 30 and the fade in ends at frame 69."""
-    writer = cv2.VideoWriter(str(path), cv2.VideoWriter_fourcc(*"MJPG"), 25.0, (64, 48))
+    writer = cv2.VideoWriter(str(path), cv2.VideoWriter.fourcc(*"MJPG"), 25.0, (64, 48))
     levels = [200] * 30
     levels += [int(200 * (1 - (i + 1) / 10)) for i in range(10)]
     levels += [0] * 20
