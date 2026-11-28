@@ -267,7 +267,7 @@ def _write_blank_video(path: str, width: int, height: int, num_frames: int = 3) 
     import cv2
     import numpy as np
 
-    writer = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*"MJPG"), 10.0, (width, height))
+    writer = cv2.VideoWriter(path, cv2.VideoWriter.fourcc(*"MJPG"), 10.0, (width, height))
     for _ in range(num_frames):
         writer.write(np.zeros((height, width, 3), dtype=np.uint8))
     writer.release()

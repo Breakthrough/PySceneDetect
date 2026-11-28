@@ -508,8 +508,9 @@ class SceneManager:
             logger.debug(
                 f"Crop set: top left = {self._crop[0:2]}, bottom right = {self._crop[2:4]}"
             )
-            # Use the public (inclusive) coordinates, `_crop` is stored one-past-the-end.
-            x0, y0, x1, y1 = self.crop
+            # `_crop` is stored one-past-the-end, so step back to the inclusive coordinates.
+            x0, y0, x1, y1 = self._crop
+            x1, y1 = x1 - 1, y1 - 1
             min_x, min_y = (min(x0, x1), min(y0, y1))
             max_x, max_y = (max(x0, x1), max(y0, y1))
             frame_width, frame_height = video.frame_size
