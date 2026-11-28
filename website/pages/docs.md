@@ -5,6 +5,7 @@ Select a version below to open the PySceneDetect Reference Manual (CLI and Pytho
 ## Stable
 
 - [latest](/docs/latest/)
+- [v0.7.4](/docs/0.7.4/)
 - [v0.7.3](/docs/0.7.3/)
 - [v0.7.2](/docs/0.7.2/)
 - [v0.7.1](/docs/0.7.1/)

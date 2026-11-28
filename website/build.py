@@ -47,7 +47,7 @@ REPO_DIR = WEBSITE_DIR.parent
 SITE_URL = "https://www.scenedetect.com"
 REPO_URL = "https://github.com/Breakthrough/PySceneDetect"
 PYPI_URL = "https://pypi.org/project/scenedetect/"
-DEFAULT_RELEASE_DATE = "November 8, 2026"
+DEFAULT_RELEASE_DATE = "November 28, 2026"
 DEFAULT_DESCRIPTION = (
     "Fast, frame-accurate video scene detection and splitting tool in Python "
     "with a command-line interface and Python API."
