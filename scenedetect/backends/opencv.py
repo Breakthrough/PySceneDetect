@@ -396,6 +396,14 @@ class VideoStreamCv2(VideoStream):
                 "Ensure file is valid video and system dependencies are up to date.\n"
             )
 
+        # Some capture backends (e.g. MSMF on Windows) open files without a video stream, such as
+        # audio-only files, with a frame size of 0x0. Reading from them can block, so reject them.
+        if input_is_video_file and (
+            cap.get(cv2.CAP_PROP_FRAME_WIDTH) <= 0 or cap.get(cv2.CAP_PROP_FRAME_HEIGHT) <= 0
+        ):
+            cap.release()
+            raise VideoOpenFailure("No video stream found in input file.")
+
         # Display an error if the video codec type seems unsupported (#86) as this indicates
         # potential video corruption, or may explain missing frames. We only perform this check
         # for video files on-disk (skipped for devices, image sequences, streams, etc...).

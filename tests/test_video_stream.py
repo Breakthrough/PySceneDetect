@@ -18,6 +18,7 @@ all supported backends, and verify that they are functionally equivalent where p
 
 import os.path
 import typing as ty
+import wave
 from dataclasses import dataclass
 
 import numpy
@@ -26,7 +27,7 @@ import pytest
 from scenedetect import open_video
 from scenedetect.backends import VideoStreamAv, VideoStreamMoviePy
 from scenedetect.backends.opencv import VideoStreamCv2
-from scenedetect.video_stream import SeekError, VideoStream
+from scenedetect.video_stream import SeekError, VideoOpenFailure, VideoStream
 
 # Accuracy a framerate is checked to for testing purposes.
 FRAMERATE_TOLERANCE = 0.001
@@ -357,6 +358,20 @@ def test_invalid_path(vs_type: ty.Callable[..., VideoStream]):
     """Ensure correct exception is thrown if the path does not exist."""
     with pytest.raises(OSError):
         _ = vs_type("this_path_should_not_exist.mp4")
+
+
+def test_no_video_stream(vs_type: ty.Callable[..., VideoStream], tmp_path):
+    """Opening a file with only an audio stream must raise VideoOpenFailure."""
+    if vs_type is VideoStreamMoviePy:
+        pytest.skip("MoviePy already rejects this file with an OSError.")
+    path = str(tmp_path / "audio_only.wav")
+    with wave.open(path, "wb") as audio:
+        audio.setnchannels(1)
+        audio.setsampwidth(2)
+        audio.setframerate(8000)
+        audio.writeframes(bytes(1600))
+    with pytest.raises(VideoOpenFailure):
+        _ = vs_type(path)
 
 
 def test_framerate_legacy_alias(vs_type: ty.Callable[..., VideoStream], auto_close):
